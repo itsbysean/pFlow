@@ -1,12 +1,12 @@
 (() => {
   const titles = {
     en: {
-      title: "pFlow — understand how systems and teams work",
-      description: "Understand how systems and teams work. pFlow turns code evidence and natural-language process descriptions into linked documentation and interactive HTML."
+      title: "pFlow — code and process documentation",
+      description: "pFlow is an AI Coding Agent Skill for code architecture and described processes. It creates Markdown, graph JSON, and a standalone interactive HTML Viewer."
     },
     ko: {
-      title: "pFlow — 시스템과 팀의 업무 흐름 이해",
-      description: "pFlow는 코드 근거와 자연어 프로세스 설명을 연결된 문서와 인터랙티브 HTML로 만듭니다."
+      title: "pFlow — 코드와 프로세스 문서화",
+      description: "pFlow는 코드 아키텍처와 자연어로 설명한 프로세스를 Markdown, 그래프 JSON, 독립 실행형 HTML Viewer로 문서화하는 AI Coding Agent Skill입니다."
     }
   };
 
