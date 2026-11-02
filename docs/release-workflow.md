@@ -35,15 +35,27 @@ Files are sorted, use fixed ZIP timestamps and preserve text bytes and executabl
 
 | Event | Workflow | Behavior |
 |---|---|---|
-| PR to `main`, push to `main` | `verify.yml` | Install pinned development dependencies, install test Chromium, run the full suite, build the ZIP and retain it as a seven-day Actions artifact |
-| Push to `main`, manual dispatch | `deploy-website.yml` | Validate and deploy only `website/` through the existing Pages workflow |
-| Push of a `v*` tag | `release.yml` | Call the same verifier with the exact tag, download its ZIP/checksum, check SHA-256 and publish them to GitHub Releases |
+| PR to `main` | `verify.yml` | Read-only verification, complete test suite and a local release ZIP build; no version bump or publication |
+| Push to `main`, manual dispatch | `deploy-website.yml` | Existing website-only Pages deployment |
+| Push to `main` | `release.yml` | Prepare the next patch, test/build that version, atomically publish version files and tag, then publish the ZIP/checksum |
 
-Only the publish job receives `contents: write`. Verification receives read access and uses no repository secrets. Tag input is passed through an environment variable, not interpolated into shell code. The publisher uses `gh release create --verify-tag`; it never creates a missing tag. Existing releases are not overwritten on reruns. A repeated published tag fails rather than replacing its assets.
+### Automatic patch policy
 
-Only stable `vX.Y.Z` tags exactly matching `package.json` are supported. Release versions and model versions are independent; changing a package version does not require changing the M1 model. Keep `package-lock.json` in sync using `npm version <version> --no-git-tag-version`, review and commit the version change, then tag that reviewed commit. Version/tag publication remains an explicit maintainer action. No tag, release, commit or push is performed by local build commands.
+Every successful main publication increments the highest stable package/tag version by one patch. With the current base `1.0.0`, the first automatic release is `1.0.1` / `v1.0.1`. Major/minor versions are never increased automatically. Website-only merges also qualify. Model version `1.0.0` remains independent and unchanged.
 
-In Settings → Pages, keep the deployment source set to GitHub Actions. Require the verifier in the main branch protection/ruleset if checks must block merges. Repository settings still control Pages permissions and PR branch protection. These files do not configure those settings or prove that a hosted workflow has succeeded.
+The preparer updates `package.json`, `package-lock.json` and the lock's root package entry in the disposable runner before installing dependencies, testing and building. Only after verification does it commit those two files as `chore: release vX.Y.Z`, annotate the tag with the original source SHA and push main/tag together using `git push --atomic`. No force push is used.
+
+The main release job needs `contents: write`; the PR verifier remains read-only. The built-in `GITHUB_TOKEN` publishes the version commit/tag, which does not trigger another push Workflow. The ZIP is published in the same run rather than depending on a tag-triggered run. This prevents a version-bump loop. Personal access tokens are not configured or required by this implementation.
+
+A rerun for the same source reuses its annotated tag and version. If the prior Git push succeeded but release creation failed, the rerun resumes at that version. If a published release already exists, its downloaded ZIP must match the verified build; assets are never overwritten. An unfinished draft requires manual review. Tests for version output read the current package version rather than assuming `1.0.0`.
+
+One release Workflow runs at a time. If main advances while a run verifies, the older run fails safely before pushing; the newer main run includes those changes. Pending runs can be coalesced by GitHub concurrency. This is one patch per successful publication, not a guaranteed separate release for every rapid merge. A rerun must not be used to release an obsolete source over newer main.
+
+Protected branches or rulesets may reject the bot's main push. They are not changed or bypassed here; atomic rejection leaves remote main/tag unchanged and no ZIP is published. The maintainer must deliberately permit the release actor's version-only updates or choose a release-PR policy. Git permissions and GitHub event routing still need hosted verification after merge.
+
+Manual tag pushes no longer trigger this Workflow. `npm run build:release -- --tag vX.Y.Z` remains an exact-version local build guard, not a remote publisher. `node packaging/auto-release.mjs publish-git` is CI-only publication tooling and should not be run from a development working tree. No release is performed by `npm run build:release` alone.
+
+Keep Settings → Pages configured for GitHub Actions. Require the PR verifier in the main branch ruleset if checks must block merges. These files do not change repository settings.
 
 ## Downloads and installation
 

@@ -20,7 +20,7 @@ Run `npm ci` and `npm run build:skill` in this development repository. Copy [dis
 
 This repository contains the development sources and `website/`. Install the [latest release ZIP](https://github.com/itsbysean/pFlow/releases/latest/download/pflow.zip), extract it and copy the `pflow/` folder to your agent’s Skills location. A first release must be published before this download is available. Source-code ZIPs are development checkouts, not installed Skills.
 
-See [development and release workflow](docs/release-workflow.md) for CI, local verification, Pages and version-tag releases.
+Main publication automatically increments the patch version, tests/builds the resulting Skill and publishes the ZIP. PR checks do not bump or publish. See [development and release workflow](docs/release-workflow.md) for CI, local verification, Pages and version-tag releases.
 
 ```sh
 node /installed/pflow/scripts/pflow.mjs --help

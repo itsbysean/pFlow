@@ -1,33 +1,55 @@
-name: Publish Skill release
+name: Publish automatic patch release
 on:
   push:
-    tags: ['v*']
+    branches: [main]
 permissions:
   contents: read
 concurrency:
-  group: release-${{ github.ref }}
+  group: pflow-main-release
   cancel-in-progress: false
 jobs:
-  verify:
-    uses: ./.github/workflows/verify.yml
-    with:
-      release-tag: ${{ github.ref_name }}
-  publish:
-    needs: verify
+  release:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@v7
         with:
-          name: pflow-release
-          path: release
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Prepare next patch or resume the same source
+        run: node packaging/auto-release.mjs prepare
+      - run: npm ci --ignore-scripts
+      - name: Install test browser
+        run: |
+          npx --no-install playwright-core install --with-deps chromium
+          node --input-type=module <<'JS'
+          import {appendFileSync} from 'node:fs';
+          import {chromium} from 'playwright-core';
+          appendFileSync(process.env.GITHUB_ENV, `PFLOW_BROWSER_PATH=${chromium.executablePath()}\n`);
+          JS
+      - run: npm test
+      - name: Build verified version
+        run: npm run build:release -- --tag "$RELEASE_TAG"
       - name: Verify package checksum
-        working-directory: release
+        working-directory: dist
         run: sha256sum -c pflow.zip.sha256
-      - name: Publish verified assets
+      - name: Publish version commit and tag atomically
+        run: node packaging/auto-release.mjs publish-git
+      - name: Publish ZIP or verify an existing release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" release/pflow.zip release/pflow.zip.sha256 --verify-tag --generate-notes --title "pFlow $RELEASE_TAG"
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-draft"; then
+            test "$(cat "$RUNNER_TEMP/release-draft")" = false
+            mkdir -p "$RUNNER_TEMP/pflow-existing"
+            gh release download "$RELEASE_TAG" --pattern pflow.zip --dir "$RUNNER_TEMP/pflow-existing"
+            cmp dist/pflow.zip "$RUNNER_TEMP/pflow-existing/pflow.zip"
+          else
+            gh release create "$RELEASE_TAG" dist/pflow.zip dist/pflow.zip.sha256 --verify-tag --generate-notes --title "pFlow $RELEASE_TAG"
+          fi

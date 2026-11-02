@@ -12,6 +12,7 @@ import { validateDocumentation as sharedDocumentation } from '../validation/vali
 import { repositoryRoot, validateArtifact } from './support/validate-artifact.mjs';
 import { validateDocumentation } from './support/validate-documentation.mjs';
 
+const packageVersion = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const cli = fileURLToPath(new URL('../builder/cli.mjs', import.meta.url));
 function fixture(t, names = ['a-sync']) {
   const root = mkdtempSync(path.join(tmpdir(), 'pflow-builder-'));
@@ -42,7 +43,7 @@ test('help/version work without target artifacts and bad arguments use stderr an
   const f = fixture(t);
   for (const option of ['--help', '--version']) {
     const result = run([option], f.root); assert.equal(result.status, 0); assert.equal(result.stderr, '');
-    assert.match(result.stdout, option === '--help' ? /file:\/\//i : /^pFlow 1\.0\.0\n$/);
+    if(option==='--help')assert.match(result.stdout,/file:\/\//i);else assert.equal(result.stdout,`pFlow ${packageVersion}\n`);
   }
   const result = run(['build', '--wat'], f.root); assert.equal(result.status, 1); assert.equal(result.stdout, ''); assert.match(result.stderr, /Unknown option.*--wat/);
 });

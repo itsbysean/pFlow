@@ -38,7 +38,7 @@ test('extracted ZIP builds standalone HTML without development dependencies and 
  cpSync(path.join(root,'test/fixtures/prompt-mode/deployment/bundle'),input,{recursive:true});
  const output=path.join(isolated,'architecture.html');
  const run=(args)=>spawnSync(process.execPath,['--permission',`--allow-fs-read=${isolated}`,`--allow-fs-write=${isolated}`,cli,...args],{cwd:isolated,encoding:'utf8',env:{...process.env,NODE_PATH:'',NODE_OPTIONS:''}});
- const version=run(['--version']);assert.equal(version.status,0,version.stderr);assert.match(version.stdout,/^pFlow 1\.0\.0/);
+ const version=run(['--version']);assert.equal(version.status,0,version.stderr);assert.equal(version.stdout,`pFlow ${result.version}\n`);
  const build=run(['build','--input',input,'--repository-root',isolated,'--output',output]);assert.equal(build.status,0,build.stderr);
  rmSync(input,{recursive:true});rmSync(path.join(isolated,'pflow'),{recursive:true});
  const executablePath=[process.env.PFLOW_BROWSER_PATH,'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome','/usr/bin/chromium','/usr/bin/google-chrome'].filter(Boolean).find(existsSync);
