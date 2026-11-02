@@ -1,0 +1,6 @@
+// Illustrative JavaScript source. The worker processes each received message.
+workers.register("indexer", processJob);
+function processJob(message) {
+  store.write(message);
+  return "processed";
+}

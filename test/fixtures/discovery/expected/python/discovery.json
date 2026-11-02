@@ -1,0 +1,79 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_c9d002fde83e",
+      "label": "Dial signal callback",
+      "trigger": "stdin signal/7 token",
+      "flowId": "flow_3ebca5ae03e6",
+      "sourceIds": [
+        "src_cb974f03c132",
+        "src_d0f8d2e2a660",
+        "src_f62c82af09fa",
+        "src_dd80e92231ab"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_3ebca5ae03e6",
+      "label": "Dial signal callback",
+      "startNodeId": "node_8bc16d3ceac7",
+      "docs": [
+        {
+          "path": "entry-points.md",
+          "anchor": "flow_3ebca5ae03e6"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_8bc16d3ceac7",
+          "label": "Receive control in rotate",
+          "kind": "operation",
+          "sourceIds": [
+            "src_cb974f03c132",
+            "src_d0f8d2e2a660",
+            "src_f62c82af09fa",
+            "src_dd80e92231ab"
+          ]
+        }
+      ],
+      "edges": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_cb974f03c132",
+      "path": "pyproject.toml",
+      "startLine": 4,
+      "endLine": 5
+    },
+    {
+      "id": "src_d0f8d2e2a660",
+      "path": "launch.py",
+      "startLine": 5,
+      "endLine": 8,
+      "symbol": "main"
+    },
+    {
+      "id": "src_f62c82af09fa",
+      "path": "loop.py",
+      "startLine": 1,
+      "endLine": 8
+    },
+    {
+      "id": "src_dd80e92231ab",
+      "path": "worker.py",
+      "startLine": 1,
+      "endLine": 2,
+      "symbol": "rotate"
+    },
+    {
+      "id": "src_9e016ea66e2a",
+      "path": "worker.py",
+      "startLine": 4,
+      "endLine": 5,
+      "symbol": "HttpController_onRequest"
+    }
+  ]
+}

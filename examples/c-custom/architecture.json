@@ -1,0 +1,198 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_614ac3cd60a1",
+      "label": "Nightly rollup task",
+      "flowId": "flow_4131e85f26d2",
+      "sourceIds": [
+        "src_32bed10ef9e0",
+        "src_d2d9d64232f1",
+        "src_eae3e0bb6cfb",
+        "src_d346d8984be7"
+      ],
+      "trigger": "Custom scheduler registration from XML",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "entry_614ac3cd60a1"
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_4131e85f26d2",
+      "label": "Custom scheduled dispatch",
+      "startNodeId": "node_31a244ce4c93",
+      "nodes": [
+        {
+          "id": "node_31a244ce4c93",
+          "label": "Activate configured task",
+          "kind": "operation",
+          "sourceIds": [
+            "src_32bed10ef9e0",
+            "src_eae3e0bb6cfb"
+          ]
+        },
+        {
+          "id": "node_dff9cc696735",
+          "label": "Resolve registered handler",
+          "kind": "operation",
+          "sourceIds": [
+            "src_d346d8984be7",
+            "src_d2d9d64232f1"
+          ]
+        },
+        {
+          "id": "node_9a2347f940fd",
+          "label": "Invoke rollup",
+          "kind": "operation",
+          "sourceIds": [
+            "src_32bed10ef9e0",
+            "src_d2d9d64232f1",
+            "src_d346d8984be7",
+            "src_101537a07182"
+          ],
+          "expandFlowId": "flow_6dc031d9e806"
+        },
+        {
+          "id": "node_453c6bcced56",
+          "label": "Return handler result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_d346d8984be7"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_3a2d03b335c8",
+          "from": "node_31a244ce4c93",
+          "to": "node_dff9cc696735",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_32bed10ef9e0",
+            "src_eae3e0bb6cfb",
+            "src_d346d8984be7"
+          ]
+        },
+        {
+          "id": "edge_6e7ba394154f",
+          "from": "node_dff9cc696735",
+          "to": "node_9a2347f940fd",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_32bed10ef9e0",
+            "src_d2d9d64232f1",
+            "src_d346d8984be7",
+            "src_101537a07182"
+          ]
+        },
+        {
+          "id": "edge_c63332bc6095",
+          "from": "node_9a2347f940fd",
+          "to": "node_453c6bcced56",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_d346d8984be7"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_4131e85f26d2"
+        }
+      ]
+    },
+    {
+      "id": "flow_6dc031d9e806",
+      "label": "Rollup handler",
+      "startNodeId": "node_441a3ec507a6",
+      "nodes": [
+        {
+          "id": "node_441a3ec507a6",
+          "label": "Compact archive",
+          "kind": "external",
+          "sourceIds": [
+            "src_101537a07182"
+          ],
+          "external": {
+            "kind": "other",
+            "name": "Archive service"
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_441a3ec507a6"
+            }
+          ]
+        },
+        {
+          "id": "node_8817fbc8a8cf",
+          "label": "Return complete",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_101537a07182"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_ac39134ae92d",
+          "from": "node_441a3ec507a6",
+          "to": "node_8817fbc8a8cf",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_101537a07182"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_6dc031d9e806"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_32bed10ef9e0",
+      "path": "examples/c-custom/sources/tasks.xml",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_d2d9d64232f1",
+      "path": "examples/c-custom/sources/runtime.txt",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_eae3e0bb6cfb",
+      "path": "examples/c-custom/sources/runtime.txt",
+      "startLine": 3,
+      "endLine": 4
+    },
+    {
+      "id": "src_d346d8984be7",
+      "path": "examples/c-custom/sources/runtime.txt",
+      "startLine": 5,
+      "endLine": 6,
+      "symbol": "dispatch"
+    },
+    {
+      "id": "src_101537a07182",
+      "path": "examples/c-custom/sources/handler.txt",
+      "startLine": 2,
+      "endLine": 4,
+      "symbol": "rollup"
+    }
+  ]
+}

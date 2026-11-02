@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import {collisionCase,geometryIssues,overlap,labelBox} from './support/layout-cases.mjs';
+const c=vm.createContext({});vm.runInContext(readFileSync(new URL('../viewer/graph-layout.js',import.meta.url),'utf8'),c);const {prepareDiagram,layoutDiagram}=c.pFlow;
+const layout=g=>layoutDiagram(prepareDiagram(g,g.flows[0].id));const plain=x=>JSON.parse(JSON.stringify(x));
+const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
+function valid(result){
+ assert.deepEqual(geometryIssues(result),[]);
+ for(let i=0;i<result.nodes.length;i++)for(let j=i+1;j<result.nodes.length;j++)assert.equal(overlap(result.nodes[i],result.nodes[j],8),false);
+ const byId=new Map(result.nodes.map(n=>[n.id,n]));
+ for(const r of result.edges){const from=byId.get(r.edge.from),to=byId.get(r.edge.to),first=r.points[0],last=r.points.at(-1);
+  const inset=(n,x)=>n.node.kind==='decision'?Math.abs(x-n.x-n.width/2)*n.height/n.width:0;
+  near(first[1],from.y+from.height-inset(from,first[0]));near(last[1],to.y+inset(to,last[0]));
+  for(const [p,n] of [[first,from],[last,to]])assert.ok(p[0]>n.x&&p[0]<n.x+n.width);
+  assert.ok(r.points.at(-2)[1]<last[1]);
+  for(let i=1;i<r.points.length;i++)assert.ok(r.points[i][0]===r.points[i-1][0]||r.points[i][1]===r.points[i-1][1]);
+ }
+ for(const b of [...result.nodes.map(n=>({x:n.x-6,y:n.y-6,width:n.width+12,height:n.height+12})),...result.edges.map(labelBox)]){assert.ok(b.x>=result.bounds.x-1e-7&&b.y>=result.bounds.y-1e-7);assert.ok(b.x+b.width<=result.bounds.x+result.bounds.width+1e-7&&b.y+b.height<=result.bounds.y+result.bounds.height+1e-7);}
+}
+for(const name of ['parallel','dense','long-span'])test(`${name}: node, label and unrelated-route geometry stays disjoint with valid shape ports`,()=>{const graph=collisionCase(name),result=layout(graph);valid(result);const before=plain(result);graph.flows[0].nodes.reverse();graph.flows[0].edges.reverse();assert.deepEqual(plain(layout(graph)),before);});
+test('nonuniform measured presentation frames keep row separation and route clearance',()=>{const graph=collisionCase('dense'),sizes=new Map(graph.flows[0].nodes.map((n,i)=>[n.id,{width:180+i%4*60,height:80+i%3*24}]));const projected=prepareDiagram(graph,graph.flows[0].id),result=layoutDiagram(projected,{nodeSizes:sizes}),row=result.nodes.filter(n=>n.id.startsWith('node_lane'));assert.equal(row.length,12);assert.equal(new Set(row.map(n=>n.y)).size,1);assert.equal(new Set(row.map(n=>n.height)).size,3);assert.ok(new Set(row.map(n=>n.width)).size>1);assert.ok(result.bounds.width>4000);valid(result);for(const n of result.nodes)assert.deepEqual({width:n.width,height:n.height},sizes.get(n.id));});
+test('parallel normal and exception relationships receive separate source/target ports and label tracks',()=>{const result=layout(collisionCase('parallel'));assert.equal(new Set(result.edges.map(r=>r.points.map(p=>p.join(',')).join(';'))).size,result.edges.length);const pair=result.edges.filter(r=>r.edge.from==='node_work');assert.equal(pair.length,2);assert.notEqual(pair[0].labelY,pair[1].labelY);assert.notEqual(pair[0].points.at(-1)[0],pair[1].points.at(-1)[0]);});
+test('nonconflicting paths share corridors instead of increasing all rank gaps',()=>{const g=collisionCase('parallel'),f=g.flows[0];f.nodes[0].kind='operation';f.edges=f.edges.filter((e,i)=>i===0||i===3);f.edges[0].kind='next';const result=layout(g),nodes=new Map(result.nodes.map(n=>[n.id,n]));near(nodes.get('node_work').y-nodes.get('node_start').y-nodes.get('node_start').height,48);valid(result);});
+test('seeded irregular cyclic graphs retain finite collision-free geometry at reasonable size',t=>{let seed=381;const random=n=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed%n;};const graph=collisionCase('long-span'),flow=graph.flows[0];flow.nodes=Array.from({length:160},(_,i)=>({id:'node_seed_'+String(i).padStart(3,'0'),label:'Synthetic mixed step '+i,kind:i%7===0?'decision':'operation',sourceIds:['src_layout']}));flow.startNodeId=flow.nodes[0].id;flow.edges=[];const add=(a,b)=>{const from=flow.nodes[a],to=flow.nodes[b];if(flow.edges.some(e=>e.from===from.id&&e.to===to.id))return;flow.edges.push({id:'edge_seed_'+flow.edges.length,from:from.id,to:to.id,kind:from.kind==='decision'?'branch':'call',mode:'sync',label:'Route '+flow.edges.length,sourceIds:['src_layout']});};for(let i=1;i<160;i++){add(i-1,i);if(i>2)add(random(i-1),i);if(i%13===0)add(i,random(i));}const start=performance.now(),result=layout(graph),ms=performance.now()-start;valid(result);assert.deepEqual(plain(layout(graph)),plain(result));assert.ok(ms<3000);t.diagnostic(JSON.stringify({nodes:result.nodes.length,edges:result.edges.length,layoutMs:ms}));});
+test('outer lanes clear long local-label overhang as well as the node envelope',()=>{const graph=collisionCase('parallel'),flow=graph.flows[0];flow.edges=Array.from({length:25},(_,i)=>({id:'edge_parallel_'+String(i).padStart(2,'0'),from:'node_start',to:'node_work',kind:'branch',mode:'sync',label:'A long constrained outcome with status '+i,sourceIds:['src_layout']}));flow.edges.push({id:'edge_skip',from:'node_start',to:'node_end',kind:'branch',mode:'sync',label:'A separately documented direct outcome',sourceIds:['src_layout']},{id:'edge_finish',from:'node_work',to:'node_end',kind:'return',mode:'sync',sourceIds:['src_layout']});valid(layout(graph));});

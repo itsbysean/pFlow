@@ -1,0 +1,241 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_1a955790e646",
+      "label": "Submit command",
+      "flowId": "flow_9e27be90a054",
+      "sourceIds": [
+        "src_cd50bc1a2640"
+      ],
+      "trigger": "Registered command submit",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "entry_1a955790e646"
+        }
+      ]
+    },
+    {
+      "id": "entry_25020255407d",
+      "label": "Indexer worker",
+      "flowId": "flow_4b996747ac21",
+      "sourceIds": [
+        "src_cb7eb44009b5",
+        "src_4e211161c2b5"
+      ],
+      "trigger": "Configured jobs subscription",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "entry_25020255407d"
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_9e27be90a054",
+      "label": "Publish job",
+      "startNodeId": "node_0e7cc113b65d",
+      "nodes": [
+        {
+          "id": "node_0e7cc113b65d",
+          "label": "Receive submit command",
+          "kind": "operation",
+          "sourceIds": [
+            "src_cd50bc1a2640"
+          ]
+        },
+        {
+          "id": "node_565205c4b6ac",
+          "label": "Publish to jobs",
+          "kind": "external",
+          "sourceIds": [
+            "src_54f1fff7e970"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Job broker",
+            "attributes": {
+              "messaging.channel": "jobs"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_565205c4b6ac"
+            }
+          ]
+        },
+        {
+          "id": "node_baa95457c989",
+          "label": "Return accepted",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_eef0c1c8de4a"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_0dbe36428aeb",
+          "from": "node_0e7cc113b65d",
+          "to": "node_565205c4b6ac",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_54f1fff7e970"
+          ]
+        },
+        {
+          "id": "edge_53b87a9d836d",
+          "from": "node_565205c4b6ac",
+          "to": "node_baa95457c989",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_eef0c1c8de4a"
+          ]
+        },
+        {
+          "id": "edge_3656a413844b",
+          "from": "node_565205c4b6ac",
+          "to": "node_787c595615f3",
+          "kind": "receive",
+          "mode": "async",
+          "sourceIds": [
+            "src_54f1fff7e970",
+            "src_cb7eb44009b5",
+            "src_4e211161c2b5"
+          ],
+          "label": "Configured jobs subscription",
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "edge_3656a413844b"
+            }
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_9e27be90a054"
+        }
+      ]
+    },
+    {
+      "id": "flow_4b996747ac21",
+      "label": "Process job",
+      "startNodeId": "node_787c595615f3",
+      "nodes": [
+        {
+          "id": "node_787c595615f3",
+          "label": "Receive jobs message",
+          "kind": "operation",
+          "sourceIds": [
+            "src_cb7eb44009b5",
+            "src_4e211161c2b5"
+          ]
+        },
+        {
+          "id": "node_b02d324b90b7",
+          "label": "Write message",
+          "kind": "external",
+          "sourceIds": [
+            "src_3007021966f4"
+          ],
+          "external": {
+            "kind": "database",
+            "name": "Job store",
+            "attributes": {
+              "database.operation": "write"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_b02d324b90b7"
+            }
+          ]
+        },
+        {
+          "id": "node_fae9e45838b8",
+          "label": "Return processed",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_3007021966f4"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_3fb40c16cb1a",
+          "from": "node_787c595615f3",
+          "to": "node_b02d324b90b7",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_3007021966f4"
+          ]
+        },
+        {
+          "id": "edge_8045d15b7fe6",
+          "from": "node_b02d324b90b7",
+          "to": "node_fae9e45838b8",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_3007021966f4"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_4b996747ac21"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_54f1fff7e970",
+      "path": "examples/b-async/sources/publisher.js.txt",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_cd50bc1a2640",
+      "path": "examples/b-async/sources/publisher.js.txt",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_eef0c1c8de4a",
+      "path": "examples/b-async/sources/publisher.js.txt",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_cb7eb44009b5",
+      "path": "examples/b-async/sources/bindings.xml",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_4e211161c2b5",
+      "path": "examples/b-async/sources/worker.js.txt",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_3007021966f4",
+      "path": "examples/b-async/sources/worker.js.txt",
+      "startLine": 3,
+      "endLine": 5,
+      "symbol": "processJob"
+    }
+  ]
+}

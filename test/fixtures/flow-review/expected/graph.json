@@ -1,0 +1,607 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [],
+  "flows": [
+    {
+      "id": "flow_4312555b59",
+      "label": "Validate before switching",
+      "startNodeId": "node_c4aa21f9c5",
+      "nodes": [
+        {
+          "id": "node_c4aa21f9c5",
+          "label": "Begin transaction",
+          "kind": "operation",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "node_85e06db656",
+          "label": "Correlation matches?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "node_8b8dbb664b",
+          "label": "Switch account",
+          "kind": "operation",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "node_77a6f7ae82",
+          "label": "Renew session",
+          "kind": "operation",
+          "sourceIds": [
+            "src_4116b462f1"
+          ],
+          "expandFlowId": "flow_cb256aea3b"
+        },
+        {
+          "id": "node_b435cb6350",
+          "label": "Throw correlation mismatch",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "node_d67fbcd5ef",
+          "label": "Return renewal result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_60bae94b17",
+          "from": "node_c4aa21f9c5",
+          "to": "node_85e06db656",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "edge_c8412c1265",
+          "from": "node_85e06db656",
+          "to": "node_8b8dbb664b",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4116b462f1"
+          ],
+          "label": "match"
+        },
+        {
+          "id": "edge_528f9493df",
+          "from": "node_85e06db656",
+          "to": "node_b435cb6350",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4116b462f1"
+          ],
+          "label": "mismatch"
+        },
+        {
+          "id": "edge_d82110a12e",
+          "from": "node_8b8dbb664b",
+          "to": "node_77a6f7ae82",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        },
+        {
+          "id": "edge_2df2be032e",
+          "from": "node_77a6f7ae82",
+          "to": "node_d67fbcd5ef",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4116b462f1"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_4312555b59"
+        }
+      ]
+    },
+    {
+      "id": "flow_cb256aea3b",
+      "label": "Handle only session validation errors",
+      "startNodeId": "node_d29a46de5a",
+      "nodes": [
+        {
+          "id": "node_d29a46de5a",
+          "label": "Invoke renewal",
+          "kind": "operation",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "node_b61e09aa48",
+          "label": "SessionValidationError?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "node_344520d49b",
+          "label": "Return authentication_required",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "node_bd75857a4c",
+          "label": "Rethrow original error",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "node_5aa9ae5ab5",
+          "label": "Return renewal value",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_458ab3e86f",
+          "from": "node_d29a46de5a",
+          "to": "node_5aa9ae5ab5",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "edge_d38d41f723",
+          "from": "node_d29a46de5a",
+          "to": "node_b61e09aa48",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ]
+        },
+        {
+          "id": "edge_512111bced",
+          "from": "node_b61e09aa48",
+          "to": "node_344520d49b",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ],
+          "label": "session"
+        },
+        {
+          "id": "edge_2ae58d4627",
+          "from": "node_b61e09aa48",
+          "to": "node_bd75857a4c",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_2e46bebb7d"
+          ],
+          "label": "other"
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_cb256aea3b"
+        }
+      ]
+    },
+    {
+      "id": "flow_a36e31a2d1",
+      "label": "Parse then throw provider error",
+      "startNodeId": "node_2bcfd2beea",
+      "nodes": [
+        {
+          "id": "node_2bcfd2beea",
+          "label": "Parse provider error normally",
+          "kind": "operation",
+          "sourceIds": [
+            "src_e4e7c5d3d2"
+          ]
+        },
+        {
+          "id": "node_60162000e2",
+          "label": "Throw parsed error",
+          "kind": "operation",
+          "sourceIds": [
+            "src_e4e7c5d3d2"
+          ]
+        },
+        {
+          "id": "node_e2eee4e311",
+          "label": "Propagate provider error",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_e4e7c5d3d2"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_60e6d010a3",
+          "from": "node_2bcfd2beea",
+          "to": "node_60162000e2",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_e4e7c5d3d2"
+          ]
+        },
+        {
+          "id": "edge_3d8bb2af67",
+          "from": "node_60162000e2",
+          "to": "node_e2eee4e311",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_e4e7c5d3d2"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_a36e31a2d1"
+        }
+      ]
+    },
+    {
+      "id": "flow_50ad6c9f62",
+      "label": "Capture defaults",
+      "startNodeId": "node_e5b841536c",
+      "nodes": [
+        {
+          "id": "node_e5b841536c",
+          "label": "Map capture fields",
+          "kind": "operation",
+          "sourceIds": [
+            "src_c909734a7f"
+          ]
+        },
+        {
+          "id": "node_670e5f9699",
+          "label": "Return mapped fields",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_c909734a7f"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_446db3df9a",
+          "from": "node_e5b841536c",
+          "to": "node_670e5f9699",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_c909734a7f"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_50ad6c9f62"
+        }
+      ]
+    },
+    {
+      "id": "flow_1ea2c147f7",
+      "label": "Write defaults",
+      "startNodeId": "node_601c9105c6",
+      "nodes": [
+        {
+          "id": "node_601c9105c6",
+          "label": "Map write fields",
+          "kind": "operation",
+          "sourceIds": [
+            "src_8576465ae8"
+          ]
+        },
+        {
+          "id": "node_c8ac02b370",
+          "label": "Return mapped fields",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_8576465ae8"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_295686fe10",
+          "from": "node_601c9105c6",
+          "to": "node_c8ac02b370",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_8576465ae8"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_1ea2c147f7"
+        }
+      ]
+    },
+    {
+      "id": "flow_2198fae6f4",
+      "label": "Decode through imported Buffer binding",
+      "startNodeId": "node_cd43e17038",
+      "nodes": [
+        {
+          "id": "node_cd43e17038",
+          "label": "Decode base64 bytes",
+          "kind": "external",
+          "sourceIds": [
+            "src_4ae4e76934",
+            "src_2217fd31e4"
+          ],
+          "external": {
+            "kind": "library",
+            "name": "Node Buffer",
+            "attributes": {
+              "library.name": "node:buffer",
+              "library.symbol": "Buffer.from"
+            }
+          }
+        },
+        {
+          "id": "node_8b0c641105",
+          "label": "Return bytes",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_4ae4e76934"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_17e32757c2",
+          "from": "node_cd43e17038",
+          "to": "node_8b0c641105",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4ae4e76934"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_2198fae6f4"
+        }
+      ]
+    },
+    {
+      "id": "flow_a50e92b00c",
+      "label": "Resolve identity with the guest-provider predicate",
+      "startNodeId": "node_692040182b",
+      "nodes": [
+        {
+          "id": "node_692040182b",
+          "label": "Existing identity includes guest provider?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_41fc6be0f3"
+          ]
+        },
+        {
+          "id": "node_0470e732cc",
+          "label": "Return created false",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_41fc6be0f3"
+          ]
+        },
+        {
+          "id": "node_0c641dddaf",
+          "label": "Return created true",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_41fc6be0f3"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_cf3a50cbda",
+          "from": "node_692040182b",
+          "to": "node_0470e732cc",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_41fc6be0f3"
+          ],
+          "label": "existing guest"
+        },
+        {
+          "id": "edge_7ed5da4b3d",
+          "from": "node_692040182b",
+          "to": "node_0c641dddaf",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_41fc6be0f3"
+          ],
+          "label": "non-guest or missing"
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_a50e92b00c"
+        }
+      ]
+    },
+    {
+      "id": "flow_ec2693cc0d",
+      "label": "Return guest response status",
+      "startNodeId": "node_c24b385737",
+      "nodes": [
+        {
+          "id": "node_c24b385737",
+          "label": "Resolve guest identity",
+          "kind": "operation",
+          "sourceIds": [
+            "src_5d40a07051"
+          ],
+          "expandFlowId": "flow_a50e92b00c"
+        },
+        {
+          "id": "node_fa13d6c8fd",
+          "label": "result.created?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_5d40a07051"
+          ]
+        },
+        {
+          "id": "node_12769b08c6",
+          "label": "Return created true and status 201",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_5d40a07051"
+          ]
+        },
+        {
+          "id": "node_9d45349f2d",
+          "label": "Return created false and status 200",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_5d40a07051"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_3f9ccae470",
+          "from": "node_c24b385737",
+          "to": "node_fa13d6c8fd",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5d40a07051"
+          ]
+        },
+        {
+          "id": "edge_923e81e752",
+          "from": "node_fa13d6c8fd",
+          "to": "node_12769b08c6",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5d40a07051"
+          ],
+          "label": "created"
+        },
+        {
+          "id": "edge_525e7a0fe0",
+          "from": "node_fa13d6c8fd",
+          "to": "node_9d45349f2d",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5d40a07051"
+          ],
+          "label": "reused"
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_ec2693cc0d"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_4116b462f1",
+      "path": "operations.mjs",
+      "startLine": 6,
+      "endLine": 11
+    },
+    {
+      "id": "src_2e46bebb7d",
+      "path": "operations.mjs",
+      "startLine": 14,
+      "endLine": 22
+    },
+    {
+      "id": "src_e4e7c5d3d2",
+      "path": "operations.mjs",
+      "startLine": 25,
+      "endLine": 28
+    },
+    {
+      "id": "src_c909734a7f",
+      "path": "operations.mjs",
+      "startLine": 31,
+      "endLine": 33
+    },
+    {
+      "id": "src_8576465ae8",
+      "path": "operations.mjs",
+      "startLine": 35,
+      "endLine": 37
+    },
+    {
+      "id": "src_2217fd31e4",
+      "path": "operations.mjs",
+      "startLine": 1,
+      "endLine": 3
+    },
+    {
+      "id": "src_4ae4e76934",
+      "path": "operations.mjs",
+      "startLine": 39,
+      "endLine": 40
+    },
+    {
+      "id": "src_41fc6be0f3",
+      "path": "operations.mjs",
+      "startLine": 43,
+      "endLine": 46
+    },
+    {
+      "id": "src_5d40a07051",
+      "path": "operations.mjs",
+      "startLine": 48,
+      "endLine": 51
+    }
+  ]
+}

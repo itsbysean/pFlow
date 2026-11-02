@@ -1,0 +1,9 @@
+{
+  "entryLabel": "Deployment requested",
+  "trigger": "Deployment requested",
+  "decision": "node_p03",
+  "branches": {
+    "passes": "node_p04",
+    "fails": "node_p05"
+  }
+}

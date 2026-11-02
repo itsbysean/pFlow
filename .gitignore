@@ -6,4 +6,6 @@ Thumbs.db
 .idea/
 .vscode/
 node_modules/
-dist/
+/dist/
+/architecture.html
+__pycache__/

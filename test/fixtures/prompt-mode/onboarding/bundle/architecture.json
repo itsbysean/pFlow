@@ -1,0 +1,263 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_p01",
+      "label": "Offer accepted",
+      "flowId": "flow_p01",
+      "sourceIds": [
+        "src_p01"
+      ],
+      "trigger": "Offer accepted"
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_p01",
+      "label": "Onboarding",
+      "startNodeId": "node_p01",
+      "nodes": [
+        {
+          "id": "node_p01",
+          "label": "Collect employee details",
+          "kind": "operation",
+          "sourceIds": [
+            "src_p01"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p01"
+            }
+          ]
+        },
+        {
+          "id": "node_p02",
+          "label": "Details complete?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_p02"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p02"
+            }
+          ]
+        },
+        {
+          "id": "node_p03",
+          "label": "Prepare access",
+          "kind": "operation",
+          "sourceIds": [
+            "src_p03",
+            "src_p04"
+          ],
+          "expandFlowId": "flow_p02",
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p03"
+            }
+          ]
+        },
+        {
+          "id": "node_p04",
+          "label": "Finish onboarding",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_p03"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p04"
+            }
+          ]
+        },
+        {
+          "id": "node_p05",
+          "label": "Request missing details",
+          "kind": "operation",
+          "sourceIds": [
+            "src_p05"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p05"
+            }
+          ]
+        },
+        {
+          "id": "node_p06",
+          "label": "Stop this attempt",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_p90"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p06"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_p01",
+          "from": "node_p01",
+          "to": "node_p02",
+          "kind": "next",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p01",
+            "src_p02"
+          ]
+        },
+        {
+          "id": "edge_p02",
+          "from": "node_p02",
+          "to": "node_p03",
+          "kind": "branch",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p02",
+            "src_p03"
+          ],
+          "label": "complete"
+        },
+        {
+          "id": "edge_p03",
+          "from": "node_p03",
+          "to": "node_p04",
+          "kind": "next",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p03"
+          ]
+        },
+        {
+          "id": "edge_p04",
+          "from": "node_p02",
+          "to": "node_p05",
+          "kind": "branch",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p02",
+            "src_p05"
+          ],
+          "label": "incomplete"
+        },
+        {
+          "id": "edge_p05",
+          "from": "node_p05",
+          "to": "node_p06",
+          "kind": "next",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p90"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "flows/process.md",
+          "anchor": "flow_p01"
+        }
+      ]
+    },
+    {
+      "id": "flow_p02",
+      "label": "Prepare access",
+      "startNodeId": "node_p07",
+      "nodes": [
+        {
+          "id": "node_p07",
+          "label": "Create an account",
+          "kind": "operation",
+          "sourceIds": [
+            "src_p04"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p07"
+            }
+          ]
+        },
+        {
+          "id": "node_p08",
+          "label": "Send a sign-in link",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_p04"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p08"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_p06",
+          "from": "node_p07",
+          "to": "node_p08",
+          "kind": "next",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p04"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "flows/process.md",
+          "anchor": "flow_p02"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_p01",
+      "path": "architecture/evidence/request.md",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_p02",
+      "path": "architecture/evidence/request.md",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_p03",
+      "path": "architecture/evidence/request.md",
+      "startLine": 3,
+      "endLine": 3
+    },
+    {
+      "id": "src_p04",
+      "path": "architecture/evidence/request.md",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_p05",
+      "path": "architecture/evidence/request.md",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_p90",
+      "path": "architecture/evidence/clarification-001.md",
+      "startLine": 5,
+      "endLine": 5
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+// Illustrative JavaScript source. Broker routing is configured separately.
+commands.register("submit", submit);
+function submit(job) {
+  broker.publish("jobs", job); // synchronous publish acknowledgment; consumer is detached
+  return "accepted";
+}

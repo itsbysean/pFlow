@@ -1,0 +1,5 @@
+[project]
+name = "dial-runner"
+version = "0.0.1"
+[project.scripts]
+watch-dials = "launch:main"

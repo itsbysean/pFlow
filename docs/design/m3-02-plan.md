@@ -1,0 +1,9 @@
+# M3-02 — Search activation and highlighting
+
+Research: local `main` starts at `41e73e0`. M1-03 supplies canonical literal entity IDs plus matching `docs` backlinks. M3-01 results retain bundle/path/section ID and previews. Existing modules already support owned node/edge selection, ID-only detail navigation, document rendering and internal scrolling. No M1 change is required.
+
+1. Resolve results by bundle, normalized document path and literal section ID. Require a matching canonical entity backlink before graph synchronization. Validate embedded documents/sections before changing graph state. Stale associations remain readable with a notice, never guessed from labels.
+2. Keep the current Flow/context when already correct. Otherwise search `expandFlowId` links breadth-first, preferring the current entry, then entries and nodes in artifact order. Reuse existing navigation actions. If no entry path exists, directly browse the known Flow with an explicit notice. Async edges do not form hierarchy.
+3. Reuse native Markdown rendering. Highlight normalized query terms by splitting text nodes into native `mark` nodes, preserving code/strong/link formatting. Scope to the indexed section's own content; prefer the first body hit for scrolling, then headings/section. Clear highlights on normal navigation. Never mutate Markdown or insert HTML.
+4. Activate by click or Enter after arrow review (first result when none reviewed). Close the overlay, retain the query and focus the document passage or error status. Keep search opening/review independent of navigation.
+5. Test canonical mapping, deterministic/reusable/cyclic paths, unmapped/stale references, long-body scrolling, multiple Unicode terms, focus/reopening, and existing Viewer behavior. Review in a separate pass, commit locally on `main`, and stop before M4.

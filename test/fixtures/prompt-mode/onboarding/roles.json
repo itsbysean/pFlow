@@ -1,0 +1,13 @@
+{
+  "entryLabel": "Offer accepted",
+  "trigger": "Offer accepted",
+  "detail": "flow_p02",
+  "expand": "node_p03",
+  "decision": "node_p02",
+  "stop": "node_p06",
+  "stopEdge": "edge_p05",
+  "branches": {
+    "complete": "node_p03",
+    "incomplete": "node_p05"
+  }
+}

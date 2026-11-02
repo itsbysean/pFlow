@@ -1,0 +1,20 @@
+---
+name: pflow-impact
+description: Detect Git source/configuration changes and plan affected pFlow flows, entries and relationships. Use with a reliable baseline bundle for incremental impact planning only; do not regenerate documentation or HTML.
+---
+
+# Change detection and impact planning
+
+Confirm the target Git root, baseline artifact/source provenance and explicit comparison scope using [baseline.md](references/baseline.md). Do not assume HEAD~1, interpret opaque revision text as a Git commit, or equate existing documentation with the current checkout. If no reliable baseline exists, report incremental planning as unavailable and recommend full analysis; do not start that analysis automatically.
+
+Read [impact.md](references/impact.md). Reuse the prior M5-01 execution-mechanism/coverage notes, existing graph, SourceReferences and canonical document links. Use the trusted [Git collector](scripts/git-changes.mjs) and [draft impact helper](scripts/impact.mjs) where available; they use native Git and existing validators, not language parsers. Their returned objects are temporary working data, not a new persistent artifact contract. Do not add impact fields to Diagram JSON.
+
+1. Collect added/modified/deleted/renamed/type/untracked changes for the selected scope, retaining old paths and old-side hunk ranges. Record resolved commits, working-tree inclusion, ignored-file limits and unstable-read diagnostics. Do not change target history/index/content or execute target scripts, filters, diff drivers, hooks or services.
+2. Validate the old bundle against its actual baseline source snapshot. Map changed paths to entry activation, owned node and edge sourceIds. Review every reference in a changed file: hunks distinguish edited ranges, shifted locations and context changes, not semantic safety. Rename similarity is not persistent identity proof.
+3. Compute direct scopes and reverse hierarchical-parent/cross-flow review closure using existing IDs and a visited set. Revalidate both ends of affected async relationships without turning them into synchronous calls or expansion paths. Keep impact dependencies distinct from runtime reachability.
+4. Inspect only changed files/hunks and the specific owned bindings, configuration/registration chains needed to resolve uncertainty. Identify whether changes can introduce/remove entries, callbacks, dispatch targets or routes absent from the old graph. Use the actual mechanism, not framework filenames. Unmapped additions and configuration/loader changes require discovery review, not an empty impact claim.
+5. Refine the conservative draft with evidence. Exclude a scope only when targeted inspection establishes why it is unrelated; record that reason. Unknown dynamic registration, inconsistent references, unstable input or broad restructuring requires broader discovery. Do not silently discard such areas to minimize the plan.
+
+Return a concise impact plan in the response, or the requested planning location only: resolved baseline/comparison scope, changed paths/statuses, direct/transitive Flow IDs and reasons, affected entries and rediscovery scope, relationships to revalidate, exclusions, unresolved areas and the recommended analysis breadth. Use existing IDs/canonical paths. No new persistent schema, historical identity matching, Markdown/JSON regeneration, merging, Builder invocation, HTML rebuilding, findings or M6-02 work is included.
+
+Use [review.md](references/review.md) for evidence and cycle checks. Validated references do not prove that the baseline is the correct snapshot or that an unchanged file's behavior is unaffected. Stop after the plan; regeneration needs separate approval.

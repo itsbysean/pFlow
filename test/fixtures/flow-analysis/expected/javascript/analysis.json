@@ -1,0 +1,749 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_66c96b5d1c26",
+      "label": "Submit request",
+      "trigger": "HTTP POST /submit with parsed request payload",
+      "flowId": "flow_154b456e58c6",
+      "sourceIds": [
+        "src_824c3d49c238",
+        "src_bb58ed7300b0",
+        "src_089b225dcef5"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_154b456e58c6",
+      "label": "Submit request",
+      "startNodeId": "node_2dfd0923d54e",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_154b456e58c6"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_2dfd0923d54e",
+          "label": "Receive control in submit",
+          "kind": "operation",
+          "sourceIds": [
+            "src_824c3d49c238",
+            "src_bb58ed7300b0",
+            "src_089b225dcef5"
+          ]
+        },
+        {
+          "id": "node_5fc48d8e8e32",
+          "label": "Invoke bound ProcessService.process",
+          "kind": "operation",
+          "sourceIds": [
+            "src_def1a7a965bf",
+            "src_bb58ed7300b0",
+            "src_453ca1c6188a"
+          ],
+          "expandFlowId": "flow_d94dae7ef0a4"
+        },
+        {
+          "id": "node_4c6cb638d177",
+          "label": "Is the caught error InvalidRecord?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_18720fd0d22f",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_b7e4c8d3ab85",
+          "label": "Return service result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_def1a7a965bf"
+          ]
+        },
+        {
+          "id": "node_3e911817528d",
+          "label": "Return invalid result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_18720fd0d22f",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_9f23045cb9d3",
+          "label": "Rethrow unmatched exception",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_18720fd0d22f"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_c1265d4972a3",
+          "from": "node_2dfd0923d54e",
+          "to": "node_5fc48d8e8e32",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_def1a7a965bf",
+            "src_bb58ed7300b0",
+            "src_453ca1c6188a"
+          ]
+        },
+        {
+          "id": "edge_1c47c100f167",
+          "from": "node_5fc48d8e8e32",
+          "to": "node_b7e4c8d3ab85",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_def1a7a965bf"
+          ]
+        },
+        {
+          "id": "edge_aa6927bcad9b",
+          "from": "node_5fc48d8e8e32",
+          "to": "node_4c6cb638d177",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_18720fd0d22f",
+            "src_34be2a982618",
+            "src_edcd8386e1a2"
+          ]
+        },
+        {
+          "id": "edge_7d96762676b8",
+          "from": "node_4c6cb638d177",
+          "to": "node_3e911817528d",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_18720fd0d22f",
+            "src_b73e70bd2ca6"
+          ],
+          "label": "InvalidRecord"
+        },
+        {
+          "id": "edge_e534ea282147",
+          "from": "node_4c6cb638d177",
+          "to": "node_9f23045cb9d3",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_18720fd0d22f"
+          ],
+          "label": "other error"
+        }
+      ]
+    },
+    {
+      "id": "flow_d94dae7ef0a4",
+      "label": "Process submitted value",
+      "startNodeId": "node_1bad58c01601",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_d94dae7ef0a4"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_1bad58c01601",
+          "label": "Receive ProcessService.process",
+          "kind": "operation",
+          "sourceIds": [
+            "src_453ca1c6188a",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "node_48216c7d488e",
+          "label": "Is the input authorized?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_5f3c123a74da"
+          ]
+        },
+        {
+          "id": "node_4221d5ee0f5b",
+          "label": "Return denied",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_5f3c123a74da"
+          ]
+        },
+        {
+          "id": "node_9f7e589cd8f1",
+          "label": "Which policy does the bound factory select?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_5a9166e1cab8",
+            "src_11723c913673",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "node_a29d3acd132a",
+          "label": "Transform using strictPolicy",
+          "kind": "operation",
+          "sourceIds": [
+            "src_5a9166e1cab8",
+            "src_eb9973e8ef03",
+            "src_bb58ed7300b0"
+          ],
+          "expandFlowId": "flow_f6b6a4872043"
+        },
+        {
+          "id": "node_e9c4a08dd641",
+          "label": "Transform using standardPolicy",
+          "kind": "operation",
+          "sourceIds": [
+            "src_5a9166e1cab8",
+            "src_d1543cf32030",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "node_bb529d142953",
+          "label": "Invoke bound MemoryRepository.save",
+          "kind": "operation",
+          "sourceIds": [
+            "src_4cbd0bb4e99c",
+            "src_0e885a7aa84b",
+            "src_bb58ed7300b0"
+          ],
+          "expandFlowId": "flow_8f7463a6499c"
+        },
+        {
+          "id": "node_da47cbb535c8",
+          "label": "Invoke bound recordSaved callback",
+          "kind": "operation",
+          "sourceIds": [
+            "src_d5fe61c7b262",
+            "src_2f042f55d3de",
+            "src_bb58ed7300b0"
+          ],
+          "expandFlowId": "flow_41722fc1a2cd"
+        },
+        {
+          "id": "node_f741d4915797",
+          "label": "Is a plugin requested?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_273e90d556cf"
+          ]
+        },
+        {
+          "id": "node_88abe7198192",
+          "label": "Runtime plugin receiver is not established",
+          "kind": "unresolved",
+          "sourceIds": [
+            "src_273e90d556cf",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "node_b47dfdf7545e",
+          "label": "Return ok and saved value",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_d2166d1afb63"
+          ]
+        },
+        {
+          "id": "node_8717cff5c509",
+          "label": "Propagate policy or storage failure",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_34be2a982618",
+            "src_edcd8386e1a2",
+            "src_b73e70bd2ca6"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_45b9ea1aeb8a",
+          "from": "node_1bad58c01601",
+          "to": "node_48216c7d488e",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5f3c123a74da"
+          ]
+        },
+        {
+          "id": "edge_ef6127255b07",
+          "from": "node_48216c7d488e",
+          "to": "node_4221d5ee0f5b",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5f3c123a74da"
+          ],
+          "label": "not authorized"
+        },
+        {
+          "id": "edge_ab87f38413b6",
+          "from": "node_48216c7d488e",
+          "to": "node_9f7e589cd8f1",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_5f3c123a74da",
+            "src_5a9166e1cab8",
+            "src_11723c913673"
+          ],
+          "label": "authorized"
+        },
+        {
+          "id": "edge_2843b7a8961e",
+          "from": "node_9f7e589cd8f1",
+          "to": "node_a29d3acd132a",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_11723c913673",
+            "src_5a9166e1cab8"
+          ],
+          "label": "mode is strict"
+        },
+        {
+          "id": "edge_b7f1c89b86eb",
+          "from": "node_9f7e589cd8f1",
+          "to": "node_e9c4a08dd641",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_11723c913673",
+            "src_5a9166e1cab8"
+          ],
+          "label": "otherwise"
+        },
+        {
+          "id": "edge_9fbf90310781",
+          "from": "node_a29d3acd132a",
+          "to": "node_bb529d142953",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4cbd0bb4e99c",
+            "src_0e885a7aa84b",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "edge_04bf78f5d3f5",
+          "from": "node_e9c4a08dd641",
+          "to": "node_bb529d142953",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_4cbd0bb4e99c",
+            "src_0e885a7aa84b",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "edge_e5e82aeffbf4",
+          "from": "node_a29d3acd132a",
+          "to": "node_8717cff5c509",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "edge_09a38c822266",
+          "from": "node_bb529d142953",
+          "to": "node_8717cff5c509",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_edcd8386e1a2",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "edge_0ee30f10ee30",
+          "from": "node_bb529d142953",
+          "to": "node_da47cbb535c8",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_d5fe61c7b262",
+            "src_2f042f55d3de",
+            "src_bb58ed7300b0"
+          ]
+        },
+        {
+          "id": "edge_ff74a53a0a2d",
+          "from": "node_da47cbb535c8",
+          "to": "node_f741d4915797",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_273e90d556cf"
+          ]
+        },
+        {
+          "id": "edge_cac346d3a42d",
+          "from": "node_f741d4915797",
+          "to": "node_88abe7198192",
+          "kind": "branch",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_273e90d556cf",
+            "src_bb58ed7300b0"
+          ],
+          "label": "plugin requested"
+        },
+        {
+          "id": "edge_d8f99a43d916",
+          "from": "node_f741d4915797",
+          "to": "node_b47dfdf7545e",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_273e90d556cf",
+            "src_d2166d1afb63"
+          ],
+          "label": "no plugin"
+        }
+      ]
+    },
+    {
+      "id": "flow_8f7463a6499c",
+      "label": "Save in project repository",
+      "startNodeId": "node_a1a537a5c0f3",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_8f7463a6499c"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_a1a537a5c0f3",
+          "label": "Receive repository save",
+          "kind": "operation",
+          "sourceIds": [
+            "src_0e885a7aa84b"
+          ]
+        },
+        {
+          "id": "node_b3f9d3c631a4",
+          "label": "Does the value equal broken?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_edcd8386e1a2"
+          ]
+        },
+        {
+          "id": "node_4d368cac06c7",
+          "label": "Throw StorageFault",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_edcd8386e1a2",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_2235dbc0e2c4",
+          "label": "Return value",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_0e885a7aa84b"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_a94be2350c9a",
+          "from": "node_a1a537a5c0f3",
+          "to": "node_b3f9d3c631a4",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_0e885a7aa84b"
+          ]
+        },
+        {
+          "id": "edge_e73c7d8d3734",
+          "from": "node_b3f9d3c631a4",
+          "to": "node_4d368cac06c7",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_edcd8386e1a2",
+            "src_b73e70bd2ca6"
+          ],
+          "label": "broken"
+        },
+        {
+          "id": "edge_c46545e9ffe9",
+          "from": "node_b3f9d3c631a4",
+          "to": "node_2235dbc0e2c4",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_0e885a7aa84b"
+          ],
+          "label": "other value"
+        }
+      ]
+    },
+    {
+      "id": "flow_41722fc1a2cd",
+      "label": "Record local notification",
+      "startNodeId": "node_a161822dc640",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_41722fc1a2cd"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_a161822dc640",
+          "label": "Append to project-owned audit history",
+          "kind": "operation",
+          "sourceIds": [
+            "src_2f042f55d3de"
+          ]
+        }
+      ],
+      "edges": []
+    },
+    {
+      "id": "flow_f6b6a4872043",
+      "label": "Strict policy transformation",
+      "startNodeId": "node_046f94082598",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_f6b6a4872043"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_046f94082598",
+          "label": "Receive strict policy transform",
+          "kind": "operation",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_77bb4408d25b",
+          "label": "Does the value equal !?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_496c49362896",
+          "label": "Throw InvalidRecord",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "node_8f898e2f1318",
+          "label": "Return trimmed uppercase value",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_96238b2d4c62",
+          "from": "node_046f94082598",
+          "to": "node_77bb4408d25b",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ]
+        },
+        {
+          "id": "edge_417da9ee0d35",
+          "from": "node_77bb4408d25b",
+          "to": "node_496c49362896",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ],
+          "label": "value is !"
+        },
+        {
+          "id": "edge_000691a68ee3",
+          "from": "node_77bb4408d25b",
+          "to": "node_8f898e2f1318",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_eb9973e8ef03",
+            "src_34be2a982618",
+            "src_b73e70bd2ca6"
+          ],
+          "label": "other value"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_824c3d49c238",
+      "path": "package.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_bb58ed7300b0",
+      "path": "boot.mjs",
+      "startLine": 8,
+      "endLine": 15
+    },
+    {
+      "id": "src_089b225dcef5",
+      "path": "app/entry.mjs",
+      "startLine": 4,
+      "endLine": 4,
+      "symbol": "submit"
+    },
+    {
+      "id": "src_def1a7a965bf",
+      "path": "app/entry.mjs",
+      "startLine": 5,
+      "endLine": 6,
+      "symbol": "submit"
+    },
+    {
+      "id": "src_18720fd0d22f",
+      "path": "app/entry.mjs",
+      "startLine": 7,
+      "endLine": 9
+    },
+    {
+      "id": "src_453ca1c6188a",
+      "path": "domain/service.mjs",
+      "startLine": 1,
+      "endLine": 6,
+      "symbol": "ProcessService.process"
+    },
+    {
+      "id": "src_5f3c123a74da",
+      "path": "domain/service.mjs",
+      "startLine": 7,
+      "endLine": 7
+    },
+    {
+      "id": "src_5a9166e1cab8",
+      "path": "domain/service.mjs",
+      "startLine": 8,
+      "endLine": 9
+    },
+    {
+      "id": "src_11723c913673",
+      "path": "domain/policies.mjs",
+      "startLine": 11,
+      "endLine": 12,
+      "symbol": "policyFor"
+    },
+    {
+      "id": "src_d1543cf32030",
+      "path": "domain/policies.mjs",
+      "startLine": 3,
+      "endLine": 3,
+      "symbol": "standardPolicy.transform"
+    },
+    {
+      "id": "src_eb9973e8ef03",
+      "path": "domain/policies.mjs",
+      "startLine": 4,
+      "endLine": 8,
+      "symbol": "strictPolicy.transform"
+    },
+    {
+      "id": "src_34be2a982618",
+      "path": "domain/policies.mjs",
+      "startLine": 6,
+      "endLine": 6
+    },
+    {
+      "id": "src_4cbd0bb4e99c",
+      "path": "domain/service.mjs",
+      "startLine": 10,
+      "endLine": 10
+    },
+    {
+      "id": "src_0e885a7aa84b",
+      "path": "data/repository.mjs",
+      "startLine": 3,
+      "endLine": 7,
+      "symbol": "MemoryRepository.save"
+    },
+    {
+      "id": "src_edcd8386e1a2",
+      "path": "data/repository.mjs",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_d5fe61c7b262",
+      "path": "domain/service.mjs",
+      "startLine": 11,
+      "endLine": 11
+    },
+    {
+      "id": "src_2f042f55d3de",
+      "path": "domain/audit.mjs",
+      "startLine": 1,
+      "endLine": 2,
+      "symbol": "recordSaved"
+    },
+    {
+      "id": "src_273e90d556cf",
+      "path": "domain/service.mjs",
+      "startLine": 12,
+      "endLine": 12
+    },
+    {
+      "id": "src_d2166d1afb63",
+      "path": "domain/service.mjs",
+      "startLine": 13,
+      "endLine": 13
+    },
+    {
+      "id": "src_b73e70bd2ca6",
+      "path": "domain/errors.mjs",
+      "startLine": 1,
+      "endLine": 2
+    }
+  ]
+}

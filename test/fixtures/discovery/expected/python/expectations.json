@@ -1,0 +1,25 @@
+{
+  "confirmed": [
+    {
+      "name": "custom",
+      "entryId": "entry_c9d002fde83e",
+      "handler": "rotate",
+      "sourceIds": [
+        "src_cb974f03c132",
+        "src_d0f8d2e2a660",
+        "src_f62c82af09fa",
+        "src_dd80e92231ab"
+      ]
+    }
+  ],
+  "unresolved": [],
+  "rejected": [
+    {
+      "symbol": "HttpController_onRequest",
+      "sourceIds": [
+        "src_9e016ea66e2a",
+        "src_d0f8d2e2a660"
+      ]
+    }
+  ]
+}

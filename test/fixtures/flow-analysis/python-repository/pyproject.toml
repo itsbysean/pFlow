@@ -1,0 +1,5 @@
+[project]
+name = "depth-counter"
+version = "0.0.1"
+[project.scripts]
+count-depth = "entry:run"

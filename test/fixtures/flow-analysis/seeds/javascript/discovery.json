@@ -1,0 +1,63 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_66c96b5d1c26",
+      "label": "Submit request",
+      "trigger": "HTTP POST /submit with parsed request payload",
+      "flowId": "flow_154b456e58c6",
+      "sourceIds": [
+        "src_824c3d49c238",
+        "src_bb58ed7300b0",
+        "src_089b225dcef5"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_154b456e58c6",
+      "label": "Submit request",
+      "startNodeId": "node_2dfd0923d54e",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_154b456e58c6"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_2dfd0923d54e",
+          "label": "Receive control in submit",
+          "kind": "operation",
+          "sourceIds": [
+            "src_824c3d49c238",
+            "src_bb58ed7300b0",
+            "src_089b225dcef5"
+          ]
+        }
+      ],
+      "edges": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_824c3d49c238",
+      "path": "package.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_bb58ed7300b0",
+      "path": "boot.mjs",
+      "startLine": 8,
+      "endLine": 15
+    },
+    {
+      "id": "src_089b225dcef5",
+      "path": "app/entry.mjs",
+      "startLine": 4,
+      "endLine": 4,
+      "symbol": "submit"
+    }
+  ]
+}

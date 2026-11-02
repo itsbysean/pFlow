@@ -1,0 +1,7 @@
+# Illustrative Python source; dependency implementations are outside scope.
+def read_state(args):
+    valid = input_rules.check(args)
+    if not valid:
+        return "invalid input"
+    state = http.get(STATE_URL + "/state")  # waits; request exceptions propagate
+    return state

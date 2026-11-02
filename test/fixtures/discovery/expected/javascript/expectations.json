@@ -1,0 +1,67 @@
+{
+  "confirmed": [
+    {
+      "name": "http",
+      "entryId": "entry_72119a97757f",
+      "handler": "status",
+      "sourceIds": [
+        "src_2a3642ba3f7e",
+        "src_585b5e5ad498",
+        "src_33bad8545bb5",
+        "src_b17a1190aa0d",
+        "src_645c338bc90b"
+      ]
+    },
+    {
+      "name": "scheduled",
+      "entryId": "entry_580f3b5ccceb",
+      "handler": "compactLedger",
+      "sourceIds": [
+        "src_2a3642ba3f7e",
+        "src_be57acc2443e",
+        "src_89c0eb645c68",
+        "src_239508adb291",
+        "src_39e746cb3871",
+        "src_deace3d5f1a3"
+      ]
+    },
+    {
+      "name": "custom",
+      "entryId": "entry_8ac388aee6ed",
+      "handler": "flushBuffer",
+      "sourceIds": [
+        "src_2a3642ba3f7e",
+        "src_1ec6db584626",
+        "src_c1a7a7165087",
+        "src_fa76cdf9df55",
+        "src_c7680e3cdb3d"
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "name": "runtime-site-task",
+      "sourceIds": [
+        "src_ba65c69115f1",
+        "src_39e746cb3871",
+        "src_be57acc2443e"
+      ]
+    }
+  ],
+  "rejected": [
+    {
+      "symbol": "AdminController_handleRequest",
+      "sourceIds": [
+        "src_ebb873a57c1d",
+        "src_33bad8545bb5"
+      ]
+    },
+    {
+      "symbol": "onScheduledTask",
+      "sourceIds": [
+        "src_544274531e02",
+        "src_239508adb291"
+      ]
+    }
+  ]
+}

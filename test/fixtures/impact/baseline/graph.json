@@ -1,0 +1,466 @@
+{
+  "modelVersion": "1.0.0",
+  "revision": "reviewed-inert-fixture",
+  "entryPoints": [
+    {
+      "id": "entry_6daded7ae701",
+      "label": "alpha",
+      "flowId": "flow_6daded7ae701",
+      "trigger": "CLI alpha",
+      "sourceIds": [
+        "src_71f7c4e13703"
+      ]
+    },
+    {
+      "id": "entry_e8a0c4059ae6",
+      "label": "beta",
+      "flowId": "flow_e8a0c4059ae6",
+      "trigger": "CLI beta",
+      "sourceIds": [
+        "src_71f7c4e13703"
+      ]
+    },
+    {
+      "id": "entry_d814e61191d1",
+      "label": "shared",
+      "flowId": "flow_d814e61191d1",
+      "trigger": "Configured relay callback",
+      "sourceIds": [
+        "src_4ddb4d12e6e6",
+        "src_71f7c4e13703"
+      ]
+    },
+    {
+      "id": "entry_9f3625e6d230",
+      "label": "consumer",
+      "flowId": "flow_9f3625e6d230",
+      "trigger": "Configured jobs callback",
+      "sourceIds": [
+        "src_4ddb4d12e6e6",
+        "src_71f7c4e13703"
+      ]
+    },
+    {
+      "id": "entry_010761f5e0b5",
+      "label": "unrelated",
+      "flowId": "flow_010761f5e0b5",
+      "trigger": "CLI unrelated",
+      "sourceIds": [
+        "src_71f7c4e13703"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_6daded7ae701",
+      "label": "alpha",
+      "startNodeId": "node_4503de15fc58",
+      "nodes": [
+        {
+          "id": "node_4503de15fc58",
+          "label": "Receive alpha",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6daded7ae701"
+          ]
+        },
+        {
+          "id": "node_05f3ed1c1e3b",
+          "label": "Invoke shared",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6daded7ae701"
+          ],
+          "expandFlowId": "flow_d814e61191d1"
+        },
+        {
+          "id": "node_66a35945665d",
+          "label": "Return alpha",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_6daded7ae701"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_5165093a345c",
+          "from": "node_4503de15fc58",
+          "to": "node_05f3ed1c1e3b",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6daded7ae701"
+          ]
+        },
+        {
+          "id": "edge_dcb4348b3ce1",
+          "from": "node_05f3ed1c1e3b",
+          "to": "node_66a35945665d",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6daded7ae701"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_6daded7ae701"
+        }
+      ]
+    },
+    {
+      "id": "flow_e8a0c4059ae6",
+      "label": "beta",
+      "startNodeId": "node_30f76db69c38",
+      "nodes": [
+        {
+          "id": "node_30f76db69c38",
+          "label": "Receive beta",
+          "kind": "operation",
+          "sourceIds": [
+            "src_e8a0c4059ae6"
+          ]
+        },
+        {
+          "id": "node_d5a3f02be6bd",
+          "label": "Invoke shared",
+          "kind": "operation",
+          "sourceIds": [
+            "src_e8a0c4059ae6"
+          ],
+          "expandFlowId": "flow_d814e61191d1"
+        },
+        {
+          "id": "node_70237aba3a45",
+          "label": "Return beta",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_e8a0c4059ae6"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_043b9623f9bb",
+          "from": "node_30f76db69c38",
+          "to": "node_d5a3f02be6bd",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_e8a0c4059ae6"
+          ]
+        },
+        {
+          "id": "edge_f3d6badf5e0e",
+          "from": "node_d5a3f02be6bd",
+          "to": "node_70237aba3a45",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_e8a0c4059ae6"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_e8a0c4059ae6"
+        }
+      ]
+    },
+    {
+      "id": "flow_d814e61191d1",
+      "label": "shared",
+      "startNodeId": "node_cfc18605865a",
+      "nodes": [
+        {
+          "id": "node_cfc18605865a",
+          "label": "Receive shared",
+          "kind": "operation",
+          "sourceIds": [
+            "src_d814e61191d1",
+            "src_612d754ef27e",
+            "src_4ddb4d12e6e6",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ]
+        },
+        {
+          "id": "node_eecbe3d7dbb1",
+          "label": "Publish shared",
+          "kind": "external",
+          "sourceIds": [
+            "src_d814e61191d1",
+            "src_612d754ef27e",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ],
+          "external": {
+            "kind": "messaging",
+            "attributes": {
+              "messaging.destination": "jobs.v1",
+              "messaging.endpoint": "port://fixed.example.invalid"
+            }
+          }
+        },
+        {
+          "id": "node_5badd504dbe2",
+          "label": "Return shared",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_d814e61191d1"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_27bd3a095a84",
+          "from": "node_cfc18605865a",
+          "to": "node_eecbe3d7dbb1",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_d814e61191d1"
+          ]
+        },
+        {
+          "id": "edge_40dc31ad9b7a",
+          "from": "node_eecbe3d7dbb1",
+          "to": "node_5badd504dbe2",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_d814e61191d1"
+          ]
+        },
+        {
+          "id": "edge_826d6f859506",
+          "from": "node_eecbe3d7dbb1",
+          "to": "node_90dac2ec0141",
+          "kind": "receive",
+          "mode": "async",
+          "label": "Configured exact-destination possibility",
+          "sourceIds": [
+            "src_d814e61191d1",
+            "src_612d754ef27e",
+            "src_4ddb4d12e6e6",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_d814e61191d1"
+        }
+      ]
+    },
+    {
+      "id": "flow_9f3625e6d230",
+      "label": "consumer",
+      "startNodeId": "node_90dac2ec0141",
+      "nodes": [
+        {
+          "id": "node_90dac2ec0141",
+          "label": "Receive consumer",
+          "kind": "operation",
+          "sourceIds": [
+            "src_9f3625e6d230",
+            "src_612d754ef27e",
+            "src_4ddb4d12e6e6",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ]
+        },
+        {
+          "id": "node_fe8700f67c84",
+          "label": "Publish consumer",
+          "kind": "external",
+          "sourceIds": [
+            "src_9f3625e6d230",
+            "src_612d754ef27e",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ],
+          "external": {
+            "kind": "messaging",
+            "attributes": {
+              "messaging.destination": "relay.v1",
+              "messaging.endpoint": "port://fixed.example.invalid"
+            }
+          }
+        },
+        {
+          "id": "node_f3cfe71e49e5",
+          "label": "Return consumer",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_9f3625e6d230"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_41c60ef322d4",
+          "from": "node_90dac2ec0141",
+          "to": "node_fe8700f67c84",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_9f3625e6d230"
+          ]
+        },
+        {
+          "id": "edge_dbfb60cf5340",
+          "from": "node_fe8700f67c84",
+          "to": "node_f3cfe71e49e5",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_9f3625e6d230"
+          ]
+        },
+        {
+          "id": "edge_56af39c1dc60",
+          "from": "node_fe8700f67c84",
+          "to": "node_cfc18605865a",
+          "kind": "receive",
+          "mode": "async",
+          "label": "Configured exact-destination possibility",
+          "sourceIds": [
+            "src_9f3625e6d230",
+            "src_612d754ef27e",
+            "src_4ddb4d12e6e6",
+            "src_71f7c4e13703",
+            "src_25caa77b46f4"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_9f3625e6d230"
+        }
+      ]
+    },
+    {
+      "id": "flow_010761f5e0b5",
+      "label": "unrelated",
+      "startNodeId": "node_d6d8ace04cb5",
+      "nodes": [
+        {
+          "id": "node_d6d8ace04cb5",
+          "label": "Receive unrelated",
+          "kind": "operation",
+          "sourceIds": [
+            "src_010761f5e0b5"
+          ]
+        },
+        {
+          "id": "node_49e8a8bccd00",
+          "label": "Publish unrelated",
+          "kind": "operation",
+          "sourceIds": [
+            "src_010761f5e0b5"
+          ]
+        },
+        {
+          "id": "node_f949d3484d7d",
+          "label": "Return unrelated",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_010761f5e0b5"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_9f2e9e933cb0",
+          "from": "node_d6d8ace04cb5",
+          "to": "node_49e8a8bccd00",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_010761f5e0b5"
+          ]
+        },
+        {
+          "id": "edge_c623bf336aad",
+          "from": "node_49e8a8bccd00",
+          "to": "node_f949d3484d7d",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_010761f5e0b5"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_010761f5e0b5"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_6daded7ae701",
+      "path": "entries.mjs",
+      "startLine": 1,
+      "endLine": 2
+    },
+    {
+      "id": "src_e8a0c4059ae6",
+      "path": "entries.mjs",
+      "startLine": 1,
+      "endLine": 3
+    },
+    {
+      "id": "src_010761f5e0b5",
+      "path": "entries.mjs",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_d814e61191d1",
+      "path": "shared.mjs",
+      "startLine": 3,
+      "endLine": 6
+    },
+    {
+      "id": "src_9f3625e6d230",
+      "path": "consumer.mjs",
+      "startLine": 1,
+      "endLine": 4
+    },
+    {
+      "id": "src_612d754ef27e",
+      "path": "config/publish.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_4ddb4d12e6e6",
+      "path": "config/subscriptions.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_71f7c4e13703",
+      "path": "boot.mjs",
+      "startLine": 1,
+      "endLine": 14
+    },
+    {
+      "id": "src_25caa77b46f4",
+      "path": "message-port.md",
+      "startLine": 3,
+      "endLine": 3
+    }
+  ]
+}

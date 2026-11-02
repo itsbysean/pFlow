@@ -1,0 +1,10 @@
+# M2-03 — Hierarchical navigation
+
+Research: `main` is clean at `7ddeabf`. M1-01 is approved; EntryPoint `flowId` and Node `expandFlowId` express the required relationships. M2-02 already projects a single Flow without changing graph ownership. Its renderer supplies keyboard/pointer panning and fit controls. The inspector and documentation remain fixed sample previews. No contract change is needed.
+
+1. Add a small navigation trail containing Flow IDs and the owning call-site Node ID used to reach each detail. Index the original artifact; never copy or rewrite its graph. Back and breadcrumbs move toward the root; Forward revisits a retained descendant. Opening another branch discards the forward trail. Selecting an entry or using the existing flat Flow chooser starts a new root context.
+2. Connect entry buttons to `flowId`. Add Back, Forward, Root, and actionable breadcrumbs above the workspace. Use actual entry, Flow, and call-site labels. Keep categories derived from trigger text.
+3. Make local nodes with `expandFlowId` focusable SVG buttons, with a visible detail marker, hover/focus states, and Enter/Space activation. Separate click from drag so panning a node does not open detail. Remote async boundary stubs remain noninteractive, even if their original node has detail.
+4. Prevent a detail target already present in the active path from being appended. Explain the block in a live navigation notice. Preserve graph cycles and allow Back, Root, and breadcrumbs. Missing targets fail safely without a fabricated navigation level.
+5. Fit on every Flow transition, including Back/Forward. Defer viewport restoration to keep state small. Restore focus to the new SVG after navigation. Preserve the fixed inspector/document panels and existing renderer semantics.
+6. Extend pure navigation tests and real-browser tests for entry selection, multi-level drill-down, history, breadcrumbs, reused callees, cycle blocking, dangling references, keyboard access, drag discrimination, viewport refitting, and async separation. Review wide/narrow presentation and document limitations. Continue on `main`; stop after M2-03.

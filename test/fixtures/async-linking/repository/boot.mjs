@@ -1,0 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { connect } from 'message-fabric';
+import { register } from './app/register.mjs';
+import { emit, retry, runtimeProducer } from './app/handlers.mjs';
+const cfg = JSON.parse(readFileSync(new URL('./config/routes.json', import.meta.url), 'utf8'));
+const clients = Object.fromEntries(Object.entries(cfg.brokers).map(([key, value]) => [key, connect({ endpoint: value.endpoint ?? process.env[value.endpointEnv], namespace: value.namespace })]));
+register(clients, cfg);
+const input = JSON.parse(process.argv[3] || '{}');
+if (process.argv[2] === 'retry') await retry(clients.primary, cfg, input);
+else if (process.argv[2] === 'runtime') await runtimeProducer(clients.runtimeProducer, cfg, input);
+else await emit(clients.primary, cfg, input);
