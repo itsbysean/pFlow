@@ -1,0 +1,14 @@
+import { readFileSync } from 'node:fs';
+import { connect } from 'message-port';
+import { alpha, beta, unrelated } from './entries.mjs';
+import { processRecord } from './shared.mjs';
+import { consume } from './consumer.mjs';
+const cfg = JSON.parse(readFileSync(new URL('./config/publish.json', import.meta.url), 'utf8'));
+const registry = JSON.parse(readFileSync(new URL('./config/subscriptions.json', import.meta.url), 'utf8'));
+const bus = connect('port://fixed.example.invalid');
+const handlers = { consume: message => consume(bus, cfg, message), relay: message => processRecord(bus, cfg, message) };
+for (const row of registry) bus.subscribe(row.destination, handlers[row.handler]);
+const input = JSON.parse(process.argv[3] || '{}');
+if (process.argv[2] === 'alpha') await alpha(bus, cfg, input);
+else if (process.argv[2] === 'beta') await beta(bus, cfg, input);
+else unrelated(input);

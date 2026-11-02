@@ -1,0 +1,1 @@
+After requesting missing details, does this attempt stop or return to checking?

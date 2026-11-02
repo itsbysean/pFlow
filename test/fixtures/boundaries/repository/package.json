@@ -1,0 +1,1 @@
+{"type":"module","scripts":{"start":"node boot.mjs"},"dependencies":{"wire-http":"1.0.0","ledger-store":"2.0.0","parcel-bus":"3.0.0","cloud-objects":"4.0.0","seal-kit":"file:third_party/seal-kit","unused-mail":"5.0.0"}}

@@ -1,0 +1,37 @@
+name: Verify source and release package
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Install test browser
+        run: |
+          npx --no-install playwright-core install --with-deps chromium
+          node --input-type=module <<'JS'
+          import {appendFileSync} from 'node:fs';
+          import {chromium} from 'playwright-core';
+          appendFileSync(process.env.GITHUB_ENV, `PFLOW_BROWSER_PATH=${chromium.executablePath()}\n`);
+          JS
+      - run: npm test
+      - name: Build release ZIP
+        run: npm run build:release
+      - name: Keep verified package
+        uses: actions/upload-artifact@v7
+        with:
+          name: pflow-release
+          path: |
+            dist/pflow.zip
+            dist/pflow.zip.sha256
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,12 @@
+# M3-01 — Offline Markdown search
+
+Research: `main` is clean at `d19622a`. M1-03 defines literal entity anchors and an index/linked-document corpus. The Viewer embeds exact Markdown in `pFlowDocuments`, renders it with native DOM APIs, and keeps diagram/navigation state in separate modules. The header has a reserved search location. Node tests and offline Chromium tests are available. No M1 schema change is needed.
+
+1. Add a DOM-independent search module that extracts plain prose, headings, inline code, and link labels from M1-03 Markdown. Omit anchor markup, link destinations, source definitions/citation IDs, fenced examples, and formatting. Index every available bundle, not only the displayed Flow.
+2. Store one plain-text record per literal section (and a document-level record for unanchored text), document metadata once, and unique normalized token postings. Preserve bundle/path/section IDs and previews. Keep the index serializable for a future precomputed M4 payload; do not implement a Builder or alter M1.
+3. Use locale-independent Unicode normalization/casing and letter/mark/number tokens. Support literal substring matches inside tokens. Require all terms in a section's title/heading/body context. Rank an exact document title first, then heading matches, then body matches; break ties by stable document/section order. Suppress title-only duplicates and repeated matches in one section.
+4. Replace the reserved header location with an accessible search input and read-only results popup. Debounce text input, cap displayed results, and highlight with native text/mark nodes. Support arrows, Escape, clear, and exact Ctrl/Cmd+K. Do not attach document/diagram navigation to results.
+5. Keep the search controller independent of Viewer navigation and selection. Build once at startup, reuse postings for queries, and accept explicit index replacement or an optional precomputed index. No per-keystroke Markdown parsing or background service.
+6. Add deterministic pure tests for extraction, ranking, Unicode, matching, deduplication, empty/missing content, serialized indexes, and a representative corpus. Add Chromium checks for safe previews, keyboard controls, offline startup, and unchanged graph/document state. Review the popup at desktop/narrow widths and commit on `main`. Stop before M3-02.
+
+Limits: no stemming, query language, transliteration, full CommonMark parser, fuzzy matching, result navigation, or live Markdown watching. Unanchored headings remain document-level search context rather than invented heading slugs.

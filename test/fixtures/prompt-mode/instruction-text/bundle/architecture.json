@@ -1,0 +1,83 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_p01",
+      "label": "Display literal message",
+      "flowId": "flow_p01",
+      "sourceIds": [
+        "src_p01"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_p01",
+      "label": "Literal message",
+      "startNodeId": "node_p01",
+      "nodes": [
+        {
+          "id": "node_p01",
+          "label": "Display the literal message",
+          "kind": "operation",
+          "sourceIds": [
+            "src_p01"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p01"
+            }
+          ]
+        },
+        {
+          "id": "node_p02",
+          "label": "Finish",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_p02"
+          ],
+          "docs": [
+            {
+              "path": "flows/process.md",
+              "anchor": "node_p02"
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_p01",
+          "from": "node_p01",
+          "to": "node_p02",
+          "kind": "next",
+          "mode": "unknown",
+          "sourceIds": [
+            "src_p01",
+            "src_p02"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "flows/process.md",
+          "anchor": "flow_p01"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_p01",
+      "path": "architecture/evidence/request.md",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_p02",
+      "path": "architecture/evidence/request.md",
+      "startLine": 2,
+      "endLine": 2
+    }
+  ]
+}

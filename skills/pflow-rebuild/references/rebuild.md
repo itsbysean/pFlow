@@ -1,0 +1,19 @@
+# Existing Builder integration and safe publication
+
+Use the trusted packaged runtime documented in the main Skill. Node.js 24+ is required; no target npm install or server is needed. The runtime exports the existing prepareBuild, validateOutput-backed writer and safe rebuild helpers. Its build, inspect and rebuild commands use those implementations, not a second renderer.
+
+The default HTML destination is <target>/docs/architecture/architecture.html, whose parent must already exist. Resolve the existing flat or legacy bundle without migration. Choose input broad enough for the whole intended publication set; repository-wide input includes all discovered envelopes. Discovered IDs stay scoped by artifact key in the Viewer.
+
+Use inspectArchitectureSet({input,repositoryRoot,output}) to validate/inspect and obtain digest/indexInventory. After actual entry/index review, use rebuildArchitectureSet({...same,indexReview:{digest,outcome:'pass',findings:[]}}). A failed review instead supplies actionable findings and blocks publication. These objects are transient. Repeated unchanged inputs can reuse the matching review; no model call is required by the helper. Do not modify Diagram JSON or Markdown merely to rebuild.
+
+Preparation is repeated around hashes of the discovery inventory, artifact JSON, mapped Markdown, every referenced source (including unused/file-level evidence) and declared Viewer assets. Canonical paths and content are checked. Only referenced evidence files are read, not all project source. The private candidate is written by the existing M4 writer, which embeds safe Markdown, graph data, snippets, Viewer and search. No runtime assets or network requests are introduced.
+
+Before replacement, the helper rechecks whole-set inputs, generated stage bytes and the previous output's state; existing output/evidence/Viewer collision and symlink protections are reused. A complete candidate replaces final HTML through one atomic same-parent rename. Failure before that rename leaves old HTML intact and cleans owned temporary files. Equal bytes skip rename and preserve inode/mtime; normal replacements preserve existing permission bits. Rename/test hooks are trusted fixture seams, never data from analyzed sources.
+
+Warnings such as location-only or oversized snippet evidence remain in prepared diagnostics. Do not fabricate snippets or suppress warnings. A legitimately unresolved call can render as unresolved while its actual references remain valid. The tooling proves structural consistency and packaging, not semantic truth, current deployment values or guaranteed messaging delivery.
+
+For task tests, move the rebuilt HTML away from inputs and open through file:// with browser networking disabled. Verify updated entry navigation, expansion, selection, documentation, numbered snippets and search. Do not start real-project E2E or infrastructure. Report untested browser coverage honestly. Repeated builds are deterministic for identical documentation/assets; private temporary names/digests are not embedded.
+
+Fingerprints detect ordinary stale inputs, not all adversarial races or edits that occur and are restored between observations. A crash before publication leaves the old HTML and may leave an owned temporary file for explicit cleanup; do not delete unrelated files. No atomic combined Markdown/JSON/HTML transaction is claimed: validated regenerated docs survive even when rebuilding fails. Stop before M6-04.
+
+Use the shared builder/bundle-layout.mjs resolver (resolveBundleRoot for a known bundle) for graphPath/docsRoot. Flat diagrams/architecture.json + root Markdown and legacy architecture.json + docs/ are supported without migration. Pass resolved baseline docsRoot to impact planning. Targeted apply requires baseline/current layout agreement and retains all Git, source separation, ownership and rollback guards; prompt incremental apply remains unsupported.

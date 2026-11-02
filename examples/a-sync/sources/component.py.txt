@@ -1,0 +1,3 @@
+# Illustrative Python source; exceptions propagate to the caller.
+def execute(args):
+    return read_state(args)

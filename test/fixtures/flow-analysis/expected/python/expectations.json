@@ -1,0 +1,31 @@
+{
+  "flows": {
+    "root": "flow_7595fc490e75",
+    "recursive": "flow_6dad8626e3bd"
+  },
+  "nodes": {
+    "receiving": "node_cf4fe3e0be11",
+    "invoke": "node_875763b22a53",
+    "return": "node_9439902202ab",
+    "recursiveStart": "node_0f73ab29708b",
+    "baseGuard": "node_8173fc7297c1",
+    "baseReturn": "node_afac48eafc18",
+    "recursiveCall": "node_c80bc6b2cc29",
+    "recursiveReturn": "node_1e77f5e4fc03"
+  },
+  "edges": {
+    "invoke": "edge_458ca44c5205",
+    "return": "edge_8752fc7b7df8",
+    "guard": "edge_b6c1c55d07cd",
+    "base": "edge_269a0aac42e6",
+    "recursive": "edge_b9eea18ca83c",
+    "unwind": "edge_b8f7571fdcd1"
+  },
+  "sourceRoles": {
+    "activation": "src_5e2501075f45",
+    "call": "src_94ad48aff725",
+    "body": "src_952baaec0c93",
+    "base": "src_aadc69e180ac",
+    "recurse": "src_c8646daf750d"
+  }
+}

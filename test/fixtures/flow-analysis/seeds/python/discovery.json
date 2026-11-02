@@ -1,0 +1,55 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_0b5ae51c0da0",
+      "label": "Count depth",
+      "trigger": "Installed count-depth command invokes entry.run",
+      "flowId": "flow_7595fc490e75",
+      "sourceIds": [
+        "src_9164ab193c62",
+        "src_5e2501075f45"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_7595fc490e75",
+      "label": "Count depth",
+      "startNodeId": "node_cf4fe3e0be11",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_7595fc490e75"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_cf4fe3e0be11",
+          "label": "Receive control in run",
+          "kind": "operation",
+          "sourceIds": [
+            "src_9164ab193c62",
+            "src_5e2501075f45"
+          ]
+        }
+      ],
+      "edges": []
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_9164ab193c62",
+      "path": "pyproject.toml",
+      "startLine": 4,
+      "endLine": 5
+    },
+    {
+      "id": "src_5e2501075f45",
+      "path": "entry.py",
+      "startLine": 3,
+      "endLine": 3,
+      "symbol": "run"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Illustrative Python source; not a runnable application.
+commands.register("refresh", run_refresh)
+def run_refresh(args):
+    return refresh_component.execute(args)

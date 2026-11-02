@@ -1,0 +1,9 @@
+{
+  "billing": { "name": "billing-ledger", "origin": "https://billing.example.invalid", "timeoutMs": 900, "retries": 2 },
+  "database": { "driver": "sqlite", "passwordEnv": "DB_PASSWORD" },
+  "tables": { "invoice": "acct_items" },
+  "storage": { "bucket": "invoice-archive", "region": "region-one" },
+  "signing": { "format": "compact" },
+  "messaging": { "url": "parcel://ledger.example.invalid", "namespace": "accounting" },
+  "unused": { "origin": "https://unused.example.invalid", "table": "InvoiceRecord", "topic": "not-used" }
+}

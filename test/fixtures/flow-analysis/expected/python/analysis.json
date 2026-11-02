@@ -1,0 +1,221 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_0b5ae51c0da0",
+      "label": "Count depth",
+      "trigger": "Installed count-depth command invokes entry.run",
+      "flowId": "flow_7595fc490e75",
+      "sourceIds": [
+        "src_9164ab193c62",
+        "src_5e2501075f45"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_7595fc490e75",
+      "label": "Count depth",
+      "startNodeId": "node_cf4fe3e0be11",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_7595fc490e75"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_cf4fe3e0be11",
+          "label": "Receive control in run",
+          "kind": "operation",
+          "sourceIds": [
+            "src_9164ab193c62",
+            "src_5e2501075f45"
+          ]
+        },
+        {
+          "id": "node_875763b22a53",
+          "label": "Invoke count_down",
+          "kind": "operation",
+          "sourceIds": [
+            "src_94ad48aff725",
+            "src_952baaec0c93"
+          ],
+          "expandFlowId": "flow_6dad8626e3bd"
+        },
+        {
+          "id": "node_9439902202ab",
+          "label": "Return count result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_94ad48aff725"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_458ca44c5205",
+          "from": "node_cf4fe3e0be11",
+          "to": "node_875763b22a53",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_94ad48aff725",
+            "src_952baaec0c93"
+          ]
+        },
+        {
+          "id": "edge_8752fc7b7df8",
+          "from": "node_875763b22a53",
+          "to": "node_9439902202ab",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_94ad48aff725"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_6dad8626e3bd",
+      "label": "Recursive depth count",
+      "startNodeId": "node_0f73ab29708b",
+      "docs": [
+        {
+          "path": "entries.md",
+          "anchor": "flow_6dad8626e3bd"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_0f73ab29708b",
+          "label": "Receive count_down",
+          "kind": "operation",
+          "sourceIds": [
+            "src_952baaec0c93"
+          ]
+        },
+        {
+          "id": "node_8173fc7297c1",
+          "label": "Is depth nonpositive?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_aadc69e180ac"
+          ]
+        },
+        {
+          "id": "node_afac48eafc18",
+          "label": "Return zero",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_aadc69e180ac"
+          ]
+        },
+        {
+          "id": "node_c80bc6b2cc29",
+          "label": "Invoke count_down with depth minus one",
+          "kind": "operation",
+          "sourceIds": [
+            "src_c8646daf750d",
+            "src_952baaec0c93"
+          ],
+          "expandFlowId": "flow_6dad8626e3bd"
+        },
+        {
+          "id": "node_1e77f5e4fc03",
+          "label": "Return child count plus one",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_c8646daf750d"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_b6c1c55d07cd",
+          "from": "node_0f73ab29708b",
+          "to": "node_8173fc7297c1",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_aadc69e180ac"
+          ]
+        },
+        {
+          "id": "edge_269a0aac42e6",
+          "from": "node_8173fc7297c1",
+          "to": "node_afac48eafc18",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_aadc69e180ac"
+          ],
+          "label": "depth <= 0"
+        },
+        {
+          "id": "edge_b9eea18ca83c",
+          "from": "node_8173fc7297c1",
+          "to": "node_c80bc6b2cc29",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_aadc69e180ac",
+            "src_c8646daf750d"
+          ],
+          "label": "depth > 0"
+        },
+        {
+          "id": "edge_b8f7571fdcd1",
+          "from": "node_c80bc6b2cc29",
+          "to": "node_1e77f5e4fc03",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_c8646daf750d"
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_9164ab193c62",
+      "path": "pyproject.toml",
+      "startLine": 4,
+      "endLine": 5
+    },
+    {
+      "id": "src_5e2501075f45",
+      "path": "entry.py",
+      "startLine": 3,
+      "endLine": 3,
+      "symbol": "run"
+    },
+    {
+      "id": "src_94ad48aff725",
+      "path": "entry.py",
+      "startLine": 1,
+      "endLine": 4,
+      "symbol": "run"
+    },
+    {
+      "id": "src_952baaec0c93",
+      "path": "recursion.py",
+      "startLine": 1,
+      "endLine": 4,
+      "symbol": "count_down"
+    },
+    {
+      "id": "src_aadc69e180ac",
+      "path": "recursion.py",
+      "startLine": 2,
+      "endLine": 3
+    },
+    {
+      "id": "src_c8646daf750d",
+      "path": "recursion.py",
+      "startLine": 4,
+      "endLine": 4
+    }
+  ]
+}

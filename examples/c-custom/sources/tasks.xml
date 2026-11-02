@@ -1,0 +1,3 @@
+<tasks>
+  <task name="nightly-rollup" handler="rollup-v1" />
+</tasks>

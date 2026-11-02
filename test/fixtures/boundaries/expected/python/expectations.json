@@ -1,0 +1,21 @@
+{
+  "nodes": {
+    "start": "node_170efa171933",
+    "read": "node_3a1a46c9137d",
+    "done": "node_4d78790957a7"
+  },
+  "flows": {
+    "read": "flow_cafa776809b0"
+  },
+  "sources": {
+    "launch": "src_1f90c832bab6",
+    "entry": "src_9afa4f003fdb",
+    "binding": "src_11f58d83b2f8",
+    "path": "src_c2de3f0385ae",
+    "read": "src_914468fcc89c"
+  },
+  "edges": {
+    "read": "edge_2e64502da3fc",
+    "done": "edge_4b190f47374b"
+  }
+}

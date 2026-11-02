@@ -1,0 +1,4 @@
+<transport protocol="amqp">
+  <publication topic="ledger.saved" />
+  <subscription topic="ledger.saved" route="invoice.saved" type="InvoiceSaved" group="archive" handler="archiveInvoice" />
+</transport>

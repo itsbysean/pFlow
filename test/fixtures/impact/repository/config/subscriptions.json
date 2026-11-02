@@ -1,0 +1,1 @@
+[{"destination":"jobs.v1","handler":"consume"},{"destination":"relay.v1","handler":"relay"}]

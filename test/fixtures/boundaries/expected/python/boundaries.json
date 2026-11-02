@@ -1,0 +1,131 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_6e8e242ee315",
+      "label": "Read note",
+      "trigger": "Installed copy-note command",
+      "flowId": "flow_cafa776809b0",
+      "sourceIds": [
+        "src_1f90c832bab6",
+        "src_9afa4f003fdb"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_cafa776809b0",
+      "label": "Read configured report",
+      "startNodeId": "node_170efa171933",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_cafa776809b0"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_170efa171933",
+          "label": "Receive run",
+          "kind": "operation",
+          "sourceIds": [
+            "src_1f90c832bab6",
+            "src_9afa4f003fdb"
+          ]
+        },
+        {
+          "id": "node_3a1a46c9137d",
+          "label": "Read text from configured path",
+          "kind": "external",
+          "sourceIds": [
+            "src_11f58d83b2f8",
+            "src_c2de3f0385ae",
+            "src_914468fcc89c"
+          ],
+          "external": {
+            "kind": "other",
+            "attributes": {
+              "system.type": "filesystem",
+              "filesystem.operation": "read_text",
+              "filesystem.pathEnv": "REPORT_PATH",
+              "filesystem.encoding": "utf-8",
+              "library.name": "pathlib",
+              "library.symbol": "Path.read_text"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_3a1a46c9137d"
+            }
+          ]
+        },
+        {
+          "id": "node_4d78790957a7",
+          "label": "Return text",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_914468fcc89c"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_2e64502da3fc",
+          "from": "node_170efa171933",
+          "to": "node_3a1a46c9137d",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_11f58d83b2f8",
+            "src_c2de3f0385ae",
+            "src_914468fcc89c"
+          ]
+        },
+        {
+          "id": "edge_4b190f47374b",
+          "from": "node_3a1a46c9137d",
+          "to": "node_4d78790957a7",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_914468fcc89c"
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_1f90c832bab6",
+      "path": "pyproject.toml",
+      "startLine": 4,
+      "endLine": 5
+    },
+    {
+      "id": "src_9afa4f003fdb",
+      "path": "entry.py",
+      "startLine": 4,
+      "endLine": 4,
+      "symbol": "run"
+    },
+    {
+      "id": "src_11f58d83b2f8",
+      "path": "entry.py",
+      "startLine": 1,
+      "endLine": 2
+    },
+    {
+      "id": "src_c2de3f0385ae",
+      "path": "entry.py",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_914468fcc89c",
+      "path": "entry.py",
+      "startLine": 6,
+      "endLine": 6
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# M7-03 output policy and bundle compatibility plan
+
+Baseline: main ff9d6b5 with uncommitted M7-01/M7-02 work. Verify actual M7-02 instructions and evaluations; preserve them. No schema, Viewer, prompt incremental or M8 changes.
+
+1. Add one shared filesystem layout resolver for architecture.json + docs/ (legacy) and diagrams/architecture.json + root Markdown (flat). Reject competing graphs/corpora and unsafe roots. Feed resolved paths into existing preparation, HTML input protection and rebuild fingerprints; keep the normalized graph/doc payload unchanged.
+2. Add a small trusted output-selection helper used by the existing Skill: repository root or prompt cwd, docs/ then doc/ then new docs/, explicit final bundle destinations and designated document boundaries. Validate paths/collisions/writability before optional directory creation; no fallback, migration or ownership inference. Repository evidence remains rooted at the actual source project.
+3. Resolve baseline/current/staged M6 paths through the same helper without changing Git provenance, scope checks, source/output separation, merge logic or recoverable transactions. Legacy updates retain their layout; flat repository updates remain protected. Prompt targeted regeneration remains unsupported.
+4. Add focused real-filesystem and actual Builder/CLI tests for output policy, explicit workspace isolation, flat/legacy validation/rendering, mixed layouts, citations/ranges, malicious paths/symlinks/collisions and prior-output preservation. Exercise flat M6 apply/rebuild/idempotence and rollback alongside all existing M6 tests, plus offline flat HTML behavior.
+5. Update current instructions/docs and obtain independent read-only review of safety/compatibility. Run focused/full regressions and Skill validation. Report limits and stop before M7-04/M8. Do not migrate old fixtures or rewrite M1–M6 completion records.

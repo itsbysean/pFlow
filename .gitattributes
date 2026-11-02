@@ -1,0 +1,3 @@
+# Preserve the exact CRLF prompt evidence used by fidelity evaluations.
+test/fixtures/prompt-mode/instruction-text/input/request.md -text whitespace=cr-at-eol
+test/fixtures/prompt-mode/instruction-text/bundle/evidence/request.md -text whitespace=cr-at-eol

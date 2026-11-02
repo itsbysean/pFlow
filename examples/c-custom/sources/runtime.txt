@@ -1,0 +1,6 @@
+Illustrative custom runtime pseudocode; not a framework API.
+registry.bind("rollup-v1", rollup)
+for task in read_xml("tasks.xml"):
+    scheduler.register(task.name, lambda: dispatch(task.handler))
+def dispatch(key):
+    return registry.lookup(key)()

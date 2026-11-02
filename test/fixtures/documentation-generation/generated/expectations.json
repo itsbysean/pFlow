@@ -1,0 +1,15 @@
+{
+  "nodes": {
+    "billing": "node_cf9ef68432e0",
+    "insert": "node_527c2b0b8379",
+    "publication": "node_926798dab987",
+    "plugin": "node_72b6b46e7b9f",
+    "consumer": "node_836a20f74140",
+    "persistCall": "node_18ca93589633"
+  },
+  "shipFlow": "flow_ff2edda491e6",
+  "consumerFlow": "flow_0ebe141e7ede",
+  "consumerEntryLabel": "Archive callback",
+  "asyncEdge": "edge_f070175252ad",
+  "searchQuery": "externally populated"
+}

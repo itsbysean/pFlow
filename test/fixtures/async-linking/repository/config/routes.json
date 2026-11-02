@@ -1,0 +1,19 @@
+{
+  "brokers": {
+    "primary": { "endpoint": "fabric://alpha.example.invalid", "namespace": "sales" },
+    "separate": { "endpoint": "fabric://beta.example.invalid", "namespace": "sales" },
+    "runtimeProducer": { "endpointEnv": "BUS_ENDPOINT", "namespace": "sales" },
+    "runtimeConsumer": { "endpointEnv": "BUS_ENDPOINT", "namespace": "sales" }
+  },
+  "destinations": { "orders": "orders.v1", "audit": "receipts.v1" },
+  "subscriptions": [
+    { "handler": "workerOne", "broker": "primary", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "workers", "enabled": true },
+    { "handler": "workerTwo", "broker": "primary", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "workers", "enabled": true },
+    { "handler": "auditTap", "broker": "primary", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "audit", "enabled": true },
+    { "handler": "receipt", "broker": "primary", "destinationKey": "audit", "route": "receipt", "type": "Receipt", "group": "receipts", "enabled": true },
+    { "handler": "rejectedOnly", "broker": "primary", "destinationKey": "orders", "route": "rejected", "type": "Order", "group": "rejects", "enabled": true },
+    { "handler": "wrongBroker", "broker": "separate", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "workers", "enabled": true },
+    { "handler": "runtimeConsumer", "broker": "runtimeConsumer", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "runtime", "enabled": true },
+    { "handler": "disabled", "broker": "primary", "destinationKey": "orders", "route": "ready", "type": "Order", "group": "disabled", "enabled": false }
+  ]
+}

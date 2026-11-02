@@ -1,0 +1,1183 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_cbe6f5153b38",
+      "label": "emit",
+      "trigger": "CLI default",
+      "flowId": "flow_cbe6f5153b38",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_cbe6f5153b38"
+      ]
+    },
+    {
+      "id": "entry_eb6f9dd9d2e0",
+      "label": "retry",
+      "trigger": "CLI retry",
+      "flowId": "flow_eb6f9dd9d2e0",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_eb6f9dd9d2e0"
+      ]
+    },
+    {
+      "id": "entry_4ad0c5b90470",
+      "label": "workerOne",
+      "trigger": "Enabled subscription primary/orders, group workers",
+      "flowId": "flow_4ad0c5b90470",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_4ad0c5b90470",
+        "src_b8d7c054f7c7",
+        "src_cdf5c5e6f7a8",
+        "src_7208821376ea",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_9caa229dc74f",
+      "label": "workerTwo",
+      "trigger": "Enabled subscription primary/orders, group workers",
+      "flowId": "flow_9caa229dc74f",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_9caa229dc74f",
+        "src_b8d7c054f7c7",
+        "src_35491b9f975b",
+        "src_7208821376ea",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_cb8bb08c6973",
+      "label": "auditTap",
+      "trigger": "Enabled subscription primary/orders, group audit",
+      "flowId": "flow_cb8bb08c6973",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_cb8bb08c6973",
+        "src_b8d7c054f7c7",
+        "src_5e62bdfebed0",
+        "src_7208821376ea",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_8a6b65c8b772",
+      "label": "receipt",
+      "trigger": "Enabled subscription primary/audit, group receipts",
+      "flowId": "flow_8a6b65c8b772",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_8a6b65c8b772",
+        "src_b8d7c054f7c7",
+        "src_d7bb1f107a82",
+        "src_7208821376ea",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_1511096ac1a4",
+      "label": "rejectedOnly",
+      "trigger": "Enabled subscription primary/orders, group rejects",
+      "flowId": "flow_1511096ac1a4",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_1511096ac1a4",
+        "src_b8d7c054f7c7",
+        "src_f25a62e5bb5e",
+        "src_7208821376ea",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_8db1396ab2e4",
+      "label": "wrongBroker",
+      "trigger": "Enabled subscription separate/orders, group workers",
+      "flowId": "flow_8db1396ab2e4",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_8db1396ab2e4",
+        "src_b8d7c054f7c7",
+        "src_712d2221849b",
+        "src_f92222fa5ded",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_e121783623c1",
+      "label": "runtimeConsumer",
+      "trigger": "Enabled subscription runtimeConsumer/orders, group runtime",
+      "flowId": "flow_e121783623c1",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_e121783623c1",
+        "src_b8d7c054f7c7",
+        "src_178b5a67faee",
+        "src_e9cedc72efc5",
+        "src_debd90d09631"
+      ]
+    },
+    {
+      "id": "entry_c4da96fde9ca",
+      "label": "runtimeProducer",
+      "trigger": "CLI runtime",
+      "flowId": "flow_c4da96fde9ca",
+      "sourceIds": [
+        "src_6c8a8f87fbd8",
+        "src_207d2e80db4c",
+        "src_69413e2258b8",
+        "src_c4da96fde9ca"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_cbe6f5153b38",
+      "label": "emit",
+      "startNodeId": "node_400a36ae44d0",
+      "nodes": [
+        {
+          "id": "node_400a36ae44d0",
+          "label": "Receive emit",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_cbe6f5153b38"
+          ]
+        },
+        {
+          "id": "node_bd1ab0f07f1e",
+          "label": "Return emit",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_cbe6f5153b38"
+          ]
+        },
+        {
+          "id": "node_ce5763e58f11",
+          "label": "Publish orders",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_ce5763e58f11",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "orders.v1",
+              "messaging.route": "ready",
+              "messaging.type": "Order",
+              "messaging.namespace": "sales",
+              "messaging.endpoint": "fabric://alpha.example.invalid"
+            }
+          }
+        },
+        {
+          "id": "node_8337fdd3dada",
+          "label": "Publish audit",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8337fdd3dada",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "receipts.v1",
+              "messaging.route": "receipt",
+              "messaging.type": "Receipt",
+              "messaging.namespace": "sales",
+              "messaging.endpoint": "fabric://alpha.example.invalid"
+            }
+          }
+        },
+        {
+          "id": "node_7ff102b90868",
+          "label": "input.audit?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_8337fdd3dada"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_6b213a320d3b",
+          "from": "node_400a36ae44d0",
+          "to": "node_ce5763e58f11",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_ce5763e58f11",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        },
+        {
+          "id": "edge_07356ec5d366",
+          "from": "node_ce5763e58f11",
+          "to": "node_7ff102b90868",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_8337fdd3dada"
+          ]
+        },
+        {
+          "id": "edge_eac10fe61484",
+          "from": "node_7ff102b90868",
+          "to": "node_8337fdd3dada",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8337fdd3dada",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "label": "input.audit"
+        },
+        {
+          "id": "edge_bd19f34de6a6",
+          "from": "node_7ff102b90868",
+          "to": "node_bd1ab0f07f1e",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_8337fdd3dada"
+          ],
+          "label": "otherwise"
+        },
+        {
+          "id": "edge_cc229b46ffd6",
+          "from": "node_8337fdd3dada",
+          "to": "node_bd1ab0f07f1e",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8337fdd3dada",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_cbe6f5153b38"
+        }
+      ]
+    },
+    {
+      "id": "flow_eb6f9dd9d2e0",
+      "label": "retry",
+      "startNodeId": "node_da6f4263f8d0",
+      "nodes": [
+        {
+          "id": "node_da6f4263f8d0",
+          "label": "Receive retry",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_eb6f9dd9d2e0"
+          ]
+        },
+        {
+          "id": "node_095ed41e25e4",
+          "label": "Return retry",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_eb6f9dd9d2e0"
+          ]
+        },
+        {
+          "id": "node_00f615880573",
+          "label": "Publish orders",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_00f615880573",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "orders.v1",
+              "messaging.route": "ready",
+              "messaging.type": "Order",
+              "messaging.namespace": "sales",
+              "messaging.endpoint": "fabric://alpha.example.invalid"
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_e743b8acccf0",
+          "from": "node_da6f4263f8d0",
+          "to": "node_00f615880573",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_00f615880573",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        },
+        {
+          "id": "edge_6a256dccedd9",
+          "from": "node_00f615880573",
+          "to": "node_095ed41e25e4",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_00f615880573",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_eb6f9dd9d2e0"
+        }
+      ]
+    },
+    {
+      "id": "flow_4ad0c5b90470",
+      "label": "workerOne",
+      "startNodeId": "node_850e935d6226",
+      "nodes": [
+        {
+          "id": "node_850e935d6226",
+          "label": "Receive workerOne",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_4ad0c5b90470",
+            "src_b8d7c054f7c7",
+            "src_cdf5c5e6f7a8",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_9d40e7397b92",
+          "label": "Return workerOne",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_4ad0c5b90470"
+          ]
+        },
+        {
+          "id": "node_323c450255d5",
+          "label": "Publish audit",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_323c450255d5",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "receipts.v1",
+              "messaging.route": "receipt",
+              "messaging.type": "Receipt",
+              "messaging.namespace": "sales",
+              "messaging.endpoint": "fabric://alpha.example.invalid"
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_019b4b1c4d33",
+          "from": "node_850e935d6226",
+          "to": "node_323c450255d5",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_323c450255d5",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        },
+        {
+          "id": "edge_063859f2c1b7",
+          "from": "node_323c450255d5",
+          "to": "node_9d40e7397b92",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_323c450255d5",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_4ad0c5b90470"
+        }
+      ]
+    },
+    {
+      "id": "flow_9caa229dc74f",
+      "label": "workerTwo",
+      "startNodeId": "node_973d52103235",
+      "nodes": [
+        {
+          "id": "node_973d52103235",
+          "label": "Receive workerTwo",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_9caa229dc74f",
+            "src_b8d7c054f7c7",
+            "src_35491b9f975b",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_cdd1dc05b02a",
+          "label": "Return workerTwo",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_9caa229dc74f"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_2510d437cba1",
+          "from": "node_973d52103235",
+          "to": "node_cdd1dc05b02a",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_9caa229dc74f",
+            "src_b8d7c054f7c7",
+            "src_35491b9f975b",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_9caa229dc74f"
+        }
+      ]
+    },
+    {
+      "id": "flow_cb8bb08c6973",
+      "label": "auditTap",
+      "startNodeId": "node_c720bf15a6f8",
+      "nodes": [
+        {
+          "id": "node_c720bf15a6f8",
+          "label": "Receive auditTap",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_cb8bb08c6973",
+            "src_b8d7c054f7c7",
+            "src_5e62bdfebed0",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_1e67f233141c",
+          "label": "Return auditTap",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_cb8bb08c6973"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_4d670aba31c5",
+          "from": "node_c720bf15a6f8",
+          "to": "node_1e67f233141c",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_cb8bb08c6973",
+            "src_b8d7c054f7c7",
+            "src_5e62bdfebed0",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_cb8bb08c6973"
+        }
+      ]
+    },
+    {
+      "id": "flow_8a6b65c8b772",
+      "label": "receipt",
+      "startNodeId": "node_a23289c1afff",
+      "nodes": [
+        {
+          "id": "node_a23289c1afff",
+          "label": "Receive receipt",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8a6b65c8b772",
+            "src_b8d7c054f7c7",
+            "src_d7bb1f107a82",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_9c105f407f0d",
+          "label": "Return receipt",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_8a6b65c8b772"
+          ]
+        },
+        {
+          "id": "node_4f193651796c",
+          "label": "message.replay?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_1b3ea6da9678"
+          ]
+        },
+        {
+          "id": "node_1b3ea6da9678",
+          "label": "Publish orders",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_1b3ea6da9678",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "orders.v1",
+              "messaging.route": "ready",
+              "messaging.type": "Order",
+              "messaging.namespace": "sales",
+              "messaging.endpoint": "fabric://alpha.example.invalid"
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_9b1292c0e696",
+          "from": "node_a23289c1afff",
+          "to": "node_4f193651796c",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_1b3ea6da9678"
+          ]
+        },
+        {
+          "id": "edge_7c143aab32ae",
+          "from": "node_4f193651796c",
+          "to": "node_1b3ea6da9678",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_1b3ea6da9678",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ],
+          "label": "message.replay"
+        },
+        {
+          "id": "edge_407fabc29101",
+          "from": "node_4f193651796c",
+          "to": "node_9c105f407f0d",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_1b3ea6da9678"
+          ],
+          "label": "otherwise"
+        },
+        {
+          "id": "edge_ef18180f0a3c",
+          "from": "node_1b3ea6da9678",
+          "to": "node_9c105f407f0d",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_1b3ea6da9678",
+            "src_debd90d09631",
+            "src_7208821376ea"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_8a6b65c8b772"
+        }
+      ]
+    },
+    {
+      "id": "flow_1511096ac1a4",
+      "label": "rejectedOnly",
+      "startNodeId": "node_63b566a52625",
+      "nodes": [
+        {
+          "id": "node_63b566a52625",
+          "label": "Receive rejectedOnly",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_1511096ac1a4",
+            "src_b8d7c054f7c7",
+            "src_f25a62e5bb5e",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_f51726effedf",
+          "label": "Return rejectedOnly",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_1511096ac1a4"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_c4f476845a9e",
+          "from": "node_63b566a52625",
+          "to": "node_f51726effedf",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_1511096ac1a4",
+            "src_b8d7c054f7c7",
+            "src_f25a62e5bb5e",
+            "src_7208821376ea",
+            "src_debd90d09631"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_1511096ac1a4"
+        }
+      ]
+    },
+    {
+      "id": "flow_8db1396ab2e4",
+      "label": "wrongBroker",
+      "startNodeId": "node_da071404a650",
+      "nodes": [
+        {
+          "id": "node_da071404a650",
+          "label": "Receive wrongBroker",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8db1396ab2e4",
+            "src_b8d7c054f7c7",
+            "src_712d2221849b",
+            "src_f92222fa5ded",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_7a8861930cec",
+          "label": "Return wrongBroker",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_8db1396ab2e4"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_8af749366f44",
+          "from": "node_da071404a650",
+          "to": "node_7a8861930cec",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_8db1396ab2e4",
+            "src_b8d7c054f7c7",
+            "src_712d2221849b",
+            "src_f92222fa5ded",
+            "src_debd90d09631"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_8db1396ab2e4"
+        }
+      ]
+    },
+    {
+      "id": "flow_e121783623c1",
+      "label": "runtimeConsumer",
+      "startNodeId": "node_53afb154b99c",
+      "nodes": [
+        {
+          "id": "node_53afb154b99c",
+          "label": "Receive runtimeConsumer",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_e121783623c1",
+            "src_b8d7c054f7c7",
+            "src_178b5a67faee",
+            "src_e9cedc72efc5",
+            "src_debd90d09631"
+          ]
+        },
+        {
+          "id": "node_dbf3f734beee",
+          "label": "Return runtimeConsumer",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_e121783623c1"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_64d967ea9992",
+          "from": "node_53afb154b99c",
+          "to": "node_dbf3f734beee",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_e121783623c1",
+            "src_b8d7c054f7c7",
+            "src_178b5a67faee",
+            "src_e9cedc72efc5",
+            "src_debd90d09631"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_e121783623c1"
+        }
+      ]
+    },
+    {
+      "id": "flow_c4da96fde9ca",
+      "label": "runtimeProducer",
+      "startNodeId": "node_25a7c3cfad1a",
+      "nodes": [
+        {
+          "id": "node_25a7c3cfad1a",
+          "label": "Receive runtimeProducer",
+          "kind": "operation",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_c4da96fde9ca"
+          ]
+        },
+        {
+          "id": "node_3b586918293c",
+          "label": "Return runtimeProducer",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_c4da96fde9ca"
+          ]
+        },
+        {
+          "id": "node_0e172ef5aa4f",
+          "label": "Publish orders",
+          "kind": "external",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_0e172ef5aa4f",
+            "src_debd90d09631",
+            "src_4d9a691d3ada"
+          ],
+          "external": {
+            "kind": "messaging",
+            "name": "Configured message-fabric boundary",
+            "attributes": {
+              "library.name": "message-fabric",
+              "messaging.destination": "orders.v1",
+              "messaging.route": "ready",
+              "messaging.type": "Order",
+              "messaging.namespace": "sales",
+              "messaging.endpointEnv": "BUS_ENDPOINT"
+            }
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_e3ac22c01859",
+          "from": "node_25a7c3cfad1a",
+          "to": "node_0e172ef5aa4f",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_0e172ef5aa4f",
+            "src_debd90d09631",
+            "src_4d9a691d3ada"
+          ]
+        },
+        {
+          "id": "edge_b153ab6e1264",
+          "from": "node_0e172ef5aa4f",
+          "to": "node_3b586918293c",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_6c8a8f87fbd8",
+            "src_207d2e80db4c",
+            "src_69413e2258b8",
+            "src_0e172ef5aa4f",
+            "src_debd90d09631",
+            "src_4d9a691d3ada"
+          ]
+        }
+      ],
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_c4da96fde9ca"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_207d2e80db4c",
+      "path": "package.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_6c8a8f87fbd8",
+      "path": "boot.mjs",
+      "startLine": 1,
+      "endLine": 11
+    },
+    {
+      "id": "src_69413e2258b8",
+      "path": "message-port.md",
+      "startLine": 3,
+      "endLine": 11
+    },
+    {
+      "id": "src_b8d7c054f7c7",
+      "path": "app/register.mjs",
+      "startLine": 1,
+      "endLine": 7
+    },
+    {
+      "id": "src_7208821376ea",
+      "path": "config/routes.json",
+      "startLine": 3,
+      "endLine": 3
+    },
+    {
+      "id": "src_f92222fa5ded",
+      "path": "config/routes.json",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_4d9a691d3ada",
+      "path": "config/routes.json",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_e9cedc72efc5",
+      "path": "config/routes.json",
+      "startLine": 6,
+      "endLine": 6
+    },
+    {
+      "id": "src_debd90d09631",
+      "path": "config/routes.json",
+      "startLine": 8,
+      "endLine": 8
+    },
+    {
+      "id": "src_cdf5c5e6f7a8",
+      "path": "config/routes.json",
+      "startLine": 10,
+      "endLine": 10
+    },
+    {
+      "id": "src_35491b9f975b",
+      "path": "config/routes.json",
+      "startLine": 11,
+      "endLine": 11
+    },
+    {
+      "id": "src_5e62bdfebed0",
+      "path": "config/routes.json",
+      "startLine": 12,
+      "endLine": 12
+    },
+    {
+      "id": "src_d7bb1f107a82",
+      "path": "config/routes.json",
+      "startLine": 13,
+      "endLine": 13
+    },
+    {
+      "id": "src_f25a62e5bb5e",
+      "path": "config/routes.json",
+      "startLine": 14,
+      "endLine": 14
+    },
+    {
+      "id": "src_712d2221849b",
+      "path": "config/routes.json",
+      "startLine": 15,
+      "endLine": 15
+    },
+    {
+      "id": "src_178b5a67faee",
+      "path": "config/routes.json",
+      "startLine": 16,
+      "endLine": 16
+    },
+    {
+      "id": "src_a508c5b31a69",
+      "path": "config/routes.json",
+      "startLine": 17,
+      "endLine": 17
+    },
+    {
+      "id": "src_cbe6f5153b38",
+      "path": "app/handlers.mjs",
+      "startLine": 1,
+      "endLine": 4
+    },
+    {
+      "id": "src_eb6f9dd9d2e0",
+      "path": "app/handlers.mjs",
+      "startLine": 5,
+      "endLine": 7
+    },
+    {
+      "id": "src_4ad0c5b90470",
+      "path": "app/handlers.mjs",
+      "startLine": 8,
+      "endLine": 10
+    },
+    {
+      "id": "src_9caa229dc74f",
+      "path": "app/handlers.mjs",
+      "startLine": 11,
+      "endLine": 11
+    },
+    {
+      "id": "src_cb8bb08c6973",
+      "path": "app/handlers.mjs",
+      "startLine": 12,
+      "endLine": 12
+    },
+    {
+      "id": "src_8a6b65c8b772",
+      "path": "app/handlers.mjs",
+      "startLine": 13,
+      "endLine": 15
+    },
+    {
+      "id": "src_1511096ac1a4",
+      "path": "app/handlers.mjs",
+      "startLine": 16,
+      "endLine": 16
+    },
+    {
+      "id": "src_8db1396ab2e4",
+      "path": "app/handlers.mjs",
+      "startLine": 17,
+      "endLine": 17
+    },
+    {
+      "id": "src_e121783623c1",
+      "path": "app/handlers.mjs",
+      "startLine": 18,
+      "endLine": 18
+    },
+    {
+      "id": "src_c4da96fde9ca",
+      "path": "app/handlers.mjs",
+      "startLine": 21,
+      "endLine": 23
+    },
+    {
+      "id": "src_ce5763e58f11",
+      "path": "app/handlers.mjs",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_8337fdd3dada",
+      "path": "app/handlers.mjs",
+      "startLine": 3,
+      "endLine": 3
+    },
+    {
+      "id": "src_00f615880573",
+      "path": "app/handlers.mjs",
+      "startLine": 6,
+      "endLine": 6
+    },
+    {
+      "id": "src_323c450255d5",
+      "path": "app/handlers.mjs",
+      "startLine": 9,
+      "endLine": 9
+    },
+    {
+      "id": "src_1b3ea6da9678",
+      "path": "app/handlers.mjs",
+      "startLine": 14,
+      "endLine": 14
+    },
+    {
+      "id": "src_0e172ef5aa4f",
+      "path": "app/handlers.mjs",
+      "startLine": 22,
+      "endLine": 22
+    }
+  ]
+}

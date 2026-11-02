@@ -1,0 +1,4 @@
+Illustrative handler pseudocode.
+def rollup():
+    archive.compact()
+    return "complete"

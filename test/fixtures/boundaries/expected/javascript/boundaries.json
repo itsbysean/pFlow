@@ -1,0 +1,855 @@
+{
+  "modelVersion": "1.0.0",
+  "entryPoints": [
+    {
+      "id": "entry_4a32c221c752",
+      "label": "Ship invoice",
+      "trigger": "CLI startup unless action is drain",
+      "flowId": "flow_86e533f27463",
+      "sourceIds": [
+        "src_3974bdf10af3",
+        "src_2f0b2166ded0",
+        "src_767bdca92f20"
+      ]
+    },
+    {
+      "id": "entry_31a630a65e83",
+      "label": "Drain message",
+      "trigger": "CLI action drain",
+      "flowId": "flow_d445bdf2fa71",
+      "sourceIds": [
+        "src_3974bdf10af3",
+        "src_2f0b2166ded0",
+        "src_7f55d69338f2"
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow_86e533f27463",
+      "label": "Ship invoice",
+      "startNodeId": "node_be1d3f38b50c",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_86e533f27463"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_be1d3f38b50c",
+          "label": "Receive ship",
+          "kind": "operation",
+          "sourceIds": [
+            "src_3974bdf10af3",
+            "src_2f0b2166ded0",
+            "src_431b24774cdf",
+            "src_767bdca92f20"
+          ]
+        },
+        {
+          "id": "node_4a5f17222e7a",
+          "label": "Await billing request",
+          "kind": "external",
+          "sourceIds": [
+            "src_841afc5f3e77",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_6e77bac3dce5",
+            "src_da58dbdebcb6",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "http",
+            "name": "billing-ledger",
+            "attributes": {
+              "library.name": "wire-http",
+              "library.symbol": "request",
+              "http.method": "POST",
+              "http.url": "https://billing.example.invalid/v1/items",
+              "http.baseUrl": "https://billing.example.invalid",
+              "http.path": "/v1/items",
+              "http.timeoutMs": 900,
+              "http.retries": 2,
+              "http.errorRule": "response status >= 400"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_4a5f17222e7a"
+            }
+          ]
+        },
+        {
+          "id": "node_124da4745ee5",
+          "label": "Did billing reject the response?",
+          "kind": "decision",
+          "sourceIds": [
+            "src_da58dbdebcb6"
+          ]
+        },
+        {
+          "id": "node_95c3e42d6b09",
+          "label": "Throw billing rejection",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_da58dbdebcb6"
+          ]
+        },
+        {
+          "id": "node_12798bfc1e35",
+          "label": "Await peer request",
+          "kind": "external",
+          "sourceIds": [
+            "src_1a08070b10c1",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "http",
+            "attributes": {
+              "library.name": "wire-http",
+              "library.symbol": "request",
+              "http.method": "GET",
+              "http.baseUrlEnv": "PEER_URL",
+              "http.urlTemplate": "${PEER_URL}/status"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_12798bfc1e35"
+            }
+          ]
+        },
+        {
+          "id": "node_63569697f96a",
+          "label": "Invoke owned persistInvoice",
+          "kind": "operation",
+          "sourceIds": [
+            "src_415e0e97127f",
+            "src_623954d5f119"
+          ],
+          "expandFlowId": "flow_d50d43f1cd4f"
+        },
+        {
+          "id": "node_e44e296cfaee",
+          "label": "Publish invoice event",
+          "kind": "external",
+          "sourceIds": [
+            "src_8f600b3cb06a",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_d881f98f570c",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "messaging",
+            "attributes": {
+              "library.name": "parcel-bus",
+              "library.symbol": "publish",
+              "messaging.protocol": "amqp",
+              "messaging.operation": "publish",
+              "messaging.channel": "ledger.saved",
+              "messaging.brokerUrlEnv": "BROKER_URL",
+              "messaging.routingKey": "invoice.saved",
+              "messaging.messageType": "InvoiceSaved"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_e44e296cfaee"
+            }
+          ]
+        },
+        {
+          "id": "node_c1d632d804c4",
+          "label": "Put archive object",
+          "kind": "external",
+          "sourceIds": [
+            "src_99e42a8a1430",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_05872b2715c1",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "other",
+            "attributes": {
+              "library.name": "cloud-objects",
+              "library.symbol": "putObject",
+              "system.type": "object-storage",
+              "storage.operation": "putObject",
+              "storage.bucket": "invoice-archive",
+              "storage.region": "region-one",
+              "storage.keyExpression": "input.id"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_c1d632d804c4"
+            }
+          ]
+        },
+        {
+          "id": "node_a3d0a67c11bc",
+          "label": "Sign invoice",
+          "kind": "external",
+          "sourceIds": [
+            "src_10ce4554ba7f",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_d63b5dd688c4",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "library",
+            "name": "seal-kit",
+            "attributes": {
+              "library.name": "seal-kit",
+              "library.symbol": "sign",
+              "library.format": "compact"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_a3d0a67c11bc"
+            }
+          ]
+        },
+        {
+          "id": "node_c2fbda9e4eb1",
+          "label": "Request input-provided destination",
+          "kind": "external",
+          "sourceIds": [
+            "src_fafc28b8880b",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "http",
+            "attributes": {
+              "library.name": "wire-http",
+              "library.symbol": "request",
+              "http.method": "GET",
+              "http.urlExpression": "input.endpoint"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_c2fbda9e4eb1"
+            }
+          ]
+        },
+        {
+          "id": "node_892dc03495c0",
+          "label": "Return signature",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_fdb80eeb1b59"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_9490cd863346",
+          "from": "node_be1d3f38b50c",
+          "to": "node_4a5f17222e7a",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_841afc5f3e77",
+            "src_2f0b2166ded0"
+          ]
+        },
+        {
+          "id": "edge_1263c8911684",
+          "from": "node_4a5f17222e7a",
+          "to": "node_124da4745ee5",
+          "kind": "next",
+          "mode": "sync",
+          "sourceIds": [
+            "src_da58dbdebcb6"
+          ]
+        },
+        {
+          "id": "edge_28add549f5c8",
+          "from": "node_124da4745ee5",
+          "to": "node_95c3e42d6b09",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_da58dbdebcb6"
+          ],
+          "label": "rejected"
+        },
+        {
+          "id": "edge_c32a312450b7",
+          "from": "node_124da4745ee5",
+          "to": "node_12798bfc1e35",
+          "kind": "branch",
+          "mode": "sync",
+          "sourceIds": [
+            "src_da58dbdebcb6",
+            "src_1a08070b10c1"
+          ],
+          "label": "accepted"
+        },
+        {
+          "id": "edge_5eb2c50e1c3a",
+          "from": "node_12798bfc1e35",
+          "to": "node_63569697f96a",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_415e0e97127f",
+            "src_623954d5f119"
+          ]
+        },
+        {
+          "id": "edge_b43a8ace5e81",
+          "from": "node_63569697f96a",
+          "to": "node_e44e296cfaee",
+          "kind": "send",
+          "mode": "sync",
+          "sourceIds": [
+            "src_8f600b3cb06a"
+          ]
+        },
+        {
+          "id": "edge_09019e4a22e3",
+          "from": "node_e44e296cfaee",
+          "to": "node_c1d632d804c4",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_99e42a8a1430"
+          ]
+        },
+        {
+          "id": "edge_6ff9f48e8e22",
+          "from": "node_c1d632d804c4",
+          "to": "node_a3d0a67c11bc",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_10ce4554ba7f"
+          ]
+        },
+        {
+          "id": "edge_8a8db0c8387c",
+          "from": "node_a3d0a67c11bc",
+          "to": "node_c2fbda9e4eb1",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_fafc28b8880b"
+          ]
+        },
+        {
+          "id": "edge_b246a2aa6c86",
+          "from": "node_c2fbda9e4eb1",
+          "to": "node_892dc03495c0",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_fdb80eeb1b59"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_d50d43f1cd4f",
+      "label": "Persist invoice transaction",
+      "startNodeId": "node_c6d603f8973f",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_d50d43f1cd4f"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_c6d603f8973f",
+          "label": "Receive owned persistInvoice",
+          "kind": "operation",
+          "sourceIds": [
+            "src_623954d5f119"
+          ]
+        },
+        {
+          "id": "node_9e2169070a05",
+          "label": "Begin transaction",
+          "kind": "external",
+          "sourceIds": [
+            "src_8555d77003bf",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_b29be286e76e",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "database",
+            "attributes": {
+              "library.name": "ledger-store",
+              "library.symbol": "exec",
+              "database.driver": "sqlite",
+              "database.operation": "BEGIN"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_9e2169070a05"
+            }
+          ]
+        },
+        {
+          "id": "node_b2b5552943b7",
+          "label": "Execute mapped insert",
+          "kind": "external",
+          "sourceIds": [
+            "src_f444eee89ff5",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_b29be286e76e",
+            "src_9162b1bd2103",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "database",
+            "attributes": {
+              "library.name": "ledger-store",
+              "library.symbol": "exec",
+              "database.driver": "sqlite",
+              "database.operation": "INSERT",
+              "database.table": "acct_items"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_b2b5552943b7"
+            }
+          ]
+        },
+        {
+          "id": "node_c4637fe6a5b0",
+          "label": "Commit transaction",
+          "kind": "external",
+          "sourceIds": [
+            "src_ec2735e31dad",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_b29be286e76e",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "database",
+            "attributes": {
+              "library.name": "ledger-store",
+              "library.symbol": "exec",
+              "database.driver": "sqlite",
+              "database.operation": "COMMIT"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_c4637fe6a5b0"
+            }
+          ]
+        },
+        {
+          "id": "node_811c20083dcc",
+          "label": "Rollback transaction after failure",
+          "kind": "external",
+          "sourceIds": [
+            "src_cfac07212562",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_b29be286e76e",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "database",
+            "attributes": {
+              "library.name": "ledger-store",
+              "library.symbol": "exec",
+              "database.driver": "sqlite",
+              "database.operation": "ROLLBACK"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_811c20083dcc"
+            }
+          ]
+        },
+        {
+          "id": "node_bc7f4026f470",
+          "label": "Complete persistInvoice",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_ec2735e31dad"
+          ]
+        },
+        {
+          "id": "node_d0513642fb0a",
+          "label": "Rethrow after completed rollback",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_cfac07212562"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_c391af387dc0",
+          "from": "node_c6d603f8973f",
+          "to": "node_9e2169070a05",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_8555d77003bf"
+          ]
+        },
+        {
+          "id": "edge_2b17e9a0fc6d",
+          "from": "node_9e2169070a05",
+          "to": "node_b2b5552943b7",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_f444eee89ff5"
+          ]
+        },
+        {
+          "id": "edge_531c5663a87e",
+          "from": "node_b2b5552943b7",
+          "to": "node_c4637fe6a5b0",
+          "kind": "call",
+          "mode": "sync",
+          "sourceIds": [
+            "src_ec2735e31dad"
+          ]
+        },
+        {
+          "id": "edge_b4e2f9afb715",
+          "from": "node_b2b5552943b7",
+          "to": "node_811c20083dcc",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_cfac07212562",
+            "src_f444eee89ff5"
+          ]
+        },
+        {
+          "id": "edge_402a4acd5946",
+          "from": "node_c4637fe6a5b0",
+          "to": "node_811c20083dcc",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_cfac07212562",
+            "src_ec2735e31dad"
+          ]
+        },
+        {
+          "id": "edge_bfe6e000761b",
+          "from": "node_c4637fe6a5b0",
+          "to": "node_bc7f4026f470",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_ec2735e31dad"
+          ]
+        },
+        {
+          "id": "edge_e77d5583271e",
+          "from": "node_811c20083dcc",
+          "to": "node_d0513642fb0a",
+          "kind": "exception",
+          "mode": "sync",
+          "sourceIds": [
+            "src_cfac07212562"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flow_d445bdf2fa71",
+      "label": "Drain configured channel",
+      "startNodeId": "node_70cdb9cb0631",
+      "docs": [
+        {
+          "path": "execution.md",
+          "anchor": "flow_d445bdf2fa71"
+        }
+      ],
+      "nodes": [
+        {
+          "id": "node_70cdb9cb0631",
+          "label": "Receive drain",
+          "kind": "operation",
+          "sourceIds": [
+            "src_3974bdf10af3",
+            "src_2f0b2166ded0",
+            "src_7f55d69338f2"
+          ]
+        },
+        {
+          "id": "node_221367b29eab",
+          "label": "Receive configured message",
+          "kind": "external",
+          "sourceIds": [
+            "src_148369f1e624",
+            "src_2f0b2166ded0",
+            "src_3974bdf10af3",
+            "src_4f43cf5b58b8",
+            "src_d881f98f570c",
+            "src_7fab64aecaa3"
+          ],
+          "external": {
+            "kind": "messaging",
+            "attributes": {
+              "library.name": "parcel-bus",
+              "library.symbol": "receive",
+              "messaging.protocol": "amqp",
+              "messaging.operation": "receive",
+              "messaging.channel": "ledger.saved",
+              "messaging.brokerUrlEnv": "BROKER_URL"
+            }
+          },
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_221367b29eab"
+            }
+          ]
+        },
+        {
+          "id": "node_5d9ac40e7ffd",
+          "label": "Return received result",
+          "kind": "terminal",
+          "sourceIds": [
+            "src_148369f1e624"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "id": "edge_527a249ca15d",
+          "from": "node_70cdb9cb0631",
+          "to": "node_221367b29eab",
+          "kind": "receive",
+          "mode": "sync",
+          "sourceIds": [
+            "src_148369f1e624"
+          ]
+        },
+        {
+          "id": "edge_bd1a4e018899",
+          "from": "node_221367b29eab",
+          "to": "node_5d9ac40e7ffd",
+          "kind": "return",
+          "mode": "sync",
+          "sourceIds": [
+            "src_148369f1e624"
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "src_3974bdf10af3",
+      "path": "package.json",
+      "startLine": 1,
+      "endLine": 1
+    },
+    {
+      "id": "src_2f0b2166ded0",
+      "path": "boot.mjs",
+      "startLine": 11,
+      "endLine": 19
+    },
+    {
+      "id": "src_431b24774cdf",
+      "path": "OWNERSHIP.md",
+      "startLine": 3,
+      "endLine": 3
+    },
+    {
+      "id": "src_767bdca92f20",
+      "path": "app/handlers.mjs",
+      "startLine": 3,
+      "endLine": 3,
+      "symbol": "ship"
+    },
+    {
+      "id": "src_841afc5f3e77",
+      "path": "app/handlers.mjs",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_da58dbdebcb6",
+      "path": "app/handlers.mjs",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_1a08070b10c1",
+      "path": "app/handlers.mjs",
+      "startLine": 6,
+      "endLine": 6
+    },
+    {
+      "id": "src_415e0e97127f",
+      "path": "app/handlers.mjs",
+      "startLine": 7,
+      "endLine": 7
+    },
+    {
+      "id": "src_8f600b3cb06a",
+      "path": "app/handlers.mjs",
+      "startLine": 8,
+      "endLine": 8
+    },
+    {
+      "id": "src_99e42a8a1430",
+      "path": "app/handlers.mjs",
+      "startLine": 9,
+      "endLine": 9
+    },
+    {
+      "id": "src_10ce4554ba7f",
+      "path": "app/handlers.mjs",
+      "startLine": 10,
+      "endLine": 10
+    },
+    {
+      "id": "src_fafc28b8880b",
+      "path": "app/handlers.mjs",
+      "startLine": 11,
+      "endLine": 11
+    },
+    {
+      "id": "src_fdb80eeb1b59",
+      "path": "app/handlers.mjs",
+      "startLine": 12,
+      "endLine": 12
+    },
+    {
+      "id": "src_7f55d69338f2",
+      "path": "app/handlers.mjs",
+      "startLine": 14,
+      "endLine": 14,
+      "symbol": "drain"
+    },
+    {
+      "id": "src_148369f1e624",
+      "path": "app/handlers.mjs",
+      "startLine": 15,
+      "endLine": 15
+    },
+    {
+      "id": "src_623954d5f119",
+      "path": "app/persist.mjs",
+      "startLine": 1,
+      "endLine": 1,
+      "symbol": "persistInvoice"
+    },
+    {
+      "id": "src_8555d77003bf",
+      "path": "app/persist.mjs",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_f444eee89ff5",
+      "path": "app/persist.mjs",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_ec2735e31dad",
+      "path": "app/persist.mjs",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_cfac07212562",
+      "path": "app/persist.mjs",
+      "startLine": 6,
+      "endLine": 8
+    },
+    {
+      "id": "src_7fab64aecaa3",
+      "path": "boot.mjs",
+      "startLine": 2,
+      "endLine": 6
+    },
+    {
+      "id": "src_4f43cf5b58b8",
+      "path": "settings.mjs",
+      "startLine": 1,
+      "endLine": 5
+    },
+    {
+      "id": "src_6e77bac3dce5",
+      "path": "config/settings.json",
+      "startLine": 2,
+      "endLine": 2
+    },
+    {
+      "id": "src_b29be286e76e",
+      "path": "config/settings.json",
+      "startLine": 3,
+      "endLine": 3
+    },
+    {
+      "id": "src_9162b1bd2103",
+      "path": "config/settings.json",
+      "startLine": 4,
+      "endLine": 4
+    },
+    {
+      "id": "src_05872b2715c1",
+      "path": "config/settings.json",
+      "startLine": 5,
+      "endLine": 5
+    },
+    {
+      "id": "src_d63b5dd688c4",
+      "path": "config/settings.json",
+      "startLine": 6,
+      "endLine": 6
+    },
+    {
+      "id": "src_d881f98f570c",
+      "path": "config/transport.xml",
+      "startLine": 1,
+      "endLine": 2
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+<bindings>
+  <subscription channel="jobs" worker="indexer" />
+</bindings>

@@ -1,0 +1,53 @@
+{
+  "flows": {
+    "alpha": "flow_6daded7ae701",
+    "beta": "flow_e8a0c4059ae6",
+    "shared": "flow_d814e61191d1",
+    "consumer": "flow_9f3625e6d230",
+    "unrelated": "flow_010761f5e0b5"
+  },
+  "nodes": {
+    "alphaStart": "node_4503de15fc58",
+    "alphaAction": "node_05f3ed1c1e3b",
+    "betaStart": "node_30f76db69c38",
+    "betaAction": "node_d5a3f02be6bd",
+    "sharedStart": "node_cfc18605865a",
+    "sharedAction": "node_eecbe3d7dbb1",
+    "consumerStart": "node_90dac2ec0141",
+    "consumerAction": "node_fe8700f67c84",
+    "unrelatedStart": "node_d6d8ace04cb5",
+    "unrelatedAction": "node_49e8a8bccd00"
+  },
+  "sources": {
+    "alpha": "src_6daded7ae701",
+    "beta": "src_e8a0c4059ae6",
+    "unrelated": "src_010761f5e0b5",
+    "shared": "src_d814e61191d1",
+    "consumer": "src_9f3625e6d230",
+    "publish": "src_612d754ef27e",
+    "subscribe": "src_4ddb4d12e6e6",
+    "startup": "src_71f7c4e13703",
+    "port": "src_25caa77b46f4"
+  },
+  "entries": {
+    "alpha": "entry_6daded7ae701",
+    "beta": "entry_e8a0c4059ae6",
+    "shared": "entry_d814e61191d1",
+    "consumer": "entry_9f3625e6d230",
+    "unrelated": "entry_010761f5e0b5"
+  },
+  "edges": {
+    "alphainvoke": "edge_5165093a345c",
+    "alphareturn": "edge_dcb4348b3ce1",
+    "betainvoke": "edge_043b9623f9bb",
+    "betareturn": "edge_f3d6badf5e0e",
+    "sharedinvoke": "edge_27bd3a095a84",
+    "sharedreturn": "edge_40dc31ad9b7a",
+    "consumerinvoke": "edge_41c60ef322d4",
+    "consumerreturn": "edge_dbfb60cf5340",
+    "unrelatedinvoke": "edge_9f2e9e933cb0",
+    "unrelatedreturn": "edge_c623bf336aad",
+    "sharedDelivery": "edge_826d6f859506",
+    "consumerDelivery": "edge_56af39c1dc60"
+  }
+}

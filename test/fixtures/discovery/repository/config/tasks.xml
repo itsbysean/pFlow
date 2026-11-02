@@ -1,0 +1,4 @@
+<tasks>
+  <task name="ledger-compaction" everyMs="60000" handler="fold-v2" />
+  <task name="runtime-site-task" everyMs="30000" keyEnv="TASK_TARGET" />
+</tasks>
