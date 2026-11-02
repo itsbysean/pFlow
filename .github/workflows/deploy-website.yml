@@ -1,0 +1,50 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate website files
+        run: |
+          test -s website/index.html || { echo "::error file=website/index.html::Missing or empty website/index.html"; exit 1; }
+          test -s website/styles.css || { echo "::error file=website/styles.css::Missing or empty website/styles.css"; exit 1; }
+          test -s website/assets/site.js || { echo "::error file=website/assets/site.js::Missing or empty website/assets/site.js"; exit 1; }
+          test -s website/assets/favicon.svg || { echo "::error file=website/assets/favicon.svg::Missing or empty website/assets/favicon.svg"; exit 1; }
+          test -s website/demos/architecture/index.html || { echo "::error file=website/demos/architecture/index.html::Missing or empty architecture demo"; exit 1; }
+          test -s website/demos/process/index.html || { echo "::error file=website/demos/process/index.html::Missing or empty process demo"; exit 1; }
+          test -d website/assets || { echo "::error file=website/assets::Missing website/assets directory"; exit 1; }
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: website
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

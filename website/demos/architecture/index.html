@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-QmuGr9uG7TQAqrVml21nHsbNYmMsfuk+g4WJYbzAw7A='; style-src 'sha256-P8yGi+NvMEq5If2Y6OntsAnovMjPEsECRluM3wXJdpg='; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>pFlow — Process explorer</title>
+  <style>:root {
+  color-scheme: light;
+  --canvas: #f4f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f9fbfe;
+  --line: #e3e8f0;
+  --line-strong: #cbd5e4;
+  --text: #17233b;
+  --muted: #606d84;
+  --faint: #8490a3;
+  --blue: #2163dc;
+  --blue-soft: #eaf2ff;
+  --purple: #864bc5;
+  --purple-soft: #f4edfc;
+  --gray: #697386;
+  --gray-soft: #eef1f5;
+  --orange: #a85c0c;
+  --orange-soft: #fff4e4;
+  --red: #c03d47;
+  --red-soft: #fff0f1;
+  --green: #4b8264;
+  --grid-dot: #dde5f0;
+  --shadow: 0 1px 4px #22375b06;
+  --radius: 7px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--text); font: 13px/1.55 var(--sans); }
+button, select { font: inherit; color: inherit; }
+button, select, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+button:disabled { cursor: default; color: var(--faint); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+[hidden] { display: none !important; }
+h1, h2, h3, p, ul, dl { margin: 0; }
+h1 { font-size: 16px; font-weight: 650; letter-spacing: -.2px; }
+h2 { font-size: 13px; font-weight: 650; }
+h3 { font-size: 12px; font-weight: 650; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.skip-link { position: fixed; top: -60px; left: 12px; z-index: 3; background: var(--surface); color: var(--blue); padding: var(--space-2); border: 1px solid var(--blue); }
+.skip-link:focus { top: 4px; }
+.app-header { min-height: 56px; display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--space-4); }
+.brand { display: flex; align-items: center; gap: var(--space-2); font-size: 21px; font-weight: 720; letter-spacing: -.6px; white-space: nowrap; }
+.brand-mark { width: 28px; height: 28px; stroke: var(--blue); fill: none; stroke-width: 2.1; stroke-linejoin: round; stroke-linecap: round; }
+.brand-caption { font-size: 11px; color: var(--muted); margin-right: var(--space-2); white-space: nowrap; }
+.search-control { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; width: min(310px, 26vw); padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--faint); font-size: 11px; }
+.search-control > :first-child { font-size: 19px; line-height: 1; }
+.soon { margin-left: auto; font-size: 9px; white-space: nowrap; }
+.offline-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.offline-badge > span, .evidence-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.app-layout { display: grid; grid-template-columns: 248px minmax(0, 1fr) 284px; grid-template-rows: minmax(380px, 1fr) minmax(242px, 31vh); gap: 6px; height: calc(100dvh - 62px); min-height: 650px; margin: 0 6px 6px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; overflow: hidden; }
+.panel-heading { display: flex; align-items: center; gap: var(--space-2); min-height: 43px; padding: 0 var(--space-3); border-bottom: 1px solid var(--line); }
+.count { display: inline-flex; align-items: center; justify-content: center; min-width: 19px; height: 18px; padding: 0 5px; color: var(--muted); background: var(--gray-soft); border-radius: 8px; font-size: 10px; font-weight: 600; }
+.panel-heading > .count, .panel-heading > .muted-label { margin-left: auto; }
+.panel-note { padding: 10px var(--space-3); color: var(--muted); font-size: 10px; }
+.navigator { grid-column: 1; grid-row: 1 / 3; display: flex; flex-direction: column; background: var(--surface-soft); }
+.entry-groups { flex: 1; overflow: auto; padding-bottom: var(--space-4); }
+.entry-group + .entry-group { margin-top: var(--space-3); }
+.group-heading { display: flex; gap: 7px; align-items: flex-start; padding: 9px var(--space-3); font-size: 11px; line-height: 1.45; }
+.group-heading .group-symbol { color: var(--blue); font-size: 14px; }
+.group-heading .count { margin-left: auto; flex-shrink: 0; }
+.entry-list { list-style: none; padding: 0; }
+.entry-button { display: flex; align-items: center; gap: 8px; width: 100%; border: 0; border-left: 3px solid transparent; background: transparent; text-align: left; padding: 9px 12px 9px 27px; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.entry-button::before { content: "▧"; color: var(--muted); flex-shrink: 0; }
+.entry-button:hover { background: var(--blue-soft); }
+.entry-button[aria-pressed="true"] { background: var(--blue-soft); border-left-color: var(--blue); color: var(--blue); }
+.entry-button:focus-visible { outline-offset: -3px; }
+.navigator-footer { display: flex; align-items: center; gap: 7px; padding: var(--space-3); border-top: 1px solid var(--line); font-size: 10px; color: var(--muted); }
+.workspace { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; }
+.workspace-navigation { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--line); min-width: 0; }
+.navigation-controls { display: flex; gap: 4px; flex-shrink: 0; }
+.navigation-controls button, .breadcrumbs button { background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; font-size: 10px; }
+.navigation-controls button:not(:disabled):hover, .breadcrumbs button:hover { background: var(--blue-soft); color: var(--blue); }
+.breadcrumbs { min-width: 0; overflow-x: auto; }
+.breadcrumbs ol { display: flex; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.breadcrumbs li { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.breadcrumbs li + li::before { content: "›"; color: var(--muted); }
+.breadcrumbs button { max-width: 190px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-color: transparent; color: var(--muted); }
+.breadcrumbs button[aria-current="page"] { color: var(--text); font-weight: 600; }
+.navigation-notice { font-size: 11px; color: var(--text); }
+.navigation-notice:not(:empty) { padding: 7px 12px; background: var(--orange-soft); border-bottom: 1px solid var(--line); }
+.workspace-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding: 14px var(--space-4) 10px; }
+.eyebrow { font-size: 10px; color: var(--muted); font-weight: 550; margin-bottom: 4px; }
+.workspace-heading p { color: var(--muted); font-size: 11px; margin-top: 3px; }
+.subtle-badge { font-size: 10px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); padding: 2px 6px; white-space: nowrap; }
+.workspace-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); padding: 6px var(--space-4); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.flow-chooser { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.flow-chooser select { font-size: 10px; max-width: 210px; border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; background: var(--surface); }
+.toolbar-label { color: var(--muted); font-size: 10px; }
+.toolbar-actions { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+.toolbar-actions button { border: 0; background: transparent; padding: 1px 5px; font-size: 11px; }
+.toolbar-divider { width: 1px; height: 13px; background: var(--line); }
+.diagram-container { position: relative; display: block; flex: 1; min-height: 170px; overflow: hidden; background-image: radial-gradient(var(--grid-dot) .65px, transparent .65px); background-size: 19px 19px; }
+.diagram-svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; user-select: none; }
+.diagram-svg.is-panning { cursor: grabbing; }
+.diagram-svg:focus-visible { outline-offset: -3px; }
+.diagram-container .workspace-state { position: absolute; left: 50%; top: 50%; width: calc(100% - 48px); transform: translate(-50%, -50%); }
+.diagram-node { --node-color: var(--blue); --node-fill: var(--blue-soft); }
+.diagram-node.node-library { --node-color: var(--purple); --node-fill: var(--purple-soft); }
+.diagram-node.node-system, .diagram-node.node-terminal, .diagram-node.node-unresolved { --node-color: var(--gray); --node-fill: var(--gray-soft); }
+.diagram-node.node-condition { --node-color: var(--orange); --node-fill: var(--orange-soft); }
+.diagram-node.node-failure { --node-color: var(--red); --node-fill: var(--red-soft); }
+.diagram-node-shape { fill: var(--node-fill); stroke: var(--node-color); stroke-width: 1.4; }
+.node-expandable { cursor: pointer; }
+.diagram-node-select, .diagram-edge, .diagram-edge-label, .diagram-expand-control { cursor: pointer; }
+.diagram-node-select:hover .diagram-node-shape, .diagram-node-select:focus-visible .diagram-node-shape { stroke-width: 2.4; }
+.diagram-node-select:focus-visible, .diagram-expand-control:focus-visible, .diagram-edge:focus-visible { outline-offset: 3px; }
+.node-recursive .diagram-expand-control { cursor: help; }
+.diagram-expand-control rect { fill: var(--surface); stroke: var(--node-color); stroke-width: 1; }
+.diagram-expand-control:hover rect, .diagram-expand-control:focus-visible rect { stroke-width: 2.5; }
+.diagram-selection-ring { fill: none; stroke: var(--blue); stroke-width: 2; display: none; pointer-events: none; }
+.is-selected .diagram-selection-ring { display: block; }
+.diagram-expand-hint { font: 600 13px var(--sans); fill: var(--node-color); pointer-events: none; }
+.node-unresolved .diagram-node-shape { stroke-dasharray: 3 3; }
+.node-remote .diagram-node-shape { stroke-dasharray: 8 4; }
+.diagram-node-name { font: 600 12px var(--sans); fill: var(--text); }
+.diagram-node-type { font: 10px var(--sans); fill: var(--text); }
+.diagram-node-source { font: 9px var(--mono); fill: var(--text); }
+.diagram-edge, .diagram-edge-label { --edge-color: var(--gray); }
+.edge-call { --edge-color: var(--blue); }
+.edge-branch { --edge-color: var(--orange); }
+.mode-async { --edge-color: var(--purple); }
+.edge-exception { --edge-color: var(--red); }
+.diagram-edge-path { fill: none; stroke: var(--edge-color); stroke-width: 1.5; stroke-linejoin: round; }
+.diagram-edge-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; }
+.diagram-edge.is-selected .diagram-edge-hit { stroke: var(--blue-soft); }
+.diagram-edge.is-selected .diagram-edge-path, .diagram-edge:focus-visible .diagram-edge-path { stroke-width: 3; }
+.edge-return .diagram-edge-path { stroke-dasharray: 2 3; }
+.edge-exception .diagram-edge-path { stroke-dasharray: 5 3; }
+.mode-async .diagram-edge-path { stroke-dasharray: 9 4; }
+.mode-unknown .diagram-edge-path { stroke-dasharray: 1 4; }
+.diagram-edge-label rect { fill: var(--surface); stroke: var(--line); stroke-width: .5; }
+.diagram-edge-label.is-selected rect { fill: var(--blue-soft); stroke: var(--blue); stroke-width: 1.5; }
+.diagram-edge-label text { font: 10px var(--sans); fill: var(--text); }
+.diagram-arrow { fill: var(--gray); }
+.arrow-call { fill: var(--blue); }.arrow-branch { fill: var(--orange); }.arrow-async { fill: var(--purple); }.arrow-exception { fill: var(--red); }
+.toolbar-actions button:not(:disabled):hover { background: var(--blue-soft); color: var(--blue); border-radius: 3px; }
+.workspace-state { text-align: center; max-width: 330px; }
+.workspace-glyph { width: 45px; height: 45px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 0 auto 15px; transform: rotate(-4deg); }
+.workspace-glyph span { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 5px; }
+.workspace-glyph span:first-child { border-color: var(--blue); background: var(--blue-soft); }
+.workspace-state h2 { font-size: 14px; font-weight: 600; }
+.workspace-state p { color: var(--muted); font-size: 12px; margin-top: 6px; }
+.state-caption { display: inline-block; margin-top: 14px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); background: var(--surface); font-size: 10px; }
+.diagram-container[aria-busy="true"] .workspace-glyph { opacity: .5; }
+.diagram-legend { list-style: none; padding: 9px var(--space-4); display: flex; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--line); font-size: 9px; color: var(--muted); }
+.diagram-legend li { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 6px; height: 6px; border-radius: 2px; background: var(--gray); }
+.legend-dot.unresolved { background: var(--surface); border: 1px dashed var(--gray); }
+.internal { background: var(--blue); }.library { background: var(--purple); }.system { background: var(--gray); }.condition { background: var(--orange); }.failure { background: var(--red); }
+.inspector { grid-column: 3; grid-row: 1; overflow-y: auto; }
+.inspector .panel-heading { position: sticky; top: 0; z-index: 1; background: var(--surface); }
+.detail-identity { display: flex; align-items: flex-start; gap: 10px; padding: var(--space-4) var(--space-3) 8px; }
+.node-icon { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border: 1px solid var(--line-strong); border-radius: 7px; font-size: 26px; color: var(--blue); background: var(--blue-soft); }
+.detail-identity h3 { font-size: 14px; overflow-wrap: anywhere; }
+.type-badge { display: inline-block; font-size: 9px; color: var(--gray); background: var(--gray-soft); border-radius: 3px; padding: 1px 5px; margin-top: 4px; }
+.type-badge[data-category="internal"] { color: var(--blue); background: var(--blue-soft); }
+.type-badge[data-category="library"] { color: var(--purple); background: var(--purple-soft); }
+.type-badge[data-category="condition"] { color: var(--orange); background: var(--orange-soft); }
+.detail-description { color: var(--muted); padding: 0 var(--space-3) 14px; font-size: 11px; }
+.inspector-section { margin: 0 var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--line); }
+.inspector-section h3 { margin-bottom: var(--space-2); }
+.inspector-section h4 { font-size: 11px; margin: 8px 0; overflow-wrap: anywhere; }
+.inspector-section button, #clear-selection { border: 1px solid var(--line); border-radius: 4px; background: var(--surface-soft); color: var(--blue); padding: 5px 7px; font-size: 10px; text-align: left; overflow-wrap: anywhere; }
+.inspector-section button { width: 100%; }
+.inspector-section button + button { margin-top: 5px; }
+.inspector-section button:hover, #clear-selection:hover { background: var(--blue-soft); }
+#clear-selection { margin-left: auto; }
+.metadata-list { list-style: none; padding: 0; font-size: 11px; color: var(--muted); }
+.metadata-list li + li { margin-top: var(--space-2); }
+.metadata-list code { display: block; overflow-wrap: anywhere; font: 10px/1.6 var(--mono); color: var(--text); }
+.metadata-list small { color: var(--muted); font-size: 10px; }
+.metadata-grid { display: grid; grid-template-columns: minmax(64px, .8fr) minmax(0, 1.2fr); gap: 5px 8px; font-size: 10px; }
+.metadata-grid dt { color: var(--muted); overflow-wrap: anywhere; }
+.metadata-grid dd { margin: 0; overflow-wrap: anywhere; }
+.muted-label { color: var(--muted); font-size: 10px; font-weight: 400; }
+.panel-empty { padding: var(--space-4); color: var(--muted); font-size: 12px; }
+.panel-empty p { margin-top: 6px; }
+.documentation { grid-column: 2 / 4; grid-row: 2; display: flex; flex-direction: column; }
+.document-toolbar { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); border-bottom: 1px solid var(--line); padding: 0 12px 0 8px; }
+.document-tabs { display: flex; gap: var(--space-3); }
+#document-context { max-width: 42%; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.document-tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 12px 9px 10px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.document-tabs button[aria-selected="true"] { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+.document-tabs button:focus-visible { outline-offset: -4px; }
+.document-view { display: grid; grid-template-columns: 170px minmax(0, 1fr) 215px; flex: 1; min-height: 0; overflow: auto; }
+.document-outline { display: flex; flex-direction: column; gap: var(--space-2); margin: 12px 0; padding: 0 10px; border-right: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+.document-outline .eyebrow { padding: 4px 7px; }
+.document-outline > span:not(.eyebrow) { padding: 4px 8px; }
+.outline-active { color: var(--blue); background: var(--blue-soft); border-left: 2px solid var(--blue); border-radius: 3px; }
+.document-article { padding: var(--space-4) var(--space-5); font-size: 11px; }
+.documentation .document-view { overflow: hidden; }
+.document-article, .document-outline { overflow: auto; min-height: 0; }
+.document-outline button { text-align: left; background: transparent; border: 0; color: var(--muted); padding: 5px 7px; font-size: 10px; overflow-wrap: anywhere; }
+.document-outline button:hover, .document-outline button[aria-current] { background: var(--blue-soft); color: var(--blue); }
+#document-picker, #source-picker { width: 100%; max-width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: 11px; padding: 5px; }
+.document-reference { font: 9px/1.5 var(--mono); color: var(--muted); overflow-wrap: anywhere; margin-top: 5px; }
+.document-status { overflow-wrap: anywhere; }
+.document-status:not(:empty) { padding: 8px; background: var(--orange-soft); color: var(--text); border-radius: 4px; margin: 8px 0; }
+.markdown-body { overflow-wrap: anywhere; }
+.markdown-body h1 { font-size: 16px; margin: 12px 0; }
+.markdown-body h2 { font-size: 14px; margin: 14px 0 8px; }
+.markdown-body h3, .markdown-body h4 { font-size: 12px; margin: 12px 0 6px; }
+.markdown-body p { margin: 8px 0; color: var(--text); }
+.markdown-body ul, .markdown-body ol { padding-left: 20px; }
+.markdown-body li { margin: 5px 0; }
+.markdown-body code { font: 10px var(--mono); }
+.markdown-link { display: inline; border: 0; background: transparent; padding: 0; color: var(--blue); font: inherit; text-decoration: underline; overflow-wrap: anywhere; }
+.markdown-section.doc-target { border-left: 2px solid var(--blue); background: var(--blue-soft); padding: 5px 10px; margin: 8px 0; }
+.markdown-body table { border-collapse: collapse; width: 100%; font-size: 10px; }
+.markdown-body th, .markdown-body td { border: 1px solid var(--line); padding: 6px; text-align: left; }
+.markdown-body .markdown-source-reference { font: 9px/1.6 var(--mono); }
+.documentation .source-view, .documentation .summary-view { overflow: auto; }
+#source-fields, #flow-summary { margin: 12px 0; max-width: 650px; font-size: 11px; }
+#source-unavailable { border: 1px solid var(--line); border-radius: 5px; background: var(--surface-soft); margin: 10px 0; }
+#summary-exits { padding-left: 18px; font-size: 11px; }
+.document-article h2 { font-size: 15px; margin-bottom: 8px; }
+.document-article h3 { margin: var(--space-3) 0 5px; }
+.document-article p { color: var(--muted); }
+.document-facts { align-self: start; margin: 12px 10px 12px 0; padding: 10px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-soft); }
+.document-facts h3 { font-size: 10px; margin-bottom: 8px; }
+.source-view, .summary-view { display: block; padding: var(--space-4) var(--space-5); }
+.source-view h2, .summary-view h2 { margin-bottom: var(--space-2); }
+.source-location { color: var(--muted); font: 10px var(--mono); overflow-wrap: anywhere; }
+pre { margin: var(--space-3) 0; border: 1px solid var(--line); border-radius: 5px; padding: var(--space-3); background: var(--surface-soft); white-space: pre-wrap; overflow-wrap: anywhere; font: 11px/1.7 var(--mono); }
+.summary-view > p { max-width: 720px; margin-bottom: var(--space-3); }
+.noscript-note { padding: var(--space-3); }
+/* Search is an overlay. Its state does not affect the workspace. */
+.app-header { position: sticky; top: 0; z-index: 20; background: var(--canvas); }
+.skip-link:focus { z-index: 30; }
+.search-control { position: relative; min-width: 180px; color: var(--muted); }
+.search-control input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; }
+.search-control input::placeholder, .explorer-filter input::placeholder { color: var(--muted); opacity: 1; }
+.search-control input::-webkit-search-cancel-button { display: none; }
+.search-control kbd { white-space: nowrap; font: 9px var(--sans); }
+.search-control button { border: 0; border-radius: 3px; background: var(--surface-soft); color: var(--text); }
+.search-popup { position: absolute; right: 0; top: calc(100% + 8px); width: min(600px, calc(100vw - 24px)); max-height: calc(100dvh - var(--search-clearance, 80px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 7px; box-shadow: 0 8px 24px var(--line); color: var(--text); font-size: 12px; }
+.search-popup > :not(#search-results) { flex-shrink: 0; }
+.search-status, .search-help, #search-empty { padding: 10px 12px; }
+.search-status { border-bottom: 1px solid var(--line); font-weight: 600; }
+.search-help { border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+#search-results { min-height: 0; max-height: min(55vh, 480px); overflow-y: auto; overscroll-behavior: contain; }
+.search-result { padding: 10px 12px; border-bottom: 1px solid var(--line); cursor: pointer; overflow-wrap: anywhere; }
+.search-result[aria-selected="true"] { background: var(--blue-soft); box-shadow: inset 3px 0 var(--blue); }
+.search-result h3 { font-size: 12px; }
+.search-result-heading { font-weight: 600; margin-top: 3px; }
+.search-result-preview { margin-top: 4px; }
+.search-result-location { color: var(--muted); font: 10px var(--mono); margin-top: 5px; }
+.search-result mark { background: var(--orange-soft); color: inherit; font-weight: 600; }
+@media (max-width: 720px) { .search-control { position: static; } .search-popup { right: 12px; left: 12px; width: auto; top: 100%; } .search-control kbd { display: none; } }
+
+.markdown-body mark.search-match { background: var(--orange-soft); color: inherit; border-bottom: 1px solid var(--orange); border-radius: 2px; }
+.markdown-body mark.search-match:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+.markdown-section.doc-flash { outline: 2px solid var(--orange); outline-offset: -2px; }
+.section-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.section-actions button { border: 1px solid var(--line-strong); border-radius: 4px; padding: 4px 7px; background: var(--surface); color: var(--blue); font-size: 11px; }
+.section-actions button:hover { background: var(--blue-soft); }
+.panel-collapsed #clear-selection { display: none; }
+.documentation > .panel-heading { flex-wrap: wrap; }
+
+.source-snippet { margin: 12px 0; padding: 10px 12px 10px 54px; background: var(--surface-soft); border: 1px solid var(--line); border-radius: 5px; overflow: auto; font: 11px/1.7 var(--mono); }
+.source-snippet li { padding-left: 8px; }
+.source-snippet li::marker { color: var(--muted); }
+.source-snippet code { display: block; white-space: pre; min-height: 1.7em; }
+
+#view-source { scroll-margin-top: 64px; }
+
+/* pFlow shell: three columns, one document renderer, no bottom region. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #101827; --surface: #172236; --surface-soft: #1c2a40;
+  --line: #30415a; --line-strong: #536984; --text: #edf3ff;
+  --muted: #b3c2d9; --faint: #92a5c0; --blue: #85b4ff; --blue-soft: #203d63;
+  --purple: #ceacff; --purple-soft: #3b2d56; --gray: #b4c1d6; --gray-soft: #2c3b50;
+  --orange: #ffd190; --orange-soft: #4c3824; --red: #ffacb5; --red-soft: #502e3b;
+  --green: #8ccba6; --grid-dot: #34445c; --shadow: none;
+}
+body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.app-header { flex: 0 0 64px; display: grid; grid-template-columns: minmax(130px, 1fr) minmax(240px, 680px) minmax(120px, 1fr); gap: 20px; padding: 0 24px; }
+.brand { font-size: 26px; color: var(--text); }
+.brand-mark { width: 34px; height: 34px; }
+.search-control { width: 100%; margin: 0; padding: 8px 12px; font-size: 13px; border-color: var(--line-strong); }
+.header-actions { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
+.header-actions button { background: transparent; border: 0; padding: 7px 9px; border-radius: 5px; }
+.header-actions button:hover { background: var(--blue-soft); color: var(--blue); }
+#theme-toggle { font-size: 22px; line-height: 1; }
+.app-layout { --left-width: 280px; --right-width: 420px; flex: 1; min-height: 0; height: auto; margin: 0 4px 4px; gap: 0; grid-template-columns: var(--left-width) 8px minmax(0, 1fr) 8px var(--right-width); grid-template-rows: minmax(0, 1fr); }
+.navigator { grid-column: 1; grid-row: 1; background: var(--surface); }
+.workspace { grid-column: 3; grid-row: 1; min-height: 0; overflow-y: auto; }
+.workspace > :not(.diagram-container) { flex-shrink: 0; }
+.documentation { grid-column: 5; grid-row: 1; min-height: 0; }
+.panel-heading { min-height: 48px; padding: 0 14px; }
+.panel-heading h2 { font-size: 15px; }
+.panel-toggle { margin-left: auto; width: 28px; height: 30px; padding: 0; flex-shrink: 0; border: 0; background: transparent; color: var(--muted); font-size: 20px; border-radius: 4px; }
+.panel-toggle:hover { background: var(--blue-soft); color: var(--blue); }
+.panel-collapsed .panel-heading { padding: 8px 4px; border: 0; justify-content: center; }
+.panel-collapsed .panel-heading h2, .panel-collapsed .panel-heading .count { display: none; }
+.panel-collapsed .panel-toggle { margin: 0; }
+.explorer-content, .documentation-content { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
+.explorer-filter { display: grid; gap: 7px; padding: 12px; }
+.explorer-filter input, .explorer-filter select { width: 100%; min-width: 0; padding: 7px 9px; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 12px; }
+.bundle-heading { padding: 12px 14px 3px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.group-heading { font-size: 12px; padding: 10px 14px; }
+.entry-button { font-size: 12px; padding: 11px 14px 11px 24px; }
+.panel-divider { position: relative; cursor: col-resize; touch-action: none; border-radius: 3px; }
+#resize-left { grid-column: 2; grid-row: 1; } #resize-right { grid-column: 4; grid-row: 1; }
+.panel-divider::after { content: ''; position: absolute; left: 3px; top: calc(50% - 16px); height: 32px; width: 2px; border-radius: 2px; background: var(--line-strong); }
+.panel-divider:not([aria-disabled="true"]):hover, .panel-divider:focus-visible { background: var(--blue-soft); }
+.panel-divider[aria-disabled="true"] { cursor: default; }
+.panel-divider[aria-disabled="true"]::after { display: none; }
+.is-resizing, .is-resizing * { cursor: col-resize !important; user-select: none !important; }
+.workspace-heading h1 { font-size: 20px; }
+.workspace-heading > div { min-width: 0; }
+.workspace-heading h1, .workspace-heading p { overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.workspace-heading p { font-size: 12px; }
+.workspace-navigation { flex-wrap: wrap; }
+.flow-chooser select { max-width: min(200px, 100%); }
+.flow-chooser { max-width: 100%; }
+.workspace-toolbar { padding: 8px 12px; }
+.toolbar-actions { flex-wrap: wrap; }
+.diagram-container { min-height: 80px; }
+.document-toolbar { flex-direction: column; align-items: stretch; padding: 0 10px 7px; gap: 2px; }
+.document-tabs { gap: 0; flex-wrap: wrap; }
+.document-tabs button { flex: 1; padding: 11px 5px 9px; font-size: 11px; }
+#document-context { max-width: 100%; font-size: 10px; }
+.document-view { display: flex; flex-direction: column; min-height: 0; }
+.document-outline { flex: 0 0 auto; max-height: 110px; border-right: 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: row; flex-wrap: wrap; gap: 3px; padding: 8px; margin: 0; }
+.document-outline button { font-size: 11px; }
+.document-article { flex: 1; min-height: 0; padding: 16px 18px; font-size: 13px; }
+.document-facts { flex: 0 0 auto; margin: 0 12px 10px; max-height: 100px; overflow: auto; }
+.document-facts .metadata-grid { grid-template-columns: 70px minmax(0, 1fr); }
+.document-facts h3 { margin-bottom: 5px; }
+.markdown-body p { line-height: 1.75; }
+.markdown-body h2 { font-size: 17px; }
+.markdown-body h3, .markdown-body h4 { font-size: 14px; }
+.inspector { display: block; min-height: 0; overflow: auto; }
+.inspector .panel-heading { position: static; }
+.source-view, .summary-view { padding: 16px; }
+.source-snippet { font-size: 12px; }
+@media (max-width: 800px) {
+  .app-header { grid-template-columns: auto minmax(120px, 1fr) auto; gap: 10px; padding: 0 10px; }
+  .brand { font-size: 21px; gap: 5px; } .brand-mark { width: 27px; height: 27px; }
+  .header-actions { gap: 2px; } .header-actions button { padding: 7px 5px; }
+  .search-control { min-width: 0; font-size: 12px; }
+  .search-control kbd { display: none; }
+  .workspace-heading { padding: 10px; } .workspace-heading h1 { font-size: 16px; }
+  .diagram-legend { gap: 8px; padding: 8px; }
+}
+@media (max-width: 460px) {
+  .search-popup { --search-clearance: 120px; }
+  .app-header { grid-template-columns: 1fr auto; height: 100px; flex-basis: 100px; gap: 4px 8px; padding: 6px 10px; }
+  .search-control { grid-column: 1 / 3; grid-row: 2; }
+  .header-actions { grid-column: 2; grid-row: 1; }
+  .workspace-navigation { padding: 5px; } .workspace-toolbar { padding: 5px; }
+  .workspace-heading p, .toolbar-label { display: none; }
+}
+</style>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to process workspace</a>
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="m12 9 4-6 4 6M4 26l7-12 7 12H4Zm10 0 7-12 7 12H14Z" /></svg>
+      <span>pFlow</span>
+    </div>
+    <div class="search-control" id="search-control" role="search" aria-label="Architecture documentation search">
+      <span aria-hidden="true">⌕</span>
+      <label class="sr-only" for="global-search">Search documentation</label>
+      <input id="global-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results" placeholder="Search documentation…" autocomplete="off" spellcheck="false">
+      <button id="search-clear" type="button" aria-label="Clear search" hidden>×</button>
+      <kbd aria-hidden="true">⌘ / Ctrl K</kbd>
+      <section id="search-popup" class="search-popup" aria-label="Documentation search previews" hidden>
+        <div class="search-status" id="search-status" role="status" aria-live="polite"></div>
+        <div id="search-results" role="listbox" aria-label="Search results"></div>
+        <p id="search-empty"></p>
+        <p class="search-help">↑ ↓ review · Enter open · Esc close.</p>
+      </section>
+    </div>
+    <div class="header-actions"><button id="open-docs" type="button">Docs</button><button id="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true">☾</span></button></div>
+  </header>
+
+  <main class="app-layout" id="app-layout">
+    <nav class="panel navigator" id="process-explorer" aria-labelledby="navigator-title">
+      <div class="panel-heading"><h2 id="navigator-title">Process starts</h2><span class="count" id="entry-count">0</span><button id="toggle-left" class="panel-toggle" type="button" aria-controls="explorer-content" aria-expanded="true" aria-label="Collapse process explorer">«</button></div>
+      <div id="explorer-content" class="explorer-content">
+      <div class="explorer-filter"><label class="sr-only" for="process-filter">Filter processes</label><input id="process-filter" type="search" placeholder="Filter processes…"><label class="sr-only" for="category-filter">Starting condition</label><select id="category-filter"><option value="">All starts</option></select></div>
+      <p class="panel-note">Grouped by recorded starting condition</p>
+      <div id="entry-groups" class="entry-groups"></div>
+      <div class="navigator-footer" id="navigator-footer"><span class="evidence-dot" aria-hidden="true"></span>Select a start to explore</div>
+      <p id="filter-empty" class="panel-empty" hidden>No matching process starts.</p>
+      </div>
+    </nav>
+    <div id="resize-left" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process explorer" aria-orientation="vertical" aria-controls="process-explorer" aria-valuemin="180" aria-valuemax="420" aria-valuenow="260"></div>
+
+    <section class="panel workspace" id="workspace" tabindex="-1" aria-labelledby="workspace-title">
+      <div class="workspace-navigation">
+        <div class="navigation-controls" aria-label="Flow navigation">
+          <button id="navigation-back" type="button" disabled>Back</button>
+          <button id="navigation-forward" type="button" disabled>Forward</button>
+          <button id="navigation-root" type="button" disabled aria-label="Top level: return to first flow in this path">Top level</button>
+        </div>
+        <nav class="breadcrumbs" aria-label="Flow breadcrumbs"><ol id="breadcrumb-list"></ol></nav>
+      </div>
+      <p id="navigation-notice" class="navigation-notice" role="status" aria-live="polite"></p>
+      <div class="workspace-heading">
+        <div><div class="eyebrow">Process workspace</div><h1 id="workspace-title">Architecture</h1><p id="workspace-description"></p></div>
+        <span class="subtle-badge" id="flow-level">Flow</span>
+      </div>
+      <div class="workspace-toolbar" aria-label="Diagram controls">
+        <div class="flow-chooser"><label class="sr-only" for="flow-picker">Displayed flow</label><select id="flow-picker"></select><span id="flow-count" class="toolbar-label"></span></div>
+        <div class="toolbar-actions"><button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button><output id="zoom-level" aria-live="polite" aria-label="Zoom level">100%</output><button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button><span class="toolbar-divider"></span><button id="zoom-fit" type="button" disabled>Fit view</button><button id="zoom-reset" type="button" disabled title="Reset to 100% and align the diagram">Reset zoom</button></div>
+      </div>
+      <p class="panel-note" id="diagram-help">Select a step or arrow for details and evidence. Use ↗ for supported detail; Back returns to the previous level.</p>
+      <div class="diagram-container" id="diagram-container" aria-busy="false">
+        <div class="workspace-state" id="workspace-state" role="status" aria-live="polite">
+          <div class="workspace-glyph" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <h2 id="workspace-state-title">Process diagram</h2>
+          <p id="workspace-state-message">Diagram rendering will appear here.</p>
+          <span class="state-caption" id="workspace-state-caption"></span>
+        </div>
+      </div>
+      <ul class="diagram-legend" aria-label="Diagram categories">
+        <li><span class="legend-dot internal"></span>Process step</li>
+        <li><span class="legend-dot library"></span>Library</li>
+        <li><span class="legend-dot system"></span>External system</li>
+        <li><span class="legend-dot condition"></span>Condition</li>
+        <li title="An exceptional transfer, when recorded in the process"><span class="legend-dot failure"></span>Exception path</li>
+        <li title="A documented exit from this flow; read its label for the outcome"><span class="legend-dot system"></span>Outcome</li>
+        <li title="Dashed border: this step or boundary is unresolved. Read its evidence and documentation for limits."><span class="legend-dot unresolved"></span>Unresolved (dashed border)</li>
+      </ul>
+    </section>
+
+
+    <div id="resize-right" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process documentation" aria-orientation="vertical" aria-controls="process-documentation" aria-valuemin="280" aria-valuemax="640" aria-valuenow="400"></div>
+    <section class="panel documentation" id="process-documentation" aria-label="Documentation and evidence">
+      <div class="panel-heading"><h2 id="documentation-title">Process documentation</h2><button id="clear-selection" type="button" hidden>Clear selection</button><button id="toggle-right" class="panel-toggle" type="button" aria-controls="documentation-content" aria-expanded="true" aria-label="Collapse process documentation">»</button></div>
+      <div id="documentation-content" class="documentation-content">
+      <div class="document-toolbar">
+        <div class="document-tabs" role="tablist" aria-label="Documentation views">
+          <button id="tab-documentation" role="tab" type="button" aria-selected="true" aria-controls="view-documentation">Documentation</button>
+          <button id="tab-source" role="tab" type="button" aria-selected="false" aria-controls="view-source" tabindex="-1">Evidence references</button>
+          <button id="tab-summary" role="tab" type="button" aria-selected="false" aria-controls="view-summary" tabindex="-1">Process summary</button>
+          <button id="tab-details" role="tab" type="button" aria-selected="false" aria-controls="view-details" tabindex="-1">Details</button>
+        </div>
+        <span class="muted-label" id="document-context"></span>
+      </div>
+      <div id="view-documentation" class="document-view" role="tabpanel" aria-labelledby="tab-documentation" tabindex="0">
+        <nav id="document-outline" class="document-outline" aria-label="Document sections"></nav>
+        <article class="document-article" id="document-article">
+          <label class="sr-only" for="document-picker">Documentation reference</label><select id="document-picker"></select>
+          <p id="document-reference" class="document-reference"></p>
+          <p id="document-status" class="document-status" role="status"></p>
+          <div id="document-body"></div>
+        </article>
+        <aside class="document-facts" aria-label="Documentation context"><h3>Context</h3><dl id="artifact-facts" class="metadata-grid"></dl></aside>
+      </div>
+      <div id="view-source" class="document-view source-view" role="tabpanel" aria-labelledby="tab-source" tabindex="0" hidden>
+        <h2>Evidence references</h2><label for="source-picker">Recorded evidence</label><select id="source-picker"></select>
+        <dl id="source-fields" class="metadata-grid"></dl><ol id="source-snippet" class="source-snippet" aria-label="Evidence excerpt" tabindex="0" hidden></ol><p id="source-unavailable" class="panel-empty" role="status"></p>
+      </div>
+      <div id="view-summary" class="document-view summary-view" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden>
+        <h2 id="summary-title">Process summary</h2><dl id="flow-summary" class="metadata-grid"></dl><h3>Documented outcomes</h3><ul id="summary-exits"></ul>
+      </div>
+    <div id="view-details" class="document-view inspector" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
+      <div class="panel-heading"><h2 id="inspector-title">Details inspector</h2></div>
+      <div id="inspector-empty" class="panel-empty" hidden><h3>No selection</h3><p>Select a node or relationship to inspect its recorded details and evidence.</p></div>
+      <div id="inspector-content">
+        <div class="detail-identity"><div class="node-icon" aria-hidden="true">◇</div><div><h3 id="node-name"></h3><span id="node-kind" class="type-badge"></span></div></div>
+        <p id="node-description" class="detail-description" hidden></p>
+        <section class="inspector-section"><h3>Process context</h3><dl id="selection-facts" class="metadata-grid"></dl></section>
+        <section class="inspector-section" aria-labelledby="sources-title"><h3 id="sources-title">Evidence references</h3><ul id="source-references" class="metadata-list"></ul></section>
+        <section class="inspector-section" aria-labelledby="conditions-title"><h3 id="conditions-title">Relevant conditions</h3><ul id="node-conditions" class="metadata-list"></ul></section>
+        <section class="inspector-section" aria-labelledby="calls-title"><h3 id="calls-title">Related relationships</h3><ul id="node-calls" class="metadata-list"></ul></section>
+        <section class="inspector-section" aria-labelledby="external-title"><h3 id="external-title">External integration</h3><div id="external-metadata"></div></section>
+        <section class="inspector-section"><h3>Referenced detail Flow</h3><div id="detail-flow"></div></section>
+        <section class="inspector-section"><h3>Documentation</h3><div id="inspector-documentation"></div></section>
+      </div>
+    </div>
+
+      </div>
+    </section>
+  </main>
+  <noscript>Enable JavaScript to explore the embedded architecture documentation.</noscript>
+<script type="application/json" id="pflow-data">[{"key":"architecture.json","title":"Refresh architecture","architecture":{"modelVersion":"1.0.0","entryPoints":[{"id":"entry_b285ac74eb27","label":"Refresh command","flowId":"flow_9a0eb994df17","sourceIds":["src_65bf5e7a0a3d","src_9eeed4e44319"],"trigger":"Registered command refresh","docs":[{"path":"execution.md","anchor":"entry_b285ac74eb27"}]}],"flows":[{"id":"flow_9a0eb994df17","label":"Refresh command","startNodeId":"node_352296cd82d5","nodes":[{"id":"node_352296cd82d5","label":"Receive command","kind":"operation","sourceIds":["src_9eeed4e44319"]},{"id":"node_8b15c706f980","label":"Invoke refresh component","kind":"operation","sourceIds":["src_9eeed4e44319","src_e8a62f5a06fa"],"expandFlowId":"flow_df8ae1187700"},{"id":"node_4810507d3d99","label":"Return result","kind":"terminal","sourceIds":["src_9eeed4e44319"]},{"id":"node_a750a397fbb6","label":"Propagate exception","kind":"terminal","sourceIds":["src_9eeed4e44319"]}],"edges":[{"id":"edge_388f0f343535","from":"node_352296cd82d5","to":"node_8b15c706f980","kind":"call","mode":"sync","sourceIds":["src_9eeed4e44319","src_e8a62f5a06fa"]},{"id":"edge_50f5d89b43b2","from":"node_8b15c706f980","to":"node_4810507d3d99","kind":"return","mode":"sync","sourceIds":["src_9eeed4e44319"]},{"id":"edge_5e4c16fc95e4","from":"node_8b15c706f980","to":"node_a750a397fbb6","kind":"exception","mode":"sync","sourceIds":["src_9eeed4e44319"]}],"docs":[{"path":"execution.md","anchor":"flow_9a0eb994df17"}]},{"id":"flow_df8ae1187700","label":"Refresh component","startNodeId":"node_8a44645d4337","nodes":[{"id":"node_8a44645d4337","label":"Receive execution request","kind":"operation","sourceIds":["src_e8a62f5a06fa"]},{"id":"node_a92196d6ef71","label":"Invoke read_state","kind":"operation","sourceIds":["src_e8a62f5a06fa","src_1def2254d126"],"expandFlowId":"flow_844c0963da42"},{"id":"node_6f458592ca7a","label":"Return result","kind":"terminal","sourceIds":["src_e8a62f5a06fa"]},{"id":"node_f76637525363","label":"Propagate exception","kind":"terminal","sourceIds":["src_e8a62f5a06fa"]}],"edges":[{"id":"edge_bc53e9600442","from":"node_8a44645d4337","to":"node_a92196d6ef71","kind":"call","mode":"sync","sourceIds":["src_e8a62f5a06fa","src_1def2254d126"]},{"id":"edge_a5cc0e2285bc","from":"node_a92196d6ef71","to":"node_6f458592ca7a","kind":"return","mode":"sync","sourceIds":["src_e8a62f5a06fa"]},{"id":"edge_5b92d09811b8","from":"node_a92196d6ef71","to":"node_f76637525363","kind":"exception","mode":"sync","sourceIds":["src_e8a62f5a06fa"]}],"docs":[{"path":"execution.md","anchor":"flow_df8ae1187700"}]},{"id":"flow_844c0963da42","label":"Read state","startNodeId":"node_687dd127f403","nodes":[{"id":"node_687dd127f403","label":"Validate with input_rules","kind":"external","sourceIds":["src_ea6916f84f7c"],"external":{"kind":"library","name":"input_rules","attributes":{"library.symbol":"check"}},"docs":[{"path":"execution.md","anchor":"node_687dd127f403"}]},{"id":"node_b5b0dd797025","label":"Input valid?","kind":"decision","sourceIds":["src_9c29a4625764"],"docs":[{"path":"execution.md","anchor":"node_b5b0dd797025"}]},{"id":"node_d1e0f061c044","label":"Fetch state","kind":"external","sourceIds":["src_35f0bded3992"],"external":{"kind":"http","name":"State service","attributes":{"http.method":"GET","http.urlTemplate":"${STATE_URL}/state"}},"docs":[{"path":"execution.md","anchor":"node_d1e0f061c044"}]},{"id":"node_61a961f4ac47","label":"Return invalid input","kind":"terminal","sourceIds":["src_9c29a4625764"]},{"id":"node_3e4fe1d913f7","label":"Return state","kind":"terminal","sourceIds":["src_58fcca3eb0d2"]},{"id":"node_e9162329f133","label":"Propagate request exception","kind":"terminal","sourceIds":["src_35f0bded3992"]}],"edges":[{"id":"edge_c3bcb936335e","from":"node_687dd127f403","to":"node_b5b0dd797025","kind":"next","mode":"sync","sourceIds":["src_ea6916f84f7c","src_9c29a4625764"]},{"id":"edge_3a8a37b2eaf7","from":"node_b5b0dd797025","to":"node_d1e0f061c044","kind":"branch","mode":"sync","sourceIds":["src_9c29a4625764","src_35f0bded3992"],"label":"valid"},{"id":"edge_20b2f39e2cc9","from":"node_b5b0dd797025","to":"node_61a961f4ac47","kind":"branch","mode":"sync","sourceIds":["src_9c29a4625764"],"label":"invalid"},{"id":"edge_bcafd9b24e12","from":"node_d1e0f061c044","to":"node_3e4fe1d913f7","kind":"return","mode":"sync","sourceIds":["src_58fcca3eb0d2"]},{"id":"edge_768478b1f423","from":"node_d1e0f061c044","to":"node_e9162329f133","kind":"exception","mode":"sync","sourceIds":["src_35f0bded3992"]}],"docs":[{"path":"execution.md","anchor":"flow_844c0963da42"}]}],"sources":[{"id":"src_65bf5e7a0a3d","path":"examples/a-sync/sources/command.py.txt","startLine":2,"endLine":2},{"id":"src_9eeed4e44319","path":"examples/a-sync/sources/command.py.txt","startLine":3,"endLine":4,"symbol":"run_refresh"},{"id":"src_e8a62f5a06fa","path":"examples/a-sync/sources/component.py.txt","startLine":2,"endLine":3,"symbol":"execute"},{"id":"src_1def2254d126","path":"examples/a-sync/sources/state.py.txt","startLine":2,"endLine":7,"symbol":"read_state"},{"id":"src_ea6916f84f7c","path":"examples/a-sync/sources/state.py.txt","startLine":3,"endLine":3},{"id":"src_9c29a4625764","path":"examples/a-sync/sources/state.py.txt","startLine":4,"endLine":5},{"id":"src_35f0bded3992","path":"examples/a-sync/sources/state.py.txt","startLine":6,"endLine":6},{"id":"src_58fcca3eb0d2","path":"examples/a-sync/sources/state.py.txt","startLine":7,"endLine":7}]},"documents":[{"path":"execution.md","markdown":"# Synchronous refresh\n\nIllustrative Python fixtures; dependency bodies and deployment settings are outside scope.\n\n\u003ca id=\"entry_b285ac74eb27\"\u003e\u003c/a\u003e\n## Entry point\n\nThe registered `refresh` command activates `run_refresh`. Evidence: [src_65bf5e7a0a3d], [src_9eeed4e44319].\n\n\u003ca id=\"flow_9a0eb994df17\"\u003e\u003c/a\u003e\n## Refresh command\n\nReceive the command and invoke the refresh component. Return its result or propagate its exception. Evidence: [src_9eeed4e44319], [src_e8a62f5a06fa].\n\n\u003ca id=\"flow_df8ae1187700\"\u003e\u003c/a\u003e\n## Refresh component\n\nCalled by the refresh command. Invoke `read_state`, then return its result or propagate its exception. Open the [function detail](execution.md#flow_844c0963da42) through the call-site expansion. Evidence: [src_e8a62f5a06fa], [src_1def2254d126].\n\n\u003ca id=\"flow_844c0963da42\"\u003e\u003c/a\u003e\n## Read state\n\nCalled by the refresh component. Validate input; when valid, fetch and return state. Invalid input returns immediately. A request exception propagates to the caller. Evidence: [src_ea6916f84f7c], [src_9c29a4625764], [src_35f0bded3992], [src_58fcca3eb0d2].\n\n\u003ca id=\"node_687dd127f403\"\u003e\u003c/a\u003e\n### Validation library\n\n`input_rules.check` is an external library boundary. Its implementation is outside this summary. Evidence: [src_ea6916f84f7c].\n\n\u003ca id=\"node_b5b0dd797025\"\u003e\u003c/a\u003e\n### Input condition\n\n`valid` continues to the state request. `invalid` returns `invalid input` without making the request. Evidence: [src_9c29a4625764].\n\n\u003ca id=\"node_d1e0f061c044\"\u003e\u003c/a\u003e\n### State service\n\nSend a synchronous GET request to `${STATE_URL}/state`. The host is unresolved. Return and exception exits remain in this Flow and in each caller. Evidence: [src_35f0bded3992].\n\n## Source evidence\n\n[src_65bf5e7a0a3d]: ../sources/command.py.txt#L2\n[src_9eeed4e44319]: ../sources/command.py.txt#L3-L4\n[src_e8a62f5a06fa]: ../sources/component.py.txt#L2-L3\n[src_1def2254d126]: ../sources/state.py.txt#L2-L7\n[src_ea6916f84f7c]: ../sources/state.py.txt#L3\n[src_9c29a4625764]: ../sources/state.py.txt#L4-L5\n[src_35f0bded3992]: ../sources/state.py.txt#L6\n[src_58fcca3eb0d2]: ../sources/state.py.txt#L7\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eSynchronous refresh\u003c/h1\u003e\u003cp\u003eIllustrative Python fixtures; dependency bodies and deployment settings are outside scope.\u003c/p\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"entry_b285ac74eb27\"\u003e\u003ch2\u003eEntry point\u003c/h2\u003e\u003cp\u003eThe registered \u003ccode\u003erefresh\u003c/code\u003e command activates \u003ccode\u003erun_refresh\u003c/code\u003e. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/command.py.txt:2\" title=\"examples/a-sync/sources/command.py.txt:2\" data-source-id=\"src_65bf5e7a0a3d\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_65bf5e7a0a3d\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" title=\"examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" data-source-id=\"src_9eeed4e44319\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9eeed4e44319\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"flow_9a0eb994df17\"\u003e\u003ch2\u003eRefresh command\u003c/h2\u003e\u003cp\u003eReceive the command and invoke the refresh component. Return its result or propagate its exception. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" title=\"examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" data-source-id=\"src_9eeed4e44319\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9eeed4e44319\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/component.py.txt:2–3 · execute\" title=\"examples/a-sync/sources/component.py.txt:2–3 · execute\" data-source-id=\"src_e8a62f5a06fa\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_e8a62f5a06fa\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"flow_df8ae1187700\"\u003e\u003ch2\u003eRefresh component\u003c/h2\u003e\u003cp\u003eCalled by the refresh command. Invoke \u003ccode\u003eread_state\u003c/code\u003e, then return its result or propagate its exception. Open the \u003cbutton data-document-section=\"flow_844c0963da42\" data-document-path=\"execution.md\" class=\"markdown-link\" type=\"button\"\u003efunction detail\u003c/button\u003e through the call-site expansion. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/component.py.txt:2–3 · execute\" title=\"examples/a-sync/sources/component.py.txt:2–3 · execute\" data-source-id=\"src_e8a62f5a06fa\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_e8a62f5a06fa\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:2–7 · read_state\" title=\"examples/a-sync/sources/state.py.txt:2–7 · read_state\" data-source-id=\"src_1def2254d126\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_1def2254d126\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"flow_844c0963da42\"\u003e\u003ch2\u003eRead state\u003c/h2\u003e\u003cp\u003eCalled by the refresh component. Validate input; when valid, fetch and return state. Invalid input returns immediately. A request exception propagates to the caller. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:3\" title=\"examples/a-sync/sources/state.py.txt:3\" data-source-id=\"src_ea6916f84f7c\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_ea6916f84f7c\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:4–5\" title=\"examples/a-sync/sources/state.py.txt:4–5\" data-source-id=\"src_9c29a4625764\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9c29a4625764\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:6\" title=\"examples/a-sync/sources/state.py.txt:6\" data-source-id=\"src_35f0bded3992\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_35f0bded3992\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:7\" title=\"examples/a-sync/sources/state.py.txt:7\" data-source-id=\"src_58fcca3eb0d2\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_58fcca3eb0d2\u003c/button\u003e.\u003c/p\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_687dd127f403\"\u003e\u003ch3\u003eValidation library\u003c/h3\u003e\u003cp\u003e\u003ccode\u003einput_rules.check\u003c/code\u003e is an external library boundary. Its implementation is outside this summary. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:3\" title=\"examples/a-sync/sources/state.py.txt:3\" data-source-id=\"src_ea6916f84f7c\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_ea6916f84f7c\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_b5b0dd797025\"\u003e\u003ch3\u003eInput condition\u003c/h3\u003e\u003cp\u003e\u003ccode\u003evalid\u003c/code\u003e continues to the state request. \u003ccode\u003einvalid\u003c/code\u003e returns \u003ccode\u003einvalid input\u003c/code\u003e without making the request. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:4–5\" title=\"examples/a-sync/sources/state.py.txt:4–5\" data-source-id=\"src_9c29a4625764\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9c29a4625764\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_d1e0f061c044\"\u003e\u003ch3\u003eState service\u003c/h3\u003e\u003cp\u003eSend a synchronous GET request to \u003ccode\u003e${STATE_URL}/state\u003c/code\u003e. The host is unresolved. Return and exception exits remain in this Flow and in each caller. Evidence: \u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:6\" title=\"examples/a-sync/sources/state.py.txt:6\" data-source-id=\"src_35f0bded3992\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_35f0bded3992\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003c/section\u003e\u003ch2\u003eSource evidence\u003c/h2\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/command.py.txt:2\" title=\"examples/a-sync/sources/command.py.txt:2\" data-source-id=\"src_65bf5e7a0a3d\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_65bf5e7a0a3d\u003c/button\u003e — examples/a-sync/sources/command.py.txt:2\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" title=\"examples/a-sync/sources/command.py.txt:3–4 · run_refresh\" data-source-id=\"src_9eeed4e44319\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9eeed4e44319\u003c/button\u003e — examples/a-sync/sources/command.py.txt:3–4 · run_refresh\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/component.py.txt:2–3 · execute\" title=\"examples/a-sync/sources/component.py.txt:2–3 · execute\" data-source-id=\"src_e8a62f5a06fa\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_e8a62f5a06fa\u003c/button\u003e — examples/a-sync/sources/component.py.txt:2–3 · execute\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:2–7 · read_state\" title=\"examples/a-sync/sources/state.py.txt:2–7 · read_state\" data-source-id=\"src_1def2254d126\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_1def2254d126\u003c/button\u003e — examples/a-sync/sources/state.py.txt:2–7 · read_state\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:3\" title=\"examples/a-sync/sources/state.py.txt:3\" data-source-id=\"src_ea6916f84f7c\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_ea6916f84f7c\u003c/button\u003e — examples/a-sync/sources/state.py.txt:3\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:4–5\" title=\"examples/a-sync/sources/state.py.txt:4–5\" data-source-id=\"src_9c29a4625764\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_9c29a4625764\u003c/button\u003e — examples/a-sync/sources/state.py.txt:4–5\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:6\" title=\"examples/a-sync/sources/state.py.txt:6\" data-source-id=\"src_35f0bded3992\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_35f0bded3992\u003c/button\u003e — examples/a-sync/sources/state.py.txt:6\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence examples/a-sync/sources/state.py.txt:7\" title=\"examples/a-sync/sources/state.py.txt:7\" data-source-id=\"src_58fcca3eb0d2\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_58fcca3eb0d2\u003c/button\u003e — examples/a-sync/sources/state.py.txt:7\u003c/p\u003e\u003c/div\u003e","sections":[{"id":"entry_b285ac74eb27","label":"Entry point"},{"id":"flow_9a0eb994df17","label":"Refresh command"},{"id":"flow_df8ae1187700","label":"Refresh component"},{"id":"flow_844c0963da42","label":"Read state"},{"id":"node_687dd127f403","label":"Validation library"},{"id":"node_b5b0dd797025","label":"Input condition"},{"id":"node_d1e0f061c044","label":"State service"}]},{"path":"index.md","markdown":"# Refresh architecture\n\nIllustrative synchronous command with reusable component and function detail.\n\n## Entry points\n\n| Entry point | Trigger | Execution |\n|---|---|---|\n| Refresh command | Registered command `refresh` | [Refresh command](execution.md#flow_9a0eb994df17) |\n\n## Detail flows\n\n- [Refresh component](execution.md#flow_df8ae1187700)\n- [Read state](execution.md#flow_844c0963da42)\n\n## Coverage\n\nThe command and component retain their own return paths. Dependency internals and the state-service host are not established.\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eRefresh architecture\u003c/h1\u003e\u003cp\u003eIllustrative synchronous command with reusable component and function detail.\u003c/p\u003e\u003ch2\u003eEntry points\u003c/h2\u003e\u003ctable\u003e\u003ctr\u003e\u003cth\u003eEntry point\u003c/th\u003e\u003cth\u003eTrigger\u003c/th\u003e\u003cth\u003eExecution\u003c/th\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRefresh command\u003c/td\u003e\u003ctd\u003eRegistered command \u003ccode\u003erefresh\u003c/code\u003e\u003c/td\u003e\u003ctd\u003e\u003cbutton data-document-section=\"flow_9a0eb994df17\" data-document-path=\"execution.md\" class=\"markdown-link\" type=\"button\"\u003eRefresh command\u003c/button\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch2\u003eDetail flows\u003c/h2\u003e\u003cul\u003e\u003cli\u003e\u003cbutton data-document-section=\"flow_df8ae1187700\" data-document-path=\"execution.md\" class=\"markdown-link\" type=\"button\"\u003eRefresh component\u003c/button\u003e\u003c/li\u003e\u003cli\u003e\u003cbutton data-document-section=\"flow_844c0963da42\" data-document-path=\"execution.md\" class=\"markdown-link\" type=\"button\"\u003eRead state\u003c/button\u003e\u003c/li\u003e\u003c/ul\u003e\u003ch2\u003eCoverage\u003c/h2\u003e\u003cp\u003eThe command and component retain their own return paths. Dependency internals and the state-service host are not established.\u003c/p\u003e\u003c/div\u003e","sections":[]}],"snippets":[{"sourceIds":["src_65bf5e7a0a3d"],"lines":[{"number":2,"text":"commands.register(\"refresh\", run_refresh)"}]},{"sourceIds":["src_9eeed4e44319"],"lines":[{"number":3,"text":"def run_refresh(args):"},{"number":4,"text":"    return refresh_component.execute(args)"}]},{"sourceIds":["src_e8a62f5a06fa"],"lines":[{"number":2,"text":"def execute(args):"},{"number":3,"text":"    return read_state(args)"}]},{"sourceIds":["src_1def2254d126"],"lines":[{"number":2,"text":"def read_state(args):"},{"number":3,"text":"    valid = input_rules.check(args)"},{"number":4,"text":"    if not valid:"},{"number":5,"text":"        return \"invalid input\""},{"number":6,"text":"    state = http.get(STATE_URL + \"/state\")  # waits; request exceptions propagate"},{"number":7,"text":"    return state"}]},{"sourceIds":["src_ea6916f84f7c"],"lines":[{"number":3,"text":"    valid = input_rules.check(args)"}]},{"sourceIds":["src_9c29a4625764"],"lines":[{"number":4,"text":"    if not valid:"},{"number":5,"text":"        return \"invalid input\""}]},{"sourceIds":["src_35f0bded3992"],"lines":[{"number":6,"text":"    state = http.get(STATE_URL + \"/state\")  # waits; request exceptions propagate"}]},{"sourceIds":["src_58fcca3eb0d2"],"lines":[{"number":7,"text":"    return state"}]}],"diagnostics":[]}]</script><script>const embedded = JSON.parse(document.getElementById('pflow-data').textContent);
+globalThis.pFlowSamples = embedded.map(item => ({ key: item.key, title: item.title, architecture: item.architecture }));
+globalThis.pFlowDocuments = Object.fromEntries(embedded.map(item => [item.key, Object.fromEntries(item.documents.map(doc => [doc.path, doc.markdown]))]));
+globalThis.pFlowContent = Object.fromEntries(embedded.map(item => [item.key, { documents: Object.fromEntries(item.documents.map(doc => [doc.path, { html: doc.html, sections: doc.sections }])), snippets: item.snippets, diagnostics: item.diagnostics }]));
+/* Presentation adapter. It reads M1 artifacts; it does not infer execution mechanisms. */
+globalThis.pFlow = globalThis.pFlow || {};
+globalThis.pFlow.adaptSample = function adaptSample(sample) {
+  const architecture = sample.architecture;
+  const groups = new Map();
+  for (const entry of architecture.entryPoints) {
+    const trigger = entry.trigger?.trim() || 'Trigger not recorded';
+    if (!groups.has(trigger)) groups.set(trigger, []);
+    groups.get(trigger).push({ id: entry.id, label: entry.label });
+  }
+  const allNodes = architecture.flows.flatMap(flow => flow.nodes);
+  return {
+    title: sample.title,
+    groups: [...groups].map(([label, entries]) => ({ label, entries })),
+    entryCount: architecture.entryPoints.length,
+    flowCount: architecture.flows.length,
+    nodeCount: allNodes.length,
+    version: architecture.modelVersion,
+    flowTitle: architecture.flows.find(flow => flow.id === architecture.entryPoints[0]?.flowId)?.label || 'Architecture overview',
+  };
+};
+
+;
+/* Read-only Flow projection and deterministic geometry. No DOM or graph navigation. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const nodeKinds = new Set(['operation', 'decision', 'external', 'terminal', 'unresolved']);
+  const edgeKinds = new Set(['next', 'call', 'branch', 'return', 'exception', 'send', 'receive']);
+  const modes = new Set(['sync', 'async', 'unknown']);
+  const compare = (a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  const require = (condition, message) => { if (!condition) throw new Error(message); };
+  const text = value => typeof value === 'string' && value.trim().length > 0;
+
+  function prepareDiagram(architecture, flowId) {
+    require(architecture?.modelVersion === '1.0.0', 'Unsupported architecture model version.');
+    for (const key of ['entryPoints', 'flows', 'sources']) require(Array.isArray(architecture[key]), `Missing ${key} collection.`);
+    const ids = new Set(), flows = new Map(), nodes = new Map(), sources = new Map(), owners = new Map();
+    const register = item => {
+      require(item && text(item.id) && !ids.has(item.id), `Missing or duplicate ID: ${item?.id ?? '(absent)'}.`);
+      ids.add(item.id);
+    };
+    for (const source of architecture.sources) {
+      register(source); require(text(source.path), `Missing source path: ${source.id}.`);
+      require((source.startLine === undefined && source.endLine === undefined)
+        || (Number.isInteger(source.startLine) && source.startLine > 0 && Number.isInteger(source.endLine) && source.endLine >= source.startLine), `Invalid source range: ${source.id}.`);
+      sources.set(source.id, source);
+    }
+    const evidence = item => require(Array.isArray(item.sourceIds) && item.sourceIds.length > 0
+      && item.sourceIds.every(id => sources.has(id)), `Invalid source references: ${item.id}.`);
+    for (const flow of architecture.flows) {
+      register(flow); require(text(flow.label) && Array.isArray(flow.nodes) && flow.nodes.length > 0 && Array.isArray(flow.edges), `Invalid Flow: ${flow.id}.`);
+      flows.set(flow.id, flow);
+      for (const node of flow.nodes) {
+        register(node); require(text(node.label) && nodeKinds.has(node.kind), `Invalid node: ${node.id}.`); evidence(node);
+        if (node.external !== undefined) require(node.kind === 'external' && ['http', 'database', 'messaging', 'library', 'other'].includes(node.external?.kind), `Invalid external metadata: ${node.id}.`);
+        nodes.set(node.id, node); owners.set(node.id, flow.id);
+      }
+      for (const edge of flow.edges) { register(edge); evidence(edge); }
+    }
+    for (const entry of architecture.entryPoints) {
+      register(entry); evidence(entry); require(flows.has(entry.flowId), `Unknown entry Flow: ${entry.flowId}.`);
+    }
+    for (const flow of architecture.flows) {
+      require(owners.get(flow.startNodeId) === flow.id, `Invalid start node: ${flow.startNodeId}.`);
+      for (const node of flow.nodes) if (node.expandFlowId !== undefined) require(flows.has(node.expandFlowId), `Unknown detail Flow: ${node.expandFlowId}.`);
+      const outcomes = new Map();
+      for (const edge of flow.edges) {
+        require(edgeKinds.has(edge.kind) && modes.has(edge.mode), `Invalid edge kind or mode: ${edge.id}.`);
+        require(nodes.has(edge.from) && nodes.has(edge.to), `Unknown edge endpoint: ${edge.id}.`);
+        require(owners.get(edge.from) === flow.id, `Edge is not owned by its source Flow: ${edge.id}.`);
+        require(nodes.get(edge.from).kind !== 'terminal', `Terminal has an outgoing edge: ${edge.id}.`);
+        const nonlocal = owners.get(edge.to) !== flow.id;
+        require(!(nonlocal && edge.kind === 'next'), `Nonlocal continuation: ${edge.id}.`);
+        require(!(nonlocal && edge.kind === 'receive' && edge.mode !== 'async'), `Cross-flow receive is not async: ${edge.id}.`);
+        if (edge.kind === 'branch') {
+          require(nodes.get(edge.from).kind === 'decision' && text(edge.label), `Invalid branch: ${edge.id}.`);
+          const labels = outcomes.get(edge.from) || new Set();
+          require(!labels.has(edge.label), `Duplicate branch outcome: ${edge.id}.`);
+          labels.add(edge.label); outcomes.set(edge.from, labels);
+        }
+      }
+    }
+    if (!architecture.flows.length && flowId === undefined) return { nodes: [], edges: [], startNodeId: undefined, label: 'Empty architecture' };
+    const flow = flows.get(flowId ?? architecture.flows[0].id);
+    require(flow, `Unknown displayed Flow: ${flowId}.`);
+    const visible = new Map(flow.nodes.map(node => [node.id, { node, remoteFlow: undefined }]));
+    for (const edge of flow.edges) if (!visible.has(edge.to)) visible.set(edge.to, { node: nodes.get(edge.to), remoteFlow: flows.get(owners.get(edge.to)) });
+    return {
+      label: flow.label, startNodeId: flow.startNodeId,
+      nodes: [...visible.values()].map(item => ({ ...item, sources: item.node.sourceIds.map(id => sources.get(id)) })),
+      edges: flow.edges,
+    };
+  }
+
+  function nodeCategory(node, edges) {
+    if (node.kind === 'decision') return 'condition';
+    if (node.kind === 'unresolved') return 'unresolved';
+    if (node.kind === 'external') return node.external?.kind === 'library' ? 'library' : 'system';
+    if (node.kind === 'terminal') {
+      const incoming = edges.filter(edge => edge.to === node.id);
+      return incoming.length && incoming.every(edge => edge.kind === 'exception') ? 'failure' : 'terminal';
+    }
+    return 'internal';
+  }
+
+  function wrapLabel(label, limit = 27, maxLines = 2) {
+    const chars = Array.from(label.replace(/\s+/g, ' ').trim());
+    const lines = [];
+    while (chars.length && lines.length < maxLines) {
+      if (chars.length <= limit) { lines.push(chars.splice(0).join('')); break; }
+      let count = limit;
+      const space = chars.slice(0, limit + 1).lastIndexOf(' ');
+      if (space >= Math.floor(limit / 2)) count = space;
+      lines.push(chars.splice(0, count).join('').trim());
+      while (chars[0] === ' ') chars.shift();
+    }
+    if (chars.length) lines[lines.length - 1] = Array.from(lines.at(-1)).slice(0, limit - 1).join('') + '…';
+    return lines;
+  }
+
+  function layoutDiagram(graph, { nodeSizes = new Map() } = {}) {
+    if (!graph.nodes.length) return { nodes: [], edges: [], bounds: { x: 0, y: 0, width: 0, height: 0 } };
+    const columnGap = 100, rowGap = 48, trackStep = 28, clearance = 20;
+    const ordered = [...graph.nodes].sort((a, b) => compare(a.node, b.node));
+    const edges = [...graph.edges].sort(compare);
+    const outgoing = new Map(ordered.map(item => [item.node.id, []]));
+    const incoming = new Map(ordered.map(item => [item.node.id, []]));
+    for (const edge of edges) { outgoing.get(edge.from).push(edge); incoming.get(edge.to).push(edge); }
+    // Iterative DFS marks backward edges; removing only these yields an acyclic ranking graph.
+    const state = new Map(), backward = new Set();
+    const starts = [graph.startNodeId, ...ordered.map(item => item.node.id)].filter(Boolean);
+    for (const start of starts) {
+      if (state.has(start)) continue;
+      state.set(start, 1);
+      const stack = [{ id: start, cursor: 0 }];
+      while (stack.length) {
+        const frame = stack.at(-1), list = outgoing.get(frame.id);
+        if (frame.cursor === list.length) { state.set(frame.id, 2); stack.pop(); continue; }
+        const edge = list[frame.cursor++];
+        if (state.get(edge.to) === 1) backward.add(edge.id);
+        else if (!state.has(edge.to)) { state.set(edge.to, 1); stack.push({ id: edge.to, cursor: 0 }); }
+      }
+    }
+    const indegree = new Map(ordered.map(item => [item.node.id, incoming.get(item.node.id).filter(edge => !backward.has(edge.id)).length]));
+    const ranks = new Map(ordered.map(item => [item.node.id, 0]));
+    const queue = ordered.map(item => item.node.id).filter(id => indegree.get(id) === 0);
+    for (let cursor = 0; cursor < queue.length; cursor++) {
+      const id = queue[cursor];
+      for (const edge of outgoing.get(id)) if (!backward.has(edge.id)) {
+        ranks.set(edge.to, Math.max(ranks.get(edge.to), ranks.get(id) + 1));
+        indegree.set(edge.to, indegree.get(edge.to) - 1);
+        if (!indegree.get(edge.to)) queue.push(edge.to);
+      }
+    }
+    const rows = [];
+    for (const item of ordered) { const rank = ranks.get(item.node.id); (rows[rank] ||= []).push(item); }
+    const indexes = new Map();
+    for (const row of rows) {
+      const center = item => {
+        const parents = incoming.get(item.node.id).filter(edge => !backward.has(edge.id));
+        return parents.length ? parents.reduce((sum, edge) => sum + (indexes.get(edge.from) || 0), 0) / parents.length : 0;
+      };
+      row.sort((a, b) => center(a) - center(b) || compare(a.node, b.node));
+      row.forEach((item, i) => indexes.set(item.node.id, i - (row.length - 1) / 2));
+    }
+    // Private presentation extents, never fields in the architecture contract.
+    // The current renderer uses bounded 224x80 frames; callers that measure a
+    // larger frame can supply it without changing rank or routing assumptions.
+    const size = item => {
+      const value = nodeSizes.get(item.node.id) || { width: 224, height: 80 };
+      require(Number.isFinite(value.width) && value.width >= 160 && Number.isFinite(value.height) && value.height >= 80, `Invalid presentation dimensions: ${item.node.id}.`);
+      return value;
+    };
+    const rowWidths = rows.map(row => row.reduce((sum, item) => sum + size(item).width, 0) + (row.length - 1) * columnGap);
+    const graphWidth = Math.max(...rowWidths), positions = new Map();
+    rows.forEach((row, rank) => {
+      let x = (graphWidth - rowWidths[rank]) / 2;
+      for (const item of row) {
+        const dimensions = size(item);
+        positions.set(item.node.id, { ...item, id: item.node.id, rank, ...dimensions, x, y: 0, category: nodeCategory(item.node, edges) });
+        x += dimensions.width + columnGap;
+      }
+    });
+    const ports = { incoming: new Map(), outgoing: new Map() };
+    const portX = (node, list, edge, outgoing) => {
+      const cache = outgoing ? ports.outgoing : ports.incoming;
+      if (cache.has(edge.id)) return cache.get(edge.id);
+      const sorted = [...list].sort((a, b) => {
+        const other = e => positions.get(outgoing ? e.to : e.from);
+        return (other(a).x + other(a).width / 2) - (other(b).x + other(b).width / 2) || compare(a, b);
+      });
+      const inset = node.node.kind === 'terminal' ? Math.min(node.width / 2, Math.max(node.width * .2, node.height / 2 + 4)) : node.width * .2;
+      sorted.forEach((item, i) => cache.set(item.id, node.x + inset + (node.width - 2 * inset) * (i + 1) / (sorted.length + 1)));
+      return cache.get(edge.id);
+    };
+    const specifications = edges.map(edge => {
+      const from = positions.get(edge.from), to = positions.get(edge.to);
+      const sx = portX(from, outgoing.get(edge.from), edge, true), tx = portX(to, incoming.get(edge.to), edge, false);
+      const fullLabel = edge.label ? `${edge.label}${edge.mode === 'sync' ? '' : ` · ${edge.mode}`}` : `${edge.kind}${edge.mode === 'sync' ? '' : ` · ${edge.mode}`}`;
+      const label = wrapLabel(fullLabel, 32, 1)[0], labelWidth = Math.max(42, Array.from(label).length * 6 + 14);
+      return { edge, from, to, sx, tx, label, fullLabel, labelWidth, labelX: (sx + tx) / 2, backward: backward.has(edge.id) };
+    });
+    const outside = new Set(); let routed;
+    for (let pass = 0; pass <= edges.length; pass++) {
+      const gaps = Array.from({ length: rows.length + 1 }, () => []);
+      function reserve(gap, left, right) {
+        // Intervals include the label and the horizontal path. Disjoint paths can
+        // share a track; labels are not placed with repeating modulo offsets.
+        const tracks = gaps[gap];
+        let index = tracks.findIndex(intervals => intervals.every(([a, b]) => right + 12 <= a || left >= b + 12));
+        if (index < 0) { index = tracks.length; tracks.push([]); }
+        tracks[index].push([left, right]); return index;
+      }
+      const routes = specifications.map(route => ({ ...route }));
+      const local = routes.filter(route => route.to.rank === route.from.rank + 1 && !outside.has(route.edge.id));
+      let leftEdge = Math.min(0, ...local.map(route => route.labelX - route.labelWidth / 2)) - clearance;
+      let rightEdge = Math.max(graphWidth, ...local.map(route => route.labelX + route.labelWidth / 2)) + clearance;
+      for (const route of routes) {
+        const { from, to, sx, tx, labelWidth } = route;
+        if (to.rank === from.rank + 1 && !outside.has(route.edge.id)) {
+          route.labelX = (sx + tx) / 2;
+          route.track = reserve(from.rank + 1, Math.min(sx, tx, route.labelX - labelWidth / 2), Math.max(sx, tx, route.labelX + labelWidth / 2));
+        } else {
+          // The complete plate stays beyond the widest row, including its outline.
+          const left = to.rank > from.rank;
+          route.lane = left ? leftEdge - labelWidth / 2 : rightEdge + labelWidth / 2;
+          if (left) leftEdge = route.lane - labelWidth / 2 - 24;
+          else rightEdge = route.lane + labelWidth / 2 + 24;
+          route.exitTrack = reserve(from.rank + 1, Math.min(sx, route.lane), Math.max(sx, route.lane));
+          route.entryTrack = reserve(to.rank, Math.min(tx, route.lane), Math.max(tx, route.lane));
+        }
+      }
+      const gapHeights = gaps.map((tracks, i) => tracks.length ? Math.max(rowGap, clearance * 2 + (tracks.length - 1) * trackStep) : i === 0 || i === rows.length ? 0 : rowGap);
+      const gapTops = [0]; let y = gapHeights[0];
+      rows.forEach((row, rank) => {
+        const height = Math.max(...row.map(item => positions.get(item.node.id).height));
+        for (const item of row) positions.get(item.node.id).y = y;
+        gapTops[rank + 1] = y + height; y += height + gapHeights[rank + 1];
+      });
+      const trackY = (gap, track) => gapTops[gap] + clearance + track * trackStep;
+      const borderY = (node, x, bottom) => {
+        const inset = node.node.kind === 'decision' ? Math.abs(x - node.x - node.width / 2) * node.height / node.width : 0;
+        return node.y + (bottom ? node.height - inset : inset);
+      };
+      routed = routes.map(route => {
+        const { from, to, sx, tx, lane, ...result } = route;
+        const sy = borderY(from, sx, true), ty = borderY(to, tx, false);
+        let points, labelX, labelY;
+        if (lane === undefined) {
+          labelY = trackY(from.rank + 1, route.track); labelX = route.labelX;
+          points = [[sx, sy], [sx, labelY], [tx, labelY], [tx, ty]];
+        } else {
+          const exit = trackY(from.rank + 1, route.exitTrack), entry = trackY(to.rank, route.entryTrack);
+          points = [[sx, sy], [sx, exit], [lane, exit], [lane, entry], [tx, entry], [tx, ty]];
+          labelX = lane; labelY = exit + Math.sign(entry - exit) * trackStep / 2;
+        }
+        // Remove zero-length legs. Arrowheads retain the last real approach.
+        points = points.filter((p, i) => !i || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+        return { edge: result.edge, label: result.label, fullLabel: result.fullLabel, labelWidth: result.labelWidth, backward: result.backward, points, labelX, labelY };
+      });
+      // When a horizontal leg has spare room, place its plate away from other
+      // vertical stems. This preserves reserved intervals and does not add bends.
+      const verticals = routed.flatMap(route => route.points.slice(1).flatMap((b, i) => {
+        const a = route.points[i];
+        return a[0] === b[0] ? [{ id: route.edge.id, x: a[0], top: Math.min(a[1], b[1]), bottom: Math.max(a[1], b[1]) }] : [];
+      }));
+      for (let i = 0; i < routed.length; i++) {
+        if (routes[i].lane !== undefined) continue;
+        const route = routed[i], half = route.labelWidth / 2 + 4;
+        const low = Math.min(routes[i].sx, routes[i].tx) + half, high = Math.max(routes[i].sx, routes[i].tx) - half;
+        if (low > high) continue;
+        const blocked = verticals.filter(v => v.id !== route.edge.id && v.top < route.labelY + 12 && v.bottom > route.labelY - 12).map(v => v.x).sort((a, b) => a - b);
+        const free = []; let cursor = low;
+        for (const x of blocked) {
+          if (x - half > cursor) free.push([cursor, Math.min(high, x - half)]);
+          cursor = Math.max(cursor, x + half);
+          if (cursor > high) break;
+        }
+        if (cursor <= high) free.push([cursor, high]);
+        const choices = free.filter(([a, b]) => a <= b).map(([a, b]) => Math.max(a, Math.min(b, route.labelX)));
+        choices.sort((a, b) => Math.abs(a - route.labelX) - Math.abs(b - route.labelX) || a - b);
+        if (choices.length) route.labelX = choices[0];
+      }
+      // A short horizontal leg may have no plate-sized opening between stems.
+      // Give only that label a dedicated outer lane, then repeat reservations.
+      // At most one promotion per edge is possible, so cycles cannot loop here.
+      const blocked = new Set();
+      const routeBounds = new Map(routed.map(route => [route, {
+        left: Math.min(...route.points.map(p => p[0])), right: Math.max(...route.points.map(p => p[0])),
+        top: Math.min(...route.points.map(p => p[1])), bottom: Math.max(...route.points.map(p => p[1])),
+      }]));
+      for (const plate of routed) {
+        const left = plate.labelX - plate.labelWidth / 2, right = plate.labelX + plate.labelWidth / 2;
+        const top = plate.labelY - 10, bottom = plate.labelY + 10;
+        for (const route of routed) {
+          if (plate === route) continue;
+          const box = routeBounds.get(route);
+          if (box.right <= left || box.left >= right || box.bottom <= top || box.top >= bottom) continue;
+          for (let i = 1; i < route.points.length; i++) {
+            const a = route.points[i - 1], b = route.points[i];
+            if (a[0] === b[0] ? a[0] > left && a[0] < right && Math.max(a[1], b[1]) > top && Math.min(a[1], b[1]) < bottom
+              : a[1] > top && a[1] < bottom && Math.max(a[0], b[0]) > left && Math.min(a[0], b[0]) < right) blocked.add(plate.edge.id);
+          }
+        }
+      }
+      if (!blocked.size) break;
+      const before = outside.size;
+      for (const id of blocked) outside.add(id);
+      require(outside.size > before, 'Cannot place relationship labels without hiding a route.');
+    }
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const node of positions.values()) {
+      minX = Math.min(minX, node.x - 6); minY = Math.min(minY, node.y - 6);
+      maxX = Math.max(maxX, node.x + node.width + 6); maxY = Math.max(maxY, node.y + node.height + 6);
+    }
+    for (const edge of routed) {
+      for (const [x, y] of edge.points) { minX = Math.min(minX, x - 4); minY = Math.min(minY, y - 4); maxX = Math.max(maxX, x + 4); maxY = Math.max(maxY, y + 4); }
+      minX = Math.min(minX, edge.labelX - edge.labelWidth / 2 - 2); maxX = Math.max(maxX, edge.labelX + edge.labelWidth / 2 + 2);
+      minY = Math.min(minY, edge.labelY - 12); maxY = Math.max(maxY, edge.labelY + 12);
+    }
+    return { nodes: [...positions.values()], edges: routed, bounds: { x: minX, y: minY, width: maxX - minX, height: maxY - minY } };
+  }
+  Object.assign(globalThis.pFlow, { prepareDiagram, layoutDiagram, wrapLabel });
+}());
+
+;
+/* Viewport math in CSS pixels. Shared by buttons, panning, and deterministic tests. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  function fitDiagram(bounds, width, height, padding = 24) {
+    if (![bounds.x, bounds.y, bounds.width, bounds.height, width, height, padding].every(Number.isFinite)
+        || width <= 0 || height <= 0 || bounds.width < 0 || bounds.height < 0 || padding < 0) throw new Error('Invalid viewport dimensions.');
+    const scale = Math.min(1, Math.max(1, width - padding * 2) / Math.max(1, bounds.width), Math.max(1, height - padding * 2) / Math.max(1, bounds.height));
+    return { scale, x: (width - bounds.width * scale) / 2 - bounds.x * scale, y: (height - bounds.height * scale) / 2 - bounds.y * scale };
+  }
+  function zoomDiagram(view, factor, anchor, minimum = .05, maximum = 3) {
+    if (![view.scale, view.x, view.y, factor, anchor.x, anchor.y, minimum, maximum].every(Number.isFinite)
+        || view.scale <= 0 || factor <= 0 || minimum <= 0 || maximum < minimum) throw new Error('Invalid zoom values.');
+    const scale = Math.min(maximum, Math.max(minimum, view.scale * factor));
+    const ratio = scale / view.scale;
+    return { scale, x: anchor.x - (anchor.x - view.x) * ratio, y: anchor.y - (anchor.y - view.y) * ratio };
+  }
+  Object.assign(globalThis.pFlow, { fitDiagram, zoomDiagram });
+}());
+
+;
+/* Native SVG presentation. Detail callbacks navigate without changing graph ownership. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const ns = 'http://www.w3.org/2000/svg';
+  let sequence = 0;
+  function element(name, attributes = {}, text) {
+    const item = document.createElementNS(ns, name);
+    for (const [key, value] of Object.entries(attributes)) item.setAttribute(key, String(value));
+    if (text !== undefined) item.textContent = text;
+    return item;
+  }
+  function sourceLabel(source, short = false) {
+    if (!source) return 'No evidence location';
+    const line = source.startLine ? `:${source.startLine}${source.endLine === source.startLine ? '' : `–${source.endLine}`}` : '';
+    const label = (short ? source.path.split('/').at(-1) : source.path) + line;
+    return label;
+  }
+  function createDiagram(container, { onZoom = () => {}, onStatus = () => {}, onOpenDetail, onSelect = () => {} } = {}) {
+    let svg, scene, layout, view, drag, suppressClick = false;
+    const prefix = `pflow-diagram-${++sequence}`;
+    const dimensions = () => ({ width: Math.max(1, container.clientWidth), height: Math.max(1, container.clientHeight) });
+    function apply() {
+      if (!scene || !view) return;
+      scene.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.scale})`);
+      onZoom(view.scale);
+    }
+    function fit() {
+      if (!layout?.nodes.length) return;
+      const { width, height } = dimensions();
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      view = globalThis.pFlow.fitDiagram(layout.bounds, width, height); apply();
+    }
+    function zoom(factor) {
+      if (!view) return;
+      const { width, height } = dimensions();
+      const fitted = globalThis.pFlow.fitDiagram(layout.bounds, width, height);
+      view = globalThis.pFlow.zoomDiagram(view, factor, { x: width / 2, y: height / 2 }, Math.min(.05, fitted.scale)); apply();
+    }
+    function reset() {
+      if (!view) return;
+      const { width, height } = dimensions(), bounds = layout.bounds;
+      view = { scale: 1, x: (width - bounds.width) / 2 - bounds.x, y: Math.max(24, (height - bounds.height) / 2) - bounds.y }; apply();
+    }
+    function clear() { drag = undefined; svg?.remove(); svg = undefined; scene = undefined; layout = undefined; view = undefined; suppressClick = false; }
+    function action(control, callback) {
+      control.addEventListener('click', event => {
+        event.preventDefault(); event.stopPropagation();
+        if (!suppressClick || event.detail === 0) callback();
+      });
+      control.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault(); event.stopPropagation();
+        if (!event.repeat) callback();
+      });
+    }
+    function setSelection(selected) {
+      if (!svg) return;
+      for (const node of svg.querySelectorAll('.diagram-node')) {
+        const active = selected?.type === 'node' && selected.id === node.dataset.nodeId;
+        node.classList.toggle('is-selected', active); node.querySelector('.diagram-node-select').setAttribute('aria-pressed', String(active));
+      }
+      for (const edge of svg.querySelectorAll('.diagram-edge, .diagram-edge-label')) {
+        const active = selected?.type === 'edge' && selected.id === (edge.dataset.edgeId || edge.dataset.edgeLabel);
+        edge.classList.toggle('is-selected', active);
+        if (edge.classList.contains('diagram-edge')) edge.setAttribute('aria-pressed', String(active));
+      }
+    }
+    function revealSelection() {
+      if (!svg || !view) return;
+      const target = svg.querySelector('.diagram-node.is-selected, .diagram-edge.is-selected');
+      if (!target) return;
+      const box = container.getBoundingClientRect(); let item = target.getBoundingClientRect();
+      if (item.width > box.width - 32 || item.height > box.height - 32) { fit(); item = target.getBoundingClientRect(); }
+      const dx = item.left < box.left + 16 ? box.left + 16 - item.left : item.right > box.right - 16 ? box.right - 16 - item.right : 0;
+      const dy = item.top < box.top + 16 ? box.top + 16 - item.top : item.bottom > box.bottom - 16 ? box.bottom - 16 - item.bottom : 0;
+      if (dx || dy) { view = { ...view, x: view.x + dx, y: view.y + dy }; apply(); }
+    }
+    function centerSelection() {
+      if (!svg || !view) return;
+      const target = svg.querySelector('.diagram-node.is-selected, .diagram-edge.is-selected');
+      if (!target) return;
+      const box = container.getBoundingClientRect(); let item = target.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(1, box.width - 32) / Math.max(1, item.width), Math.max(1, box.height - 32) / Math.max(1, item.height));
+      if (ratio < 1) { view = { ...view, scale: view.scale * ratio }; apply(); item = target.getBoundingClientRect(); }
+      view = { ...view, x: view.x + box.left + box.width / 2 - item.left - item.width / 2, y: view.y + box.top + box.height / 2 - item.top - item.height / 2 }; apply();
+    }
+    function render(architecture, flowId, { pathFlowIds = [] } = {}) {
+      clear();
+      try {
+        const graph = globalThis.pFlow.prepareDiagram(architecture, flowId);
+        layout = globalThis.pFlow.layoutDiagram(graph);
+        if (!layout.nodes.length) { onStatus('empty'); return { ok: true, empty: true }; }
+        svg = element('svg', { class: 'diagram-svg', 'text-rendering': 'geometricPrecision', role: 'group', tabindex: 0, 'aria-labelledby': `${prefix}-title`, 'aria-describedby': `${prefix}-description diagram-help` });
+        svg.append(element('title', { id: `${prefix}-title` }, `${graph.label} process flow`), element('desc', { id: `${prefix}-description` }, `${layout.nodes.length} visible nodes and ${layout.edges.length} directed relationships. Use zoom and fit, drag to pan, or focus the diagram and use arrow keys. Tab to nodes or relationships and press Enter or Space to select. Detail navigation has a separate button. Cross-flow targets are boundary stubs.`));
+        const defs = element('defs');
+        for (const kind of ['next', 'call', 'branch', 'return', 'exception', 'send', 'receive', 'async']) {
+          const marker = element('marker', { id: `${prefix}-arrow-${kind}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto', markerUnits: 'userSpaceOnUse' });
+          marker.append(element('path', { d: 'M 0 0 L 10 5 L 0 10 Z', class: `diagram-arrow arrow-${kind}` })); defs.append(marker);
+        }
+        scene = element('g', { class: 'diagram-scene' }); svg.append(defs, scene);
+        const textLimits = [];
+        // Draw paths first, then label plates, then nodes; arrow tips terminate at real shape borders.
+        const paths = element('g'), labels = element('g'); scene.append(paths, labels);
+        const names = new Map(layout.nodes.map(item => [item.id, item.node.label]));
+        for (const route of layout.edges) {
+          const edge = route.edge;
+          const color = edge.kind === 'exception' ? 'exception' : edge.mode === 'async' ? 'async' : edge.kind;
+          const description = `${edge.kind} (${edge.mode}): ${names.get(edge.from)} → ${names.get(edge.to)}${edge.label ? `. ${edge.label}` : ''}. Evidence: ${edge.sourceIds.join(', ')}`;
+          const group = element('g', { class: `diagram-edge edge-${edge.kind} mode-${edge.mode}`, role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select relationship ${description}`, 'data-edge-id': edge.id, 'data-from': edge.from, 'data-to': edge.to });
+          group.append(element('title', {}, description));
+          const d = route.points.map(([x, y], i) => `${i ? 'L' : 'M'} ${x} ${y}`).join(' ');
+          group.append(element('path', { d, class: 'diagram-edge-hit' }), element('path', { d, 'marker-end': `url(#${prefix}-arrow-${color})`, class: 'diagram-edge-path' })); paths.append(group);
+          action(group, () => onSelect({ type: 'edge', id: edge.id }));
+          const label = element('g', { class: `diagram-edge-label edge-${edge.kind} mode-${edge.mode}`, 'data-edge-label': edge.id, 'aria-hidden': true });
+          label.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!suppressClick || event.detail === 0) onSelect({ type: 'edge', id: edge.id }); });
+          const caption = element('text', { x: route.labelX, y: route.labelY + 4, 'text-anchor': 'middle' }, route.label);
+          textLimits.push([caption, route.labelWidth - 12]);
+          label.append(element('title', {}, route.fullLabel), element('rect', { x: route.labelX - route.labelWidth / 2, y: route.labelY - 10, width: route.labelWidth, height: 20, rx: 4 }), caption); labels.append(label);
+        }
+        for (const item of layout.nodes) {
+          const { node, x, y, width, height } = item;
+          const detail = !item.remoteFlow && node.expandFlowId !== undefined && onOpenDetail
+            ? architecture.flows.find(flow => flow.id === node.expandFlowId) : undefined;
+          const recursive = detail && pathFlowIds.includes(detail.id);
+          const type = item.remoteFlow ? `Cross-flow · ${node.kind}` : node.kind === 'external' ? `External ${node.external?.kind || 'boundary'}` : node.kind;
+          const full = `${node.label}. ${type}.${item.remoteFlow ? ` Target Flow: ${item.remoteFlow.label}.` : ''} Evidence: ${item.sources.map(source => sourceLabel(source)).join('; ')}.`;
+          const group = element('g', { class: `diagram-node node-${item.category}${item.remoteFlow ? ' node-remote' : ''}${detail ? ' node-expandable' : ''}${recursive ? ' node-recursive' : ''}`, transform: `translate(${x} ${y})`, role: detail ? 'button' : 'group', 'aria-label': full, 'data-node-id': node.id, 'data-kind': node.kind, 'data-category': item.category, 'data-boundary': Boolean(item.remoteFlow) });
+          group.setAttribute('role', 'group');
+          const select = element('g', { class: 'diagram-node-select', role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select node ${full}` });
+          action(select, () => onSelect({ type: 'node', id: node.id }));
+          select.append(element('rect', { class: 'diagram-selection-ring', x: -4, y: -4, width: width + 8, height: height + 8, rx: 8 }));
+          group.append(element('title', {}, full));
+          let shape;
+          if (node.kind === 'decision') shape = element('polygon', { points: `${width / 2},0 ${width},${height / 2} ${width / 2},${height} 0,${height / 2}` });
+          else if (item.category === 'system') shape = element('path', { d: `M 14 0 H ${width} V ${height - 14} L ${width - 14} ${height} H 0 V 14 Z` });
+          else shape = element('rect', { width, height, rx: node.kind === 'terminal' ? height / 2 : item.category === 'library' ? 14 : 6 });
+          shape.setAttribute('class', 'diagram-node-shape'); select.append(shape);
+          const decision = node.kind === 'decision';
+          const lines = globalThis.pFlow.wrapLabel(node.label, decision ? 14 : 27, 2);
+          const label = element('text', { class: 'diagram-node-name', x: decision ? width / 2 : 14, y: decision ? 26 : lines.length === 1 ? 26 : 21, 'text-anchor': decision ? 'middle' : 'start' });
+          lines.forEach((line, i) => {
+            const span = element('tspan', { x: decision ? width / 2 : 14, dy: i ? 16 : 0 }, line);
+            textLimits.push([span, decision ? (i ? (detail ? 156 : 176) : 92) : width - (detail ? 48 : 28), decision ? { width, height } : undefined]); label.append(span);
+          });
+          const kind = element('text', { class: 'diagram-node-type', x: decision ? width / 2 : 14, y: 54, 'text-anchor': decision ? 'middle' : 'start' }, globalThis.pFlow.wrapLabel(type, decision ? 18 : 32, 1)[0]);
+          let short = sourceLabel(item.sources[0], true);
+          const limit = decision ? 13 : 32;
+          if (Array.from(short).length > limit) short = '…' + Array.from(short).slice(-(limit - 1)).join('');
+          const source = element('text', { class: 'diagram-node-source', x: decision ? width / 2 : node.kind === 'terminal' ? 22 : 14, y: decision ? 65 : 69, 'text-anchor': decision ? 'middle' : 'start' }, short);
+          const diamond = decision ? { width, height } : undefined;
+          textLimits.push([kind, decision ? 128 : width - 28, diamond], [source, decision ? 68 : width - 44, diamond]);
+          select.append(label, kind, source); group.append(select);
+          if (detail) {
+            const x = width - 28, y = decision ? height / 2 - 12 : 4;
+            const expand = element('g', { class: 'diagram-expand-control', role: 'button', tabindex: 0, 'aria-label': `Open detail for ${node.label}: ${detail.label}.${recursive ? ' Already in this path; activate for a navigation notice.' : ''}` });
+            expand.append(element('title', {}, recursive ? 'Detail already in this path' : `Open ${detail.label}`), element('rect', { x, y, width: 24, height: 24, rx: 4 }), element('text', { class: 'diagram-expand-hint', x: x + 12, y: y + 16, 'text-anchor': 'middle', 'aria-hidden': 'true' }, recursive ? '↻' : '↗'));
+            action(expand, () => onOpenDetail(node.id)); group.append(expand);
+          }
+          scene.append(group);
+        }
+        svg.addEventListener('pointerdown', event => {
+          if (event.button !== 0 || !event.isPrimary) return;
+          suppressClick = false;
+          drag = { id: event.pointerId, x: event.clientX, y: event.clientY, view: { ...view }, moved: false };
+        });
+        svg.addEventListener('pointermove', event => {
+          if (drag?.id !== event.pointerId) return;
+          if (!event.buttons) { drag = undefined; svg.classList.remove('is-panning'); return; }
+          if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 5) return;
+          if (!drag.moved) { drag.moved = true; svg.setPointerCapture(event.pointerId); svg.classList.add('is-panning'); }
+          view = { ...drag.view, x: drag.view.x + event.clientX - drag.x, y: drag.view.y + event.clientY - drag.y }; apply();
+        });
+        const release = event => {
+          if (drag?.id !== event.pointerId) return;
+          suppressClick = drag.moved || Math.hypot(event.clientX - drag.x, event.clientY - drag.y) >= 5;
+          drag = undefined; svg.classList.remove('is-panning');
+          if (svg.hasPointerCapture(event.pointerId)) svg.releasePointerCapture(event.pointerId);
+        };
+        svg.addEventListener('pointerup', release); svg.addEventListener('pointercancel', release); svg.addEventListener('lostpointercapture', release);
+        svg.addEventListener('keydown', event => {
+          if (event.target !== svg) return;
+          const deltas = { ArrowLeft: [32, 0], ArrowRight: [-32, 0], ArrowUp: [0, 32], ArrowDown: [0, -32] };
+          const delta = deltas[event.key]; if (!delta) return;
+          event.preventDefault(); view = { ...view, x: view.x + delta[0], y: view.y + delta[1] }; apply();
+        });
+        container.append(svg);
+        // Native measurement also bounds wide Unicode glyphs and platform-specific system fonts.
+        for (const [text, maximum, diamond] of textLimits) {
+          let limit = maximum;
+          if (diamond) {
+            // A line's real font ascent/descent matters at sloping borders.
+            // Measure each tspan, not the empty corners of a multiline text box.
+            const box = text.getBBox(), half = diamond.height / 2;
+            const extent = Math.max(Math.abs(box.y - half), Math.abs(box.y + box.height - half));
+            limit = Math.min(limit, Math.max(0, diamond.width * (1 - extent / half) - 8));
+          }
+          if (text.getComputedTextLength() <= limit) continue;
+          const characters = Array.from(text.textContent.replace(/…$/, ''));
+          do { characters.pop(); text.textContent = characters.join('') + '…'; }
+          while (characters.length && text.getComputedTextLength() > limit);
+        }
+        fit(); onStatus('ready'); return { ok: true, empty: false };
+      } catch (error) { clear(); onStatus('error', error.message); return { ok: false, error: error.message }; }
+    }
+    const resize = new ResizeObserver(() => { if (svg) fit(); }); resize.observe(container);
+    return { render, setSelection, revealSelection, centerSelection, zoom, fit, reset, clear, destroy() { clear(); resize.disconnect(); }, getView: () => view ? { ...view } : undefined };
+  }
+  globalThis.pFlow.createDiagram = createDiagram;
+}());
+
+;
+/* Navigation-only trail. Frames contain IDs, never copies of Flow graph data. */
+globalThis.pFlow = globalThis.pFlow || {};
+globalThis.pFlow.createFlowNavigation = function createFlowNavigation(architecture) {
+  const flows = new Map(architecture.flows.map(flow => [flow.id, flow]));
+  const entries = new Map(architecture.entryPoints.map(entry => [entry.id, entry]));
+  if (flows.size !== architecture.flows.length || entries.size !== architecture.entryPoints.length) throw new Error('Navigation requires unique Flow and entry point IDs.');
+  let trail = [], cursor = -1, entryId;
+  const requireFlow = id => {
+    const flow = flows.get(id);
+    if (!flow) throw new Error(`Unknown navigation Flow: ${id}.`);
+    return flow;
+  };
+  const getState = () => ({
+    entryId, flowId: trail[cursor]?.flowId,
+    path: trail.slice(0, cursor + 1).map(frame => ({ ...frame })),
+    canBack: cursor > 0, canForward: cursor >= 0 && cursor < trail.length - 1,
+  });
+  function start(flowId, selectedEntryId) {
+    requireFlow(flowId);
+    entryId = selectedEntryId; trail = [{ flowId }]; cursor = 0;
+    return getState();
+  }
+  function selectEntry(id) {
+    const entry = entries.get(id);
+    if (!entry) throw new Error(`Unknown entry point: ${id}.`);
+    return start(entry.flowId, entry.id);
+  }
+  function openDetail(nodeId) {
+    const flow = requireFlow(trail[cursor]?.flowId);
+    const node = flow.nodes.find(item => item.id === nodeId);
+    if (!node) throw new Error('Detail navigation must start at a node owned by the displayed Flow.');
+    if (node.expandFlowId === undefined) throw new Error(`No detail Flow is recorded for ${node.label}.`);
+    const target = requireFlow(node.expandFlowId);
+    if (trail.slice(0, cursor + 1).some(frame => frame.flowId === target.id)) {
+      throw new Error(`Detail Flow “${target.label}” is already in this path. Use Back or a breadcrumb to return.`);
+    }
+    trail = trail.slice(0, cursor + 1);
+    trail.push({ flowId: target.id, viaNodeId: node.id }); cursor++;
+    return getState();
+  }
+  return {
+    getState, selectEntry, openDetail,
+    selectFlow: id => start(id, undefined),
+    back() { if (cursor > 0) cursor--; return getState(); },
+    forward() { if (cursor >= 0 && cursor < trail.length - 1) cursor++; return getState(); },
+    root() { if (trail.length) cursor = 0; return getState(); },
+    breadcrumb(index) {
+      if (!Number.isInteger(index) || index < 0 || index > cursor) throw new Error('Unknown breadcrumb position.');
+      cursor = index; return getState();
+    },
+  };
+};
+
+;
+/* Resolve selection against canonical M1 objects. No stored graph or invented fields. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const sourceLocation = source => source.path + (source.startLine ? `:${source.startLine}${source.endLine !== source.startLine ? `–${source.endLine}` : ''}` : '') + (source.symbol ? ` · ${source.symbol}` : '');
+  function evidenceIds(entity) { return entity?.nodes ? [...new Set([...entity.nodes, ...entity.edges].flatMap(item => item.sourceIds))] : entity?.sourceIds || []; }
+  function resolveSelection(architecture, flowId, selection) {
+    const flow = architecture.flows.find(item => item.id === flowId);
+    if (!flow || !selection) return undefined;
+    const nodes = new Map(architecture.flows.flatMap(owner => owner.nodes.map(node => [node.id, { node, owner }])));
+    if (selection.type === 'node') {
+      const found = nodes.get(selection.id);
+      if (!found || (!flow.nodes.some(node => node.id === selection.id) && !flow.edges.some(edge => edge.to === selection.id))) return undefined;
+      return { type: 'node', entity: found.node, ownerFlow: found.owner, related: architecture.flows.flatMap(owner => owner.edges).filter(edge => edge.from === selection.id || edge.to === selection.id), boundaries: found.node.external ? [found.node] : [], remote: found.owner.id !== flowId };
+    }
+    if (selection.type !== 'edge') return undefined;
+    const edge = flow.edges.find(item => item.id === selection.id);
+    if (!edge) return undefined;
+    const from = nodes.get(edge.from)?.node, to = nodes.get(edge.to)?.node;
+    if (!from || !to) return undefined;
+    return { type: 'edge', entity: edge, ownerFlow: flow, from, to, related: [], boundaries: [...new Set([from, to].filter(node => node.external))], remote: false };
+  }
+  function createInspector({ onSource, onDocumentation, onOpenDetail }) {
+    const byId = id => document.getElementById(id);
+    const button = (text, action) => { const item = document.createElement('button'); item.type = 'button'; item.textContent = text; item.addEventListener('click', action); return item; };
+    function list(id, values) {
+      byId(id).replaceChildren(...values.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
+      byId(id).closest('.inspector-section').hidden = values.length === 0;
+    }
+    function render(architecture, flow, selected, pathFlowIds = []) {
+      byId('inspector-title').closest('.inspector').scrollTop = 0;
+      byId('inspector-title').textContent = selected?.type === 'edge' ? 'Relationship details' : selected ? 'Node details' : 'Details inspector';
+      byId('inspector-empty').hidden = Boolean(selected); byId('inspector-content').hidden = !selected;
+      if (!selected) return;
+      const { entity, type, ownerFlow, related, from, to } = selected;
+      byId('node-name').textContent = type === 'node' ? entity.label : entity.label || `${from.label} → ${to.label}`;
+      byId('node-kind').textContent = type === 'node' ? entity.kind : `${entity.kind} · ${entity.mode}`;
+      byId('node-kind').dataset.category = entity.kind === 'external' ? (entity.external?.kind === 'library' ? 'library' : 'system') : entity.kind === 'decision' ? 'condition' : 'internal';
+      const unknown = entity.kind === 'unresolved' ? 'This step or boundary is unresolved. Read its evidence and documentation for what is unknown.' : type === 'edge' && entity.mode === 'unknown' ? 'Waiting or transfer behavior is not recorded for this relationship.' : '';
+      byId('node-description').textContent = unknown; byId('node-description').hidden = !unknown;
+      const facts = [['Flow', ownerFlow.label], ...(selected.remote ? [['Context', 'Cross-flow target']] : []), ...(type === 'edge' ? [['From', from.label], ['To', to.label], ['Relationship', entity.kind], ['Mode', entity.mode], ...(entity.label ? [['Label', entity.label]] : [])] : [])];
+      byId('selection-facts').replaceChildren(...facts.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = value; return [dt, dd]; }));
+      const sources = architecture.sources.filter(source => entity.sourceIds.includes(source.id));
+      byId('source-references').replaceChildren(...sources.map(source => { const li = document.createElement('li'); li.append(button(sourceLocation(source), () => onSource(source.id))); return li; }));
+      byId('source-references').closest('.inspector-section').hidden = sources.length === 0;
+      const names = new Map(architecture.flows.flatMap(item => item.nodes).map(node => [node.id, node.label]));
+      list('node-conditions', (type === 'edge' ? entity.kind === 'branch' ? [entity] : [] : related.filter(edge => edge.kind === 'branch')).map(edge => `${names.get(edge.from)} → ${edge.label}`));
+      list('node-calls', related.filter(edge => edge.kind !== 'branch').map(edge => `${edge.kind} · ${edge.mode}: ${names.get(edge.from)} → ${names.get(edge.to)}${edge.label ? ` · ${edge.label}` : ''}`));
+      const external = byId('external-metadata'); external.replaceChildren();
+      for (const boundary of selected.boundaries) {
+        const h = document.createElement('h4'); h.textContent = boundary.label; external.append(h);
+        const dl = document.createElement('dl'); dl.className = 'metadata-grid';
+        const pairs = [['Kind', boundary.external.kind], ...(boundary.external.name ? [['Name', boundary.external.name]] : []), ...Object.entries(boundary.external.attributes || {})];
+        for (const [key, value] of pairs) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = Array.isArray(value) ? value.map(item => String(item)).join(', ') : String(value); dl.append(dt, dd); }
+        external.append(dl);
+      }
+      external.closest('.inspector-section').hidden = !selected.boundaries.length;
+      const target = type === 'node' ? architecture.flows.find(item => item.id === entity.expandFlowId) : undefined;
+      const detail = byId('detail-flow'); detail.replaceChildren(); detail.closest('.inspector-section').hidden = !target;
+      if (target) {
+        if (selected.remote) detail.textContent = `${target.label} — detail belongs to the target Flow, not the current caller.`;
+        else detail.append(button(pathFlowIds.includes(target.id) ? `Detail already in path: ${target.label}` : `Open detail: ${target.label}`, () => onOpenDetail(entity.id)));
+      }
+      const docs = byId('inspector-documentation'); docs.replaceChildren(); docs.closest('.inspector-section').hidden = !entity.docs?.length;
+      for (const ref of entity.docs || []) docs.append(button(`${ref.path}${ref.anchor ? `#${ref.anchor}` : ''}`, () => onDocumentation(ref)));
+    }
+    return { render };
+  }
+  Object.assign(globalThis.pFlow, { sourceLocation, evidenceIds, resolveSelection, createInspector });
+}());
+
+;
+/* Safe native-DOM rendering for the small M1-03 Markdown profile. No HTML evaluation. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  function resolveDocumentTarget(currentPath, target) {
+    if (typeof target !== 'string' || /[\\\s?%]/.test(target) || /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('/')) throw new Error('Unsupported documentation target.');
+    const parts = target.split('#');
+    if (parts.length > 2 || (parts.length === 2 && !/^(entry|flow|node|edge)_[A-Za-z0-9_-]+$/.test(parts[1]))) throw new Error('Invalid documentation section identifier.');
+    const file = parts[0];
+    const path = file ? currentPath.split('/').slice(0, -1) : [];
+    if (!file) path.push(...currentPath.split('/'));
+    else for (const segment of file.split('/')) {
+      if (segment === '..') { if (!path.length) throw new Error('Documentation target escapes its bundle.'); path.pop(); }
+      else if (segment && segment !== '.') path.push(segment);
+    }
+    const normalized = path.join('/');
+    if (!normalized.endsWith('.md')) throw new Error('Documentation must reference a Markdown file.');
+    return { path: normalized, ...(parts.length === 2 ? { anchor: parts[1] } : {}) };
+  }
+  function renderContractMarkdown(markdown, { path, sources, onDocument = () => {}, onSource = () => {}, document = globalThis.document }) {
+    const root = document.createElement('div'); root.className = 'markdown-body';
+    const sections = new Map(), headings = [], stack = [], definitions = new Set();
+    const sourceMap = new Map(sources.map(source => [source.id, source]));
+    const parent = () => stack.at(-1)?.element || root;
+    const button = (label, action, className) => {
+      const item = document.createElement('button'); item.type = 'button'; item.className = className; item.textContent = label; item.addEventListener('click', action); return item;
+    };
+    function citation(id) {
+      const source = sourceMap.get(id);
+      if (!source) { const missing = document.createElement('span'); missing.textContent = `[${id}: reference unavailable]`; return missing; }
+      const item = button(id, () => onSource(id), 'markdown-link source-link'); item.setAttribute('data-source-id', id); item.title = globalThis.pFlow.sourceLocation(source); item.setAttribute('aria-label', `Inspect evidence ${item.title}`); return item;
+    }
+    function inline(container, text) {
+      const pattern = /`([^`]+)`|\[([^\]\n]+)\]\(([^)\s]+)\)|\[(src_[A-Za-z0-9_-]+)\]|\*\*([^*]+)\*\*|(?<![\p{L}\p{N}_])__([^_]+)__(?![\p{L}\p{N}_])|\*([^*]+)\*|(?<![\p{L}\p{N}_])_([^_]+)_(?![\p{L}\p{N}_])/gu;
+      let cursor = 0;
+      for (const match of text.matchAll(pattern)) {
+        container.append(document.createTextNode(text.slice(cursor, match.index)));
+        if (match[1] !== undefined) { const code = document.createElement('code'); code.textContent = match[1]; container.append(code); }
+        else if (match[2] !== undefined) {
+          try { const target = resolveDocumentTarget(path, match[3]); const link = button(match[2], () => onDocument(target), 'markdown-link'); link.setAttribute('data-document-path', target.path); if (target.anchor) link.setAttribute('data-document-section', target.anchor); container.append(link); }
+          catch { const blocked = document.createElement('span'); blocked.textContent = match[2]; blocked.title = 'Unsupported documentation link'; container.append(blocked); }
+        } else if (match[4]) container.append(citation(match[4]));
+        else { const emphasis = document.createElement(match[5] || match[6] ? 'strong' : 'em'); emphasis.textContent = match[5] || match[6] || match[7] || match[8]; container.append(emphasis); }
+        cursor = match.index + match[0].length;
+      }
+      container.append(document.createTextNode(text.slice(cursor)));
+    }
+    const lines = markdown.split(/\r?\n/);
+    let pending, fence, code = [], paragraph = [], list;
+    const flush = () => { if (paragraph.length) { const p = document.createElement('p'); inline(p, paragraph.join(' ')); parent().append(p); paragraph = []; } list = undefined; };
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i], trim = line.trim();
+      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})(.*)$/);
+      if (fence) {
+        if (fenced && fenced[1][0] === fence[0] && fenced[1].length >= fence.length && !fenced[2].trim()) {
+          const pre = document.createElement('pre'), content = document.createElement('code'); content.textContent = code.join('\n'); pre.append(content); parent().append(pre); code = []; fence = undefined;
+        } else code.push(line);
+        continue;
+      }
+      if (fenced) { flush(); fence = fenced[1]; continue; }
+      const anchor = line.match(/^<a id="((?:entry|flow|node|edge)_[A-Za-z0-9_-]+)"><\/a>$/);
+      if (anchor) { flush(); if (pending) throw new Error('Section anchor has no heading.'); pending = anchor[1]; continue; }
+      if (!trim) { flush(); continue; }
+      const heading = line.match(/^(#{1,6})\s+(.+)$/);
+      if (pending && !heading) throw new Error('Section anchor has no heading.');
+      if (heading) {
+        flush(); const level = heading[1].length;
+        while (stack.length && stack.at(-1).level >= level) stack.pop();
+        if (pending) {
+          if (sections.has(pending)) throw new Error(`Ambiguous duplicate Markdown section: ${pending}.`);
+          const section = document.createElement('section'); section.id = pending; section.className = 'markdown-section'; section.tabIndex = -1;
+          parent().append(section); sections.set(pending, section); stack.push({ level, element: section });
+        }
+        const h = document.createElement(`h${level}`); inline(h, heading[2]); parent().append(h);
+        if (pending) headings.push({ id: pending, label: h.textContent });
+        pending = undefined; continue;
+      }
+      const definition = line.match(/^\[(src_[A-Za-z0-9_-]+)\]:\s+\S+\s*$/);
+      if (definition) {
+        flush(); const key = definition[1].toLowerCase();
+        if (definitions.has(key)) throw new Error(`Ambiguous source definition: ${definition[1]}.`);
+        definitions.add(key);
+        const item = document.createElement('p'); item.className = 'markdown-source-reference'; item.append(citation(definition[1]));
+        const source = sourceMap.get(definition[1]); if (source) item.append(document.createTextNode(` — ${globalThis.pFlow.sourceLocation(source)}`)); parent().append(item); continue;
+      }
+      if (/^\|.+\|$/.test(trim) && /^\|[\s:|-]+\|$/.test(lines[i + 1]?.trim() || '')) {
+        flush(); const table = document.createElement('table');
+        const addRow = (text, tag) => { const row = document.createElement('tr'); for (const cell of text.trim().slice(1, -1).split('|')) { const item = document.createElement(tag); inline(item, cell.trim()); row.append(item); } table.append(row); };
+        addRow(line, 'th'); i++;
+        while (/^\|.+\|$/.test(lines[i + 1]?.trim() || '')) addRow(lines[++i], 'td');
+        parent().append(table); continue;
+      }
+      const bullet = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.+)$/);
+      if (bullet) {
+        if (paragraph.length) flush();
+        if (!list) { list = document.createElement(/^\s*\d/.test(line) ? 'ol' : 'ul'); parent().append(list); }
+        const item = document.createElement('li'); inline(item, bullet[1]); list.append(item); continue;
+      }
+      list = undefined; paragraph.push(trim);
+    }
+    flush(); if (pending) throw new Error('Section anchor has no heading.'); if (fence) throw new Error('Unclosed fenced Markdown block.');
+    return { root, sections, headings };
+  }
+  function hydrateContractMarkdown(html, { sources, onDocument, onSource }) {
+    const tags = new Set(['DIV', 'SECTION', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'UL', 'OL', 'LI', 'PRE', 'CODE', 'STRONG', 'EM', 'TABLE', 'TR', 'TH', 'TD', 'BUTTON', 'SPAN']);
+    // Builder text escapes '<'. Reject unsupported tag tokens before browser parsing.
+    for (const match of html.matchAll(/<\/?([A-Za-z][A-Za-z0-9:-]*)\b/g)) if (!tags.has(match[1].toUpperCase())) throw new Error('Unsafe embedded Markdown element.');
+    const inert = document.implementation.createHTMLDocument('');
+    const template = inert.createElement('template'); template.innerHTML = html;
+    const root = template.content.firstElementChild;
+    if (template.content.childElementCount !== 1 || root?.tagName !== 'DIV' || root.className !== 'markdown-body') throw new Error('Invalid embedded Markdown fragment.');
+    const attributes = new Set(['class', 'id', 'tabindex', 'type', 'title', 'aria-label', 'data-document-path', 'data-document-section', 'data-source-id']);
+    const sections = new Map(), headings = [], sourceIds = new Set(sources.map(source => source.id));
+    for (const node of [root, ...root.querySelectorAll('*')]) {
+      if (!tags.has(node.tagName) || [...node.attributes].some(attr => !attributes.has(attr.name))) throw new Error('Unsafe embedded Markdown element or attribute.');
+      if (node.hasAttribute('id')) {
+        if (node.tagName !== 'SECTION' || !/^(entry|flow|node|edge)_[A-Za-z0-9_-]+$/.test(node.id) || sections.has(node.id)) throw new Error('Invalid or duplicate embedded Markdown section.');
+        sections.set(node.id, node); headings.push({ id: node.id, label: node.firstElementChild?.textContent || node.id });
+      }
+      if (node.tagName === 'BUTTON') {
+        node.type = 'button';
+        if (node.hasAttribute('data-document-path') && !node.hasAttribute('data-source-id')) {
+          const target = resolveDocumentTarget('', node.dataset.documentPath + (node.dataset.documentSection ? `#${node.dataset.documentSection}` : ''));
+          node.addEventListener('click', () => onDocument(target));
+        } else if (sourceIds.has(node.dataset.sourceId) && !node.hasAttribute('data-document-path')) node.addEventListener('click', () => onSource(node.dataset.sourceId));
+        else throw new Error('Invalid embedded Markdown control.');
+      }
+    }
+    document.adoptNode(root);
+    return { root, sections, headings };
+  }
+  Object.assign(globalThis.pFlow, { resolveDocumentTarget, renderContractMarkdown, hydrateContractMarkdown });
+}());
+
+;
+/* Offline document and source-reference presentation; never reads source files. */
+globalThis.pFlow = globalThis.pFlow || {};
+globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ showTab, onSelectSection = () => {}, onOpenDetail = () => {} }) {
+  const byId = id => document.getElementById(id);
+  let sample, flow, selected, references = [], sourceIds = [], currentTarget, currentView, markedSection, flashTimer;
+  const sources = () => sample?.architecture.sources || [];
+  const documents = () => globalThis.pFlowDocuments?.[sample?.key] || {};
+  const location = source => globalThis.pFlow.sourceLocation(source);
+  function reveal() {
+    if (!currentTarget?.isConnected || byId('view-documentation').hidden) return;
+    const article = byId('document-article');
+    article.scrollTop += currentTarget.getBoundingClientRect().top - article.getBoundingClientRect().top - 10;
+    const outline = byId('document-outline'), active = outline.querySelector('[aria-current]');
+    if (active) {
+      const item = active.getBoundingClientRect(), panel = outline.getBoundingClientRect();
+      if (item.bottom > panel.bottom) outline.scrollTop += item.bottom - panel.bottom;
+      else if (item.top < panel.top) outline.scrollTop -= panel.top - item.top;
+    }
+  }
+  function renderSource() {
+    const source = sources().find(item => item.id === byId('source-picker').value);
+    const pairs = source ? [['Path', source.path], ...(source.startLine ? [['Lines', source.startLine === source.endLine ? String(source.startLine) : `${source.startLine}–${source.endLine}`]] : []), ...(source.symbol ? [['Symbol', source.symbol]] : [])] : [];
+    byId('source-fields').replaceChildren(...pairs.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = value; return [dt, dd]; }));
+    const content = globalThis.pFlowContent?.[sample?.key];
+    const snippet = source && content?.snippets?.find(item => item.sourceIds.includes(source.id));
+    const list = byId('source-snippet'); list.replaceChildren(); list.hidden = !snippet;
+    if (snippet) for (const line of snippet.lines) {
+      const row = document.createElement('li'); row.value = line.number;
+      const code = document.createElement('code'); code.textContent = line.text; row.append(code); list.append(row);
+    }
+    if (snippet?.lines.length) list.start = snippet.lines[0].number;
+    byId('source-unavailable').hidden = Boolean(snippet);
+    byId('source-unavailable').textContent = content?.diagnostics?.find(issue => issue.path === source?.id)?.message || (source ? 'Evidence text is not embedded in this artifact. Only the recorded location is available.' : 'No evidence reference is available for this context.');
+  }
+  function populateSources(selectedId) {
+    byId('source-picker').replaceChildren(...sourceIds.map(id => sources().find(source => source.id === id)).filter(Boolean).map(source => { const option = document.createElement('option'); option.value = source.id; option.textContent = location(source); return option; }));
+    byId('source-picker').disabled = !byId('source-picker').options.length;
+    if (selectedId) byId('source-picker').value = selectedId;
+    renderSource();
+  }
+  function openSource(id) {
+    globalThis.pFlow.layout.reveal('right');
+    if (!sources().some(source => source.id === id)) return;
+    if (!sourceIds.includes(id)) sourceIds.push(id);
+    populateSources(id); showTab('source');
+    byId('source-picker').focus({ preventScroll: true });
+    byId('view-source').scrollTop = 0;
+    byId('view-source').scrollIntoView({ block: 'nearest' });
+  }
+  function prepareSearch(nextSample, reference) {
+    const target = globalThis.pFlow.resolveDocumentTarget('', reference.path + (reference.anchor ? `#${reference.anchor}` : ''));
+    const bundle = globalThis.pFlowDocuments?.[nextSample.key] || {};
+    if (!Object.hasOwn(bundle, target.path) || typeof bundle[target.path] !== 'string') throw new Error(`Markdown document is not embedded: ${target.path}.`);
+    const processed = globalThis.pFlowContent?.[nextSample.key]?.documents[target.path];
+    const reusable = currentView?.sample === nextSample && currentView.path === target.path && currentView.markdown === bundle[target.path] && currentView.html === processed?.html;
+    const options = { path: target.path, sources: nextSample.architecture.sources, onDocument: openDocument, onSource: openSource };
+    const rendered = reusable ? currentView.rendered : processed
+      ? globalThis.pFlow.hydrateContractMarkdown(processed.html, options)
+      : globalThis.pFlow.renderContractMarkdown(bundle[target.path], options);
+    if (target.anchor && !rendered.sections.has(target.anchor)) throw new Error(`Markdown section ${target.anchor} was not found in ${target.path}.`);
+    return { target, rendered, markdown: bundle[target.path], html: processed?.html };
+  }
+  function clearSearchHighlights() {
+    for (const mark of byId('document-body').querySelectorAll('mark.search-match')) mark.replaceWith(document.createTextNode(mark.textContent));
+    byId('document-body').normalize();
+  }
+  function highlightSearch(rendered, reference, query) {
+    const scope = reference.anchor ? rendered.sections.get(reference.anchor) : rendered.root;
+    const terms = globalThis.pFlow.searchTerms(query);
+    let firstBody, firstHeading;
+    // Match across inline formatting, while excluding child canonical sections and source UI.
+    for (const block of scope.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,th,td')) {
+      const section = block.closest('.markdown-section');
+      if (reference.anchor ? section !== scope : section !== null) continue;
+      if (block.closest('pre,.markdown-source-reference')) continue;
+      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+        acceptNode: node => node.parentElement.closest('.source-link,.markdown-source-reference,pre') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+      });
+      const nodes = []; let text = '', node;
+      while ((node = walker.nextNode())) { nodes.push({ node, start: text.length }); text += node.textContent; }
+      const ranges = globalThis.pFlow.searchHighlightRanges(text, terms);
+      for (const { node, start } of nodes) {
+        const value = node.textContent, fragment = document.createDocumentFragment(); let offset = 0;
+        for (const range of ranges) {
+          const left = Math.max(0, range.start - start), right = Math.min(value.length, range.end - start);
+          if (left >= right) continue;
+          fragment.append(document.createTextNode(value.slice(offset, left)));
+          const mark = document.createElement('mark'); mark.className = 'search-match'; mark.textContent = value.slice(left, right); fragment.append(mark);
+          if (/^H[1-6]$/.test(block.tagName)) firstHeading ||= mark; else firstBody ||= mark;
+          offset = right;
+        }
+        if (offset) { fragment.append(document.createTextNode(value.slice(offset))); node.replaceWith(fragment); }
+      }
+    }
+    currentTarget = firstBody || firstHeading || scope;
+    currentTarget.tabIndex = -1;
+  }
+  function openSearch(nextSample, reference, query, prepared) {
+    if (sample?.key !== nextSample.key) setContext(nextSample, undefined, undefined);
+    openDocument(reference, prepared);
+    byId('document-context').textContent = `Search result: ${nextSample.title} · ${reference.path}`;
+    byId('document-context').title = byId('document-context').textContent;
+    highlightSearch(prepared.rendered, reference, query);
+    currentTarget.focus({ preventScroll: true });
+    // Reveal the document panel when it stacks below the diagram, then scroll only its article.
+    byId('document-article').scrollIntoView({ block: 'nearest' });
+    reveal(); requestAnimationFrame(reveal);
+  }
+  function markSection(id, { move = true, flash = false } = {}) {
+    clearTimeout(flashTimer); markedSection?.classList.remove('doc-flash');
+    const rendered = currentView?.rendered;
+    if (!rendered) return;
+    for (const section of rendered.sections.values()) section.classList.toggle('doc-target', section.id === id);
+    currentTarget = rendered.sections.get(id); markedSection = currentTarget;
+    for (const button of byId('document-outline').querySelectorAll('button')) {
+      if (button.dataset.sectionId === id) button.setAttribute('aria-current', 'location'); else button.removeAttribute('aria-current');
+    }
+    if (flash && currentTarget) { currentTarget.classList.add('doc-flash'); flashTimer = setTimeout(() => markedSection?.classList.remove('doc-flash'), 1600); }
+    if (move) reveal();
+  }
+  function activateSection(id, expand = false) {
+    if (!currentView?.associations.has(id)) return false;
+    const { association, notice } = globalThis.pFlow.resolveDocumentAssociation(sample.architecture, {path:currentView.path,anchor:id}, currentView.rendered);
+    if (!association || !['node','edge'].includes(association.type)) { byId('document-status').textContent = notice || 'This section no longer maps to a diagram element.'; return false; }
+    const hadFocus = currentView.rendered.sections.get(id).contains(document.activeElement);
+    clearSearchHighlights(); byId('document-status').textContent = '';
+    markSection(id, { move: false, flash: true });
+    if (expand) onOpenDetail(sample, association); else onSelectSection(sample, association);
+    if (hadFocus && !byId('document-article').contains(document.activeElement)) {
+      (currentView?.rendered.sections.get(id)?.querySelector('.section-locate') || byId('document-article')).focus({ preventScroll: true });
+    }
+    return true;
+  }
+  function decorateSections() {
+    const view = currentView;
+    for (const actions of view.actions || []) actions.remove();
+    view.actions = []; view.associations = new Map();
+    for (const [id, section] of view.rendered.sections) {
+      const { association } = globalThis.pFlow.resolveDocumentAssociation(sample.architecture, { path: view.path, anchor: id }, view.rendered);
+      if (!association || !['node', 'edge'].includes(association.type)) continue;
+      view.associations.set(id, association);
+      const actions = document.createElement('div'); actions.className = 'section-actions';
+      const locate = document.createElement('button'); locate.type = 'button'; locate.className = 'section-locate'; locate.dataset.sectionAction = 'locate'; locate.dataset.sectionId = id;
+      locate.textContent = 'Locate in diagram'; locate.setAttribute('aria-label', `Locate ${association.type} ${association.entity.label || association.entity.kind} in diagram (${id})`); actions.append(locate);
+      if (association.type === 'node' && sample.architecture.flows.some(item => item.id === association.entity.expandFlowId)) {
+        const expand = document.createElement('button'); expand.type = 'button'; expand.className = 'section-expand'; expand.dataset.sectionAction = 'expand'; expand.dataset.sectionId = id;
+        expand.textContent = 'Open detail'; expand.setAttribute('aria-label', `Open detail for ${association.entity.label}`); actions.append(expand);
+      }
+      section.firstElementChild.after(actions);
+      view.actions.push(actions);
+    }
+  }
+  byId('document-body').addEventListener('click', event => {
+    const action = event.target.closest('button[data-section-action]');
+    if (action) { activateSection(action.dataset.sectionId, action.dataset.sectionAction === 'expand'); return; }
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.target.closest('button,a,input,select,textarea,pre') || document.getSelection()?.toString()) return;
+    const section = event.target.closest('.markdown-section');
+    if (section) activateSection(section.id);
+  });
+  function renderDocument(reference, prepared) {
+    const body = byId('document-body'), outline = byId('document-outline');
+    clearTimeout(flashTimer); markedSection?.classList.remove('doc-flash');
+    currentTarget = undefined; byId('document-status').textContent = ''; byId('document-reference').textContent = '';
+    if (!reference) { body.replaceChildren(); outline.replaceChildren(); currentView = undefined; byId('document-status').textContent = 'No Markdown documentation is associated with this context.'; return; }
+    try {
+      const next = prepared || prepareSearch(sample, reference), { target, rendered } = next;
+      byId('document-reference').textContent = target.path + (target.anchor ? `#${target.anchor}` : '');
+      if (currentView?.rendered !== rendered) {
+        body.replaceChildren(rendered.root); outline.replaceChildren();
+        currentView = { sample, path: target.path, markdown: next.markdown, html: next.html, rendered };
+        for (const heading of rendered.headings) {
+          const button = document.createElement('button'); button.type = 'button'; button.textContent = heading.label; button.dataset.sectionId = heading.id;
+          button.addEventListener('click', () => {
+            clearSearchHighlights(); byId('document-status').textContent = '';
+            markSection(heading.id); activateSection(heading.id);
+          }); outline.append(button);
+        }
+      }
+      decorateSections();
+      clearSearchHighlights();
+      if (target.anchor) markSection(target.anchor, { move: false });
+      else { for (const section of rendered.sections.values()) section.classList.remove('doc-target'); byId('document-article').scrollTop = 0; }
+      requestAnimationFrame(reveal);
+    } catch (error) { body.replaceChildren(); outline.replaceChildren(); currentView = undefined; byId('document-status').textContent = error.message; byId('document-article').scrollTop = 0; }
+  }
+  function locateSelection() {
+    const entity = selected?.entity;
+    clearSearchHighlights();
+    if (!entity) { markSection(flow?.id, { move: false }); return; }
+    const canonical = entity.docs?.find(ref => ref.anchor === entity.id);
+    let notice = 'No element documentation link. Showing Flow documentation';
+    if (canonical && selected.ownerFlow?.id === flow?.id) {
+      try {
+        const reference = globalThis.pFlow.resolveDocumentTarget('', canonical.path + '#' + canonical.anchor);
+        if (reference.path !== currentView?.path) notice = 'The element section is outside the current Flow document. Showing Flow documentation';
+        else if (!currentView.rendered.sections.has(reference.anchor)) notice = `Markdown section ${entity.id} was not found in ${reference.path}. Showing Flow documentation`;
+        else {
+          const { association, notice: invalid } = globalThis.pFlow.resolveDocumentAssociation(sample.architecture, reference, currentView.rendered);
+          if (association?.entity === entity && association.flowId === flow?.id) {
+            byId('document-status').textContent = ''; markSection(entity.id, { flash: true }); return;
+          }
+          notice = invalid || notice;
+        }
+      } catch (error) { notice = error.message; }
+    } else if (selected.remote) notice = 'The selected target belongs to another Flow. Showing current Flow documentation';
+    byId('document-status').textContent = notice + '.';
+    markSection(flow?.id, { move: false });
+  }
+  function openDocument(reference, prepared) {
+    globalThis.pFlow.layout.reveal('right');
+    let index = references.findIndex(item => item.path === reference.path && item.anchor === reference.anchor);
+    if (index < 0) { references.push(reference); index = references.length - 1; populateDocuments(); }
+    byId('document-picker').value = String(index);
+    byId('document-context').textContent = 'Linked documentation; the diagram context is unchanged.';
+    byId('document-context').title = byId('document-context').textContent;
+    showTab('documentation'); renderDocument(reference, prepared);
+  }
+  function populateDocuments() {
+    byId('document-picker').replaceChildren(...references.map((ref, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = ref.path + (ref.anchor ? `#${ref.anchor}` : ''); return option; }));
+    byId('document-picker').disabled = references.length === 0;
+  }
+  function setContext(nextSample, nextFlow, nextSelection, activate = false, locate = true) {
+    sample = nextSample; flow = nextFlow; selected = nextSelection;
+    const entity = selected?.entity || flow;
+    const sameProcess = currentView?.sample === sample && currentView.path === (flow?.docs?.find(ref => ref.anchor === flow.id) || flow?.docs?.[0])?.path && currentView.markdown === documents()[currentView.path] && currentView.html === globalThis.pFlowContent?.[sample?.key]?.documents[currentView.path]?.html;
+    references = [...(flow?.docs || [])];
+    const canonical = references.findIndex(ref => ref.anchor === flow?.id);
+    if (canonical > 0) references.unshift(references.splice(canonical, 1)[0]);
+    byId('document-context').textContent = flow ? `Flow documentation: ${flow.label}.` : 'Architecture documentation';
+    byId('document-context').title = byId('document-context').textContent;
+    populateDocuments();
+    if (!sameProcess || activate) renderDocument(references[0]);
+    if (locate && currentView) locateSelection();
+    if (selected && byId('document-status').textContent) byId('document-context').textContent = byId('document-status').textContent;
+    sourceIds = [...new Set(globalThis.pFlow.evidenceIds(entity))]; populateSources();
+    byId('summary-title').textContent = flow?.label || 'No process flow';
+    const pairs = flow ? [['Nodes', flow.nodes.length], ['Relationships', flow.edges.length], ['Branches', flow.edges.filter(edge => edge.kind === 'branch').length]] : [];
+    byId('flow-summary').replaceChildren(...pairs.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = String(value); return [dt, dd]; }));
+    byId('summary-exits').replaceChildren(...(flow?.nodes.filter(node => node.kind === 'terminal') || []).map(node => { const li = document.createElement('li'); li.textContent = node.label; return li; }));
+    byId('summary-exits').previousElementSibling.hidden = !byId('summary-exits').children.length;
+    const facts = [['Model', sample.architecture.modelVersion], ...(flow ? [['Flow', flow.label]] : []), ...(selected ? [['Selected ID', selected.entity.id]] : [])];
+    byId('artifact-facts').replaceChildren(...facts.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = value; return [dt, dd]; }));
+    if (activate) showTab('documentation');
+    if (locate && selected) reveal();
+  }
+  byId('source-picker').addEventListener('change', renderSource);
+  byId('document-picker').addEventListener('change', () => renderDocument(references[Number(byId('document-picker').value)]));
+  return { setContext, openSource, openDocument, reveal, prepareSearch, openSearch };
+};
+
+;
+/* Resolve canonical M1-03 associations; plan paths using expansion links only. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  function resolveSearchAssociation(architecture, reference) {
+    if (!reference.anchor) return {};
+    const matches = [];
+    for (const flow of architecture.flows) {
+      if (flow.id === reference.anchor) matches.push({ type: 'flow', entity: flow, flowId: flow.id });
+      for (const type of ['node', 'edge']) for (const entity of flow[type === 'node' ? 'nodes' : 'edges']) {
+        if (entity.id === reference.anchor) matches.push({ type, entity, flowId: flow.id });
+      }
+    }
+    for (const entry of architecture.entryPoints) if (entry.id === reference.anchor) matches.push({ type: 'entry', entity: entry, flowId: entry.flowId });
+    if (matches.length !== 1) return { notice: `Section ${reference.anchor} has no unique current diagram entity. Showing documentation only.` };
+    const found = matches[0];
+    const linked = (found.entity.docs || []).some(ref => {
+      try { const target = globalThis.pFlow.resolveDocumentTarget('', ref.path + (ref.anchor ? `#${ref.anchor}` : '')); return target.path === reference.path && target.anchor === reference.anchor; }
+      catch { return false; }
+    });
+    if (!linked) return { notice: `Section ${reference.anchor} has no matching canonical documentation backlink. Showing documentation only.` };
+    if (!architecture.flows.some(flow => flow.id === found.flowId)) return { notice: 'The associated Flow is no longer available. Showing documentation only.' };
+    return { association: found };
+  }
+  function planSearchFlow(architecture, flowId, state = {}, entryId) {
+    const flows = new Map(architecture.flows.map(flow => [flow.id, flow]));
+    if (!flows.has(flowId)) throw new Error(`Search Flow is unavailable: ${flowId}.`);
+    if (!entryId && state.flowId === flowId) return { keep: true };
+    const entries = entryId ? architecture.entryPoints.filter(entry => entry.id === entryId) : [...architecture.entryPoints].sort((a, b) => Number(b.id === state.entryId) - Number(a.id === state.entryId));
+    for (const entry of entries) {
+      const queue = [{ flowId: entry.flowId, via: [] }], seen = new Set([entry.flowId]);
+      for (let i = 0; i < queue.length; i++) {
+        const frame = queue[i], flow = flows.get(frame.flowId);
+        if (!flow) continue;
+        if (flow.id === flowId) return { entryId: entry.id, via: frame.via };
+        for (const node of flow.nodes) if (flows.has(node.expandFlowId) && !seen.has(node.expandFlowId)) {
+          seen.add(node.expandFlowId); queue.push({ flowId: node.expandFlowId, via: [...frame.via, node.id] });
+        }
+      }
+    }
+    return { direct: true, flowId };
+  }
+  function resolveDocumentAssociation(architecture, reference, rendered) {
+    const resolved = resolveSearchAssociation(architecture, reference);
+    const found = resolved.association;
+    if (found && ['node', 'edge'].includes(found.type)) {
+      const section = rendered.sections.get(reference.anchor), owner = rendered.sections.get(found.flowId);
+      const parent = resolveSearchAssociation(architecture, { path: reference.path, anchor: found.flowId }).association;
+      if (!owner || parent?.type !== 'flow' || section?.closest('.markdown-section[id^="flow_"]') !== owner) return { notice: 'The section is not nested in its owning Flow. Showing documentation only.' };
+    }
+    return resolved;
+  }
+  Object.assign(globalThis.pFlow, { resolveSearchAssociation, resolveDocumentAssociation, planSearchFlow });
+}());
+
+;
+/* Presentation state only. Graph, document and search state stay in their components. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const byId = id => document.getElementById(id), shell = byId('app-layout');
+  const rail = 38, divider = 8;
+  const sides = {
+    left: { panel: byId('process-explorer'), content: byId('explorer-content'), button: byId('toggle-left'), handle: byId('resize-left'), min: 180, max: 420, width: 280, closed: false, name: 'process explorer' },
+    right: { panel: byId('process-documentation'), content: byId('documentation-content'), button: byId('toggle-right'), handle: byId('resize-right'), min: 280, max: 640, width: 420, closed: false, name: 'process documentation' },
+  };
+  const span = side => side.closed ? rail : side.width;
+  const minimum = side => Math.min(side.min, Math.max(140, shell.clientWidth * .42));
+  const centerMinimum = () => Math.min(320, Math.max(100, shell.clientWidth - rail - divider * 2 - minimum(sides.right)));
+  const available = () => shell.clientWidth - centerMinimum() - divider * 2;
+  function apply() {
+    for (const [key, side] of Object.entries(sides)) {
+      const other = sides[key === 'left' ? 'right' : 'left'];
+      const active = side.content.contains(document.activeElement) || side.handle === document.activeElement;
+      side.content.hidden = side.closed;
+      side.panel.classList.toggle('panel-collapsed', side.closed);
+      side.button.setAttribute('aria-expanded', String(!side.closed));
+      side.button.setAttribute('aria-label', `${side.closed ? 'Restore' : 'Collapse'} ${side.name}`);
+      side.button.title = side.button.getAttribute('aria-label');
+      side.button.textContent = (key === 'left') !== side.closed ? '«' : '»';
+      side.handle.setAttribute('aria-disabled', String(side.closed));
+      side.handle.tabIndex = side.closed ? -1 : 0;
+      side.handle.setAttribute('aria-valuemin', String(Math.round(minimum(side))));
+      side.handle.setAttribute('aria-valuemax', String(Math.round(Math.max(minimum(side), Math.min(side.max, available() - span(other))))));
+      side.handle.setAttribute('aria-valuenow', String(Math.round(side.width)));
+      shell.style.setProperty(`--${key}-width`, `${span(side)}px`);
+      if (active && side.closed) side.button.focus({ preventScroll: true });
+    }
+  }
+  function fit(preferred) {
+    for (const side of Object.values(sides)) side.width = Math.max(minimum(side), Math.min(side.max, side.width));
+    // Reduce expanded panels before collapsing. Never hide the restore buttons.
+    for (const key of ['right', 'left']) {
+      const side = sides[key];
+      if (!side.closed) side.width = Math.max(minimum(side), side.width - Math.max(0, span(sides.left) + span(sides.right) - available()));
+    }
+    for (const key of preferred === 'left' ? ['right', 'left'] : ['left', 'right']) {
+      if (span(sides.left) + span(sides.right) <= available()) break;
+      sides[key].closed = true;
+    }
+    apply();
+  }
+  function reveal(key) { sides[key].closed = false; fit(key); }
+  for (const [key, side] of Object.entries(sides)) {
+    side.button.addEventListener('click', () => { side.closed = !side.closed; fit(key); });
+    function resize(width) {
+      const other = sides[key === 'left' ? 'right' : 'left'];
+      side.width = Math.max(minimum(side), Math.min(side.max, available() - span(other), width)); apply();
+    }
+    let drag;
+    side.handle.addEventListener('pointerdown', event => {
+      if (side.closed || event.button !== 0) return;
+      event.preventDefault(); side.handle.focus();
+      drag = { id: event.pointerId, x: event.clientX, width: side.width };
+      side.handle.setPointerCapture(event.pointerId); shell.classList.add('is-resizing');
+    });
+    side.handle.addEventListener('pointermove', event => {
+      if (drag?.id !== event.pointerId) return;
+      resize(drag.width + (event.clientX - drag.x) * (key === 'left' ? 1 : -1));
+    });
+    function stop(event) {
+      if (drag?.id !== event.pointerId) return;
+      if (event.type === 'pointercancel') resize(drag.width);
+      drag = undefined; shell.classList.remove('is-resizing');
+      if (side.handle.hasPointerCapture(event.pointerId)) side.handle.releasePointerCapture(event.pointerId);
+    }
+    for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) side.handle.addEventListener(event, stop);
+    side.handle.addEventListener('keydown', event => {
+      if (side.closed || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      resize(event.key === 'Home' ? minimum(side) : event.key === 'End' ? side.max : side.width + (event.key === 'ArrowRight' ? 20 : -20) * (key === 'left' ? 1 : -1));
+    });
+  }
+  byId('theme-toggle').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    byId('theme-toggle').setAttribute('aria-pressed', String(dark));
+    byId('theme-toggle').setAttribute('aria-label', `Use ${dark ? 'light' : 'dark'} theme`);
+    byId('theme-toggle').firstElementChild.textContent = dark ? '☀' : '☾';
+  });
+  new ResizeObserver(() => fit()).observe(shell);
+  fit();
+  globalThis.pFlow.layout = { reveal };
+}());
+
+;
+/* Viewer initialization, navigation, and one ID-based node/edge selection. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const byId = id => document.getElementById(id);
+  const setText = (id, text) => { byId(id).textContent = text; };
+  let currentSample, navigation, selection;
+  const documentation = globalThis.pFlow.createDocumentationPanel({
+    showTab: name => showTab(byId(`tab-${name}`)),
+    onSelectSection: (sample, association) => activateDocumentSection(sample, association),
+    onOpenDetail: (sample, association) => { showAssociation(sample, association); navigate(() => navigation.openDetail(association.entity.id)); },
+  });
+  const inspector = globalThis.pFlow.createInspector({
+    onSource: id => documentation.openSource(id),
+    onDocumentation: ref => documentation.openDocument(ref),
+    onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
+  });
+  const controls = ['zoom-in', 'zoom-out', 'zoom-fit', 'zoom-reset'];
+  const diagram = globalThis.pFlow.createDiagram(byId('diagram-container'), {
+    onSelect: next => selectEntity(next),
+    onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
+    onZoom: scale => setText('zoom-level', `${Math.round(scale * 100)}%`),
+    onStatus: (state, message) => {
+      const ready = state === 'ready';
+      byId('workspace-state').hidden = ready;
+      byId('diagram-container').setAttribute('aria-busy', 'false');
+      controls.forEach(id => { byId(id).disabled = !ready; });
+      if (!ready) {
+        setText('workspace-state-title', state === 'error' ? 'Cannot render this flow' : 'No process flows documented');
+        setText('workspace-state-message', message || 'A diagram will appear when the artifact supplies a process flow.');
+        setText('workspace-state-caption', state === 'error' ? 'Check the diagram data' : 'No process diagram available');
+        setText('zoom-level', '—');
+      }
+    },
+  });
+  byId('zoom-in').addEventListener('click', () => diagram.zoom(1.25));
+  byId('zoom-out').addEventListener('click', () => diagram.zoom(.8));
+  byId('zoom-fit').addEventListener('click', () => diagram.fit());
+  byId('zoom-reset').addEventListener('click', () => diagram.reset());
+  function selectEntity(next, { locateDocumentation = true } = {}) {
+    const state = navigation?.getState();
+    const flow = currentSample.architecture.flows.find(item => item.id === state?.flowId);
+    const selected = globalThis.pFlow.resolveSelection(currentSample.architecture, flow?.id, next);
+    selection = selected ? next : undefined;
+    diagram.setSelection(selection);
+    byId('clear-selection').hidden = !selected;
+    inspector.render(currentSample.architecture, flow, selected, state?.path.map(frame => frame.flowId) || []);
+    documentation.setContext(currentSample, flow, selected, false, locateDocumentation);
+    if (locateDocumentation) { globalThis.pFlow.layout.reveal('right'); showTab(byId('tab-documentation')); }
+  }
+  byId('clear-selection').addEventListener('click', () => {
+    selectEntity(undefined); byId('diagram-container').querySelector('.diagram-svg')?.focus({ preventScroll: true });
+  });
+  function renderNavigation(focus = false) {
+    const state = navigation?.getState() || { path: [], canBack: false, canForward: false };
+    const architecture = currentSample.architecture;
+    byId('flow-picker').disabled = !navigation || architecture.flows.length === 0;
+    const flow = architecture.flows.find(item => item.id === state.flowId);
+    const entry = architecture.entryPoints.find(item => item.id === state.entryId);
+    byId('navigation-back').disabled = !state.canBack;
+    byId('navigation-forward').disabled = !state.canForward;
+    byId('navigation-root').disabled = state.path.length <= 1;
+    byId('breadcrumb-list').replaceChildren(...state.path.map((frame, index) => {
+      const target = architecture.flows.find(item => item.id === frame.flowId);
+      const parent = architecture.flows.find(item => item.id === state.path[index - 1]?.flowId);
+      const via = parent?.nodes.find(item => item.id === frame.viaNodeId);
+      const item = document.createElement('li');
+      const button = document.createElement('button'); button.type = 'button';
+      button.textContent = index === 0 && entry ? entry.label : target.label;
+      button.title = via ? `${target.label} · via ${via.label}` : target.label;
+      if (index === state.path.length - 1) button.setAttribute('aria-current', 'page');
+      button.addEventListener('click', () => navigate(() => navigation.breadcrumb(index)));
+      item.append(button); return item;
+    }));
+    const breadcrumbPanel = byId('breadcrumb-list').parentElement;
+    breadcrumbPanel.scrollLeft = breadcrumbPanel.scrollWidth;
+    for (const button of document.querySelectorAll('.entry-button')) {
+      button.disabled = !navigation;
+      button.setAttribute('aria-pressed', String(button.dataset.bundleKey === (currentSample.key || '') && button.dataset.entryId === state.entryId));
+    }
+    if (flow) byId('flow-picker').value = flow.id;
+    setText('workspace-title', flow?.label || 'Process overview');
+    byId('workspace-title').title = byId('workspace-title').textContent;
+    setText('flow-level', state.path.length > 1 ? 'Detail' : entry ? 'Start flow' : 'Direct flow');
+    const parent = architecture.flows.find(item => item.id === state.path.at(-2)?.flowId);
+    const via = parent?.nodes.find(item => item.id === state.path.at(-1)?.viaNodeId);
+    const context = entry ? `Start: ${entry.label}` : flow ? 'Direct flow' : '';
+    setText('workspace-description', [currentSample.title, context, via ? `via ${via.label}` : ''].filter(Boolean).join(' · '));
+    byId('workspace-description').title = byId('workspace-description').textContent;
+    const result = diagram.render(architecture, state.flowId, { pathFlowIds: state.path.map(frame => frame.flowId) });
+    selection = undefined; byId('clear-selection').hidden = true;
+    inspector.render(architecture, flow, undefined);
+    documentation.setContext(currentSample, flow, undefined, true);
+    if (focus && result.ok) byId('diagram-container').querySelector('.diagram-svg')?.focus({ preventScroll: true });
+    return result;
+  }
+  function navigate(action) {
+    try { action(); setText('navigation-notice', ''); renderNavigation(true); }
+    catch (error) { setText('navigation-notice', error.message); }
+  }
+  byId('flow-picker').addEventListener('change', () => navigate(() => navigation.selectFlow(byId('flow-picker').value)));
+  byId('navigation-back').addEventListener('click', () => navigate(() => navigation.back()));
+  byId('navigation-forward').addEventListener('click', () => navigate(() => navigation.forward()));
+  byId('navigation-root').addEventListener('click', () => navigate(() => navigation.root()));
+  function showTab(tab, focus = false) {
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    for (const item of tabs) {
+      const selected = item === tab;
+      item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1;
+      byId(item.getAttribute('aria-controls')).hidden = !selected;
+    }
+    if (focus) tab.focus();
+    if (tab.id === 'tab-documentation') documentation.reveal();
+  }
+  function setWorkspaceState(state, model) {
+    const loading = state === 'loading'; const empty = !model || model.entryCount === 0;
+    byId('diagram-container').setAttribute('aria-busy', String(loading));
+    byId('workspace-state').hidden = false;
+    if (loading) {
+      selection = undefined; diagram.clear(); controls.forEach(id => { byId(id).disabled = true; });
+      byId('clear-selection').hidden = true;
+      if (currentSample) { inspector.render(currentSample.architecture, undefined, undefined); documentation.setContext(currentSample, undefined, undefined); }
+    }
+    setText('workspace-state-title', loading ? 'Preparing the workspace' : empty ? 'No process starts documented' : 'Process diagram');
+    setText('workspace-state-message', loading ? 'Process information is being prepared.' : empty ? 'Recorded process starts will appear here. Use the flow chooser when no start is recorded.' : 'Diagram rendering will appear here. Explore the sample context in the panels below.');
+    setText('workspace-state-caption', loading ? 'Loading process documentation' : empty ? 'No process diagram available' : `${model.flowCount} flows · ${model.nodeCount} recorded nodes`);
+  }
+  function filterExplorer() {
+    const query = byId('process-filter').value.trim().toLocaleLowerCase();
+    const trigger = byId('category-filter').value;
+    let visible = 0;
+    for (const group of byId('entry-groups').querySelectorAll('.entry-group')) {
+      let count = 0;
+      for (const item of group.querySelectorAll('li')) {
+        const match = (!trigger || group.dataset.trigger === trigger) && (!query || item.dataset.search.includes(query));
+        item.hidden = !match; if (match) count++;
+      }
+      group.hidden = count === 0; visible += count;
+    }
+    byId('filter-empty').hidden = visible > 0;
+  }
+  byId('process-filter').addEventListener('input', filterExplorer);
+  byId('category-filter').addEventListener('change', filterExplorer);
+  function renderExplorer(activeSample) {
+    const available = samples.some(item => item.key === activeSample.key) ? samples.map(item => item.key === activeSample.key ? activeSample : item) : [activeSample];
+    const allTriggers = [...new Set(available.flatMap(item => globalThis.pFlow.adaptSample(item).groups.map(group => group.label)))];
+    const previous = byId('category-filter').value;
+    byId('category-filter').replaceChildren(...['', ...allTriggers].map(trigger => {
+      const option = document.createElement('option'); option.value = trigger; option.textContent = trigger || 'All starts'; return option;
+    }));
+    if (allTriggers.includes(previous)) byId('category-filter').value = previous;
+    setText('entry-count', available.reduce((sum, item) => sum + item.architecture.entryPoints.length, 0));
+    byId('entry-groups').replaceChildren();
+    for (const sample of available) {
+      const model = globalThis.pFlow.adaptSample(sample);
+      const groups = model.groups.length ? model.groups : [{ label: 'Documented flows (no recorded start)', entries: sample.architecture.flows.map(flow => ({id:flow.id,label:flow.label})), direct: true }];
+      for (const group of groups) {
+        const section = document.createElement('section'); section.className = 'entry-group'; section.dataset.bundleKey = sample.key || ''; section.dataset.trigger = group.label;
+        if (available.length > 1) { const title = document.createElement('p'); title.className = 'bundle-heading'; title.textContent = sample.title; section.append(title); }
+        const heading = document.createElement('h3'); heading.className = 'group-heading';
+        const symbol = document.createElement('span'); symbol.className = 'group-symbol'; symbol.textContent = '◉'; symbol.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span'); label.textContent = group.label;
+        const count = document.createElement('span'); count.className = 'count'; count.textContent = group.entries.length;
+        heading.append(symbol, label, count);
+        const entries = document.createElement('ul'); entries.className = 'entry-list';
+        for (const entry of group.entries) {
+          const item = document.createElement('li'); item.dataset.search = `${sample.title} ${group.label} ${entry.label}`.toLocaleLowerCase();
+          const button = document.createElement('button'); button.type = 'button'; button.className = group.direct ? 'entry-button flow-button' : 'entry-button'; button.textContent = entry.label; button.setAttribute('aria-label', entry.label);
+          button.dataset.bundleKey = sample.key || ''; button.dataset.entryId = entry.id; button.setAttribute('aria-pressed', 'false');
+          button.addEventListener('click', () => {
+            if (currentSample !== sample) initializeSample(sample);
+            navigate(() => group.direct ? navigation.selectFlow(entry.id) : navigation.selectEntry(entry.id));
+          });
+          item.append(button); entries.append(item);
+        }
+        section.append(heading, entries); byId('entry-groups').append(section);
+      }
+    }
+    filterExplorer();
+  }
+  byId('open-docs').addEventListener('click', () => {
+    const flow = currentSample?.architecture.flows.find(item => item.id === navigation?.getState().flowId);
+    const reference = flow?.docs?.find(ref => ref.anchor === flow.id) || flow?.docs?.[0];
+    const selected = globalThis.pFlow.resolveSelection(currentSample.architecture, flow?.id, selection);
+    documentation.setContext(currentSample, flow, selected, false, false);
+    globalThis.pFlow.layout.reveal('right');
+    if (reference) documentation.openDocument(reference);
+    else if (Object.hasOwn(globalThis.pFlowDocuments?.[currentSample?.key] || {}, 'index.md')) documentation.openDocument({ path: 'index.md' });
+    else { showTab(byId('tab-documentation')); setText('document-status', 'No documentation is available for this process.'); }
+    byId('document-article').tabIndex = -1; byId('document-article').focus({ preventScroll: true });
+  });
+  function initializeSample(sample) {
+    currentSample = sample;
+    const model = globalThis.pFlow.adaptSample(sample);
+    document.title = `pFlow — ${model.title}`;
+    byId('app-layout').dataset.bundleId = sample.key || '';
+    setText('workspace-title', model.flowTitle);
+    setText('workspace-description', model.title);
+    setText('flow-count', `${model.flowCount} documented flows`);
+    renderExplorer(sample);
+    setWorkspaceState('ready', model);
+    const flows = sample.architecture.flows;
+    byId('flow-picker').replaceChildren(...flows.map(flow => {
+      const option = document.createElement('option'); option.value = flow.id; option.textContent = flow.label; return option;
+    }));
+    byId('flow-picker').disabled = flows.length === 0;
+    setText('navigation-notice', '');
+    navigation = undefined;
+    try {
+      navigation = globalThis.pFlow.createFlowNavigation(sample.architecture);
+      const entry = sample.architecture.entryPoints[0];
+      if (entry) navigation.selectEntry(entry.id);
+      else if (flows[0]) navigation.selectFlow(flows[0].id);
+    } catch (error) { setText('navigation-notice', error.message); }
+    renderNavigation();
+    showTab(byId('tab-documentation'));
+    return model;
+  }
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => showTab(tab));
+    tab.addEventListener('keydown', event => {
+      const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : undefined;
+      if (next !== undefined) { event.preventDefault(); showTab(tabs[next], true); }
+    });
+  });
+  function showAssociation(sample, association) {
+    const plan = globalThis.pFlow.planSearchFlow(sample.architecture, association.flowId, currentSample === sample ? navigation?.getState() : {}, association.type === 'entry' ? association.entity.id : undefined);
+    if (currentSample !== sample) initializeSample(sample);
+    if (!navigation) throw new Error('Diagram navigation is unavailable for this artifact.');
+    let notice = '';
+    if (!plan.keep) {
+      if (plan.direct) { navigation.selectFlow(plan.flowId); notice = 'No entry-point expansion path reaches this Flow. Opened directly.'; }
+      else { navigation.selectEntry(plan.entryId); for (const nodeId of plan.via) navigation.openDetail(nodeId); }
+      renderNavigation();
+    }
+    return notice;
+  }
+  function activateDocumentSection(sample, association) {
+    try {
+      const sameFlow = currentSample === sample && navigation?.getState().flowId === association.flowId;
+      const notice = showAssociation(sample, association);
+      selectEntity({ type: association.type, id: association.entity.id }, { locateDocumentation: !sameFlow });
+      const expected = selection;
+      diagram.centerSelection();
+      requestAnimationFrame(() => { if (selection === expected) diagram.centerSelection(); });
+      setText('navigation-notice', notice);
+    } catch (error) { setText('navigation-notice', error.message); }
+  }
+  function activateSearchResult(result, query) {
+    const api = globalThis.pFlow;
+    try {
+      if (!result || typeof result.bundleId !== 'string' || typeof result.path !== 'string' || (result.sectionId !== null && (typeof result.sectionId !== 'string' || !/^(entry|flow|node|edge)_[A-Za-z0-9_-]+$/.test(result.sectionId))) || typeof query !== 'string') throw new Error('Invalid search result identifier.');
+      const sample = currentSample.key === result.bundleId ? currentSample : samples.find(item => item.key === result.bundleId);
+      if (!sample) throw new Error(`Documentation bundle is unavailable: ${result.bundleId}.`);
+      const prepared = documentation.prepareSearch(sample, { path: result.path, ...(result.sectionId ? { anchor: result.sectionId } : {}) });
+      const reference = prepared.target;
+      const { association, notice: unresolved = '' } = api.resolveDocumentAssociation(sample.architecture, reference, prepared.rendered);
+      let notice = unresolved;
+      if (association) {
+        notice = showAssociation(sample, association);
+        selectEntity(['node', 'edge'].includes(association.type) ? { type: association.type, id: association.entity.id } : undefined, { locateDocumentation: false });
+        diagram.revealSelection();
+      } else selectEntity(undefined, { locateDocumentation: false });
+      documentation.openSearch(sample, reference, query, prepared);
+      setText('navigation-notice', notice);
+      return { ok: true };
+    } catch (error) {
+      setText('navigation-notice', error.message);
+      byId('navigation-notice').tabIndex = -1; byId('navigation-notice').focus({ preventScroll: true });
+      byId('navigation-notice').scrollIntoView({ block: 'center' });
+      return { ok: false, error: error.message };
+    }
+  }
+  globalThis.pFlow.activateSearchResult = activateSearchResult;
+  globalThis.pFlow.initializeSample = initializeSample;
+  globalThis.pFlow.setWorkspaceState = setWorkspaceState;
+  const samples = globalThis.pFlowSamples || [];
+  if (samples.length) initializeSample(samples[0]);
+  else initializeSample({ title: 'Architecture', architecture: { modelVersion: '1.0.0', entryPoints: [], flows: [], sources: [] } });
+}());
+
+;
+/* Pure, serializable search over raw M1-03 Markdown. No graph or DOM dependency. */
+globalThis.pFlow = globalThis.pFlow || {};
+(function () {
+  const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  const fold = text => Array.from(text.normalize('NFKC'), char => char.toUpperCase().toLowerCase()).join('');
+  const tokens = text => [...new Set(fold(text).match(/[\p{L}\p{M}\p{N}_]+/gu) || [])];
+  const phrase = text => fold(text).trim().replace(/\s+/g, ' ');
+  const segments = text => typeof Intl.Segmenter === 'function'
+    ? [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text)].map(item => ({ text: item.segment, start: item.index, end: item.index + item.segment.length }))
+    : Array.from(text).reduce((items, char) => { const start = items.at(-1)?.end || 0; items.push({ text: char, start, end: start + char.length }); return items; }, []);
+
+  function plainInline(text) {
+    return text.split(/(`[^`]+`)/g).map(part => {
+      if (part.startsWith('`') && part.endsWith('`')) return part.slice(1, -1);
+      return part.replace(/<\/?[A-Za-z][^>]*>/g, ' ')
+        .replace(/!?\[([^\]]+)\]\([^)]*\)/g, '$1')
+        .replace(/\[(src_[A-Za-z0-9_-]+)\]/g, '')
+        .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1')
+        .replace(/\*\*([^*]+)\*\*|__([^_]+)__/g, (_, strong, underscore) => strong || underscore)
+        .replace(/(^|\s)[*_]([^*_]+)[*_](?=\s|[.,;:!?]|$)/g, '$1$2')
+        .replace(/\\([\\`*_[\]{}()#+.!>|~-])/g, '$1');
+    }).join('').replace(/\s+/g, ' ').trim();
+  }
+
+  function extract(markdown) {
+    // M1-03 excludes embedded HTML other than literal anchors. Never index executable blocks.
+    const lines = markdown.replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '').split(/\r?\n/);
+    const records = new Map(), stack = [];
+    let title = '', pending, fence, current;
+    const record = id => {
+      if (!records.has(id)) records.set(id, { sectionId: id, headings: [], parts: [], ordinal: records.size });
+      return records.get(id);
+    };
+    current = record(null);
+    for (const line of lines) {
+      const fenced = line.match(/^\s{0,3}(`{3,}|~{3,})(.*)$/);
+      if (fence) { if (fenced && fenced[1][0] === fence[0] && fenced[1].length >= fence.length && !fenced[2].trim()) fence = undefined; continue; }
+      if (fenced) { fence = fenced[1]; continue; }
+      const anchor = line.match(/^<a id="((?:entry|flow|node|edge)_[A-Za-z0-9_-]+)"><\/a>$/);
+      if (anchor) { pending = anchor[1]; continue; }
+      if (/^\s*\[[^\]]+\]:/.test(line) || /^\s*\|?[\s:|-]+\|?\s*$/.test(line) || !line.trim()) continue;
+      const heading = line.match(/^(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/);
+      if (heading) {
+        const level = heading[1].length, label = plainInline(heading[2]);
+        while (stack.length && stack.at(-1).level >= level) stack.pop();
+        if (pending) { stack.push({ level, id: pending }); pending = undefined; }
+        current = record(stack.at(-1)?.id || null);
+        if (label && !current.headings.includes(label)) current.headings.push(label);
+        if (level === 1 && !title) title = label;
+        continue;
+      }
+      pending = undefined;
+      const prose = plainInline(line.replace(/^\s*(?:[-*+]|\d+[.)])\s+/, '').replace(/^\s*>\s?/, '').replace(/^\s*\||\|\s*$/g, '').replace(/\|/g, ' '));
+      if (prose) current.parts.push(prose);
+    }
+    return { title, records: [...records.values()].map(item => ({ sectionId: item.sectionId, headings: item.headings, text: [...new Set(item.parts)].join(' '), ordinal: item.ordinal })).filter(item => item.text || item.headings.length) };
+  }
+
+  function buildMarkdownSearchIndex(payload) {
+    const documents = [], sections = [], postings = Object.create(null), unique = new Map();
+    for (const item of payload || []) {
+      if (!item || typeof item.bundleId !== 'string' || typeof item.path !== 'string' || !item.path.endsWith('.md') || typeof item.markdown !== 'string' || !item.markdown.trim()) continue;
+      const key = JSON.stringify([item.bundleId, item.path]);
+      if (unique.has(key) && unique.get(key).markdown !== item.markdown) throw new Error(`Conflicting Markdown content: ${item.bundleId}/${item.path}.`);
+      unique.set(key, item);
+    }
+    const ordered = [...unique.values()].sort((a, b) => compare(a.bundleId, b.bundleId) || compare(a.path, b.path));
+    function post(text, field, id) {
+      for (const token of tokens(text)) {
+        if (!Object.hasOwn(postings, token)) postings[token] = { title: [], heading: [], body: [] };
+        postings[token][field].push(id);
+      }
+    }
+    for (const item of ordered) {
+      const parsed = extract(item.markdown);
+      if (!parsed.records.length) continue;
+      const document = documents.length;
+      documents.push({ bundleId: item.bundleId, path: item.path, title: parsed.title });
+      post(parsed.title, 'title', document);
+      for (const record of parsed.records) {
+        const id = sections.length; sections.push({ document, ...record });
+        post(record.headings.join(' '), 'heading', id); post(record.text, 'body', id);
+      }
+    }
+    return { version: 1, documents, sections, postings };
+  }
+
+  function searchHighlightRanges(text, terms) {
+    const units = segments(text), starts = [], ends = [];
+    let normalized = '';
+    for (const unit of units) {
+      const part = fold(unit.text); normalized += part;
+      for (let i = 0; i < part.length; i++) { starts.push(unit.start); ends.push(unit.end); }
+    }
+    const ranges = [];
+    for (const term of terms) {
+      if (!term) continue;
+      let at = normalized.indexOf(term);
+      while (at !== -1) { ranges.push({ start: starts[at], end: ends[at + term.length - 1] }); at = normalized.indexOf(term, at + 1); }
+    }
+    ranges.sort((a, b) => a.start - b.start || a.end - b.end);
+    const merged = [];
+    for (const range of ranges) {
+      if (merged.length && range.start <= merged.at(-1).end) merged.at(-1).end = Math.max(merged.at(-1).end, range.end);
+      else merged.push({ ...range });
+    }
+    return merged;
+  }
+  function preview(text, terms) {
+    if (text.length <= 180) return text;
+    const first = searchHighlightRanges(text, terms)[0]?.start || 0;
+    let start = Math.max(0, first - 45), end = Math.min(text.length, start + 180);
+    if (start) { const space = text.lastIndexOf(' ', start); if (space >= start - 20) start = space + 1; }
+    const units = segments(text);
+    start = units.findLast(unit => unit.start <= start)?.start || 0;
+    end = units.find(unit => unit.end >= end)?.end || text.length;
+    return `${start ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
+  }
+
+  function createMarkdownSearcher(index) {
+    if (index?.version !== 1 || !Array.isArray(index.documents) || !Array.isArray(index.sections) || !index.postings || typeof index.postings !== 'object') throw new Error('Unsupported or invalid search index.');
+    if (!index.documents.every(doc => doc && typeof doc.bundleId === 'string' && typeof doc.path === 'string' && typeof doc.title === 'string')
+      || !index.sections.every(section => section && Number.isInteger(section.document) && index.documents[section.document] && (section.sectionId === null || typeof section.sectionId === 'string') && Array.isArray(section.headings) && section.headings.every(item => typeof item === 'string') && typeof section.text === 'string' && Number.isInteger(section.ordinal))) throw new Error('Invalid search document or section metadata.');
+    const vocabulary = Object.keys(index.postings).sort(compare), byDocument = index.documents.map(() => []);
+    for (const token of vocabulary) for (const field of ['title', 'heading', 'body']) {
+      const values = index.postings[token]?.[field], maximum = field === 'title' ? index.documents.length : index.sections.length;
+      if (!Array.isArray(values) || !values.every(id => Number.isInteger(id) && id >= 0 && id < maximum)) throw new Error('Invalid search postings.');
+    }
+    index.sections.forEach((section, id) => byDocument[section.document].push(id));
+    const normalizedTitles = index.documents.map(doc => phrase(doc.title));
+    return {
+      documentCount: index.documents.length,
+      search(query, limit = 20) {
+        const terms = tokens(String(query)), normalizedQuery = phrase(String(query));
+        if (!terms.length) return { total: 0, documents: 0, results: [] };
+        let candidates;
+        for (const term of terms) {
+          const matches = new Map();
+          const hit = (id, mask) => matches.set(id, (matches.get(id) || 0) | mask);
+          for (const token of vocabulary) if (token.includes(term)) {
+            const entry = index.postings[token];
+            for (const doc of entry.title) for (const section of byDocument[doc]) hit(section, 1);
+            for (const section of entry.heading) hit(section, 2);
+            for (const section of entry.body) hit(section, 4);
+          }
+          if (!candidates) candidates = new Map([...matches].map(([id, mask]) => [id, [mask]]));
+          else for (const [id, masks] of candidates) { if (!matches.has(id)) candidates.delete(id); else masks.push(matches.get(id)); }
+          if (!candidates.size) break;
+        }
+        const ranked = [];
+        for (const [id, masks] of candidates || []) {
+          const section = index.sections[id], doc = index.documents[section.document];
+          const own = masks.some(mask => mask & 6);
+          const titleRecord = byDocument[section.document][0];
+          if (!own && id !== titleRecord) continue;
+          const headingHits = masks.filter(mask => mask & 2).length, bodyHits = masks.filter(mask => mask & 4).length;
+          const exactTitle = id === titleRecord && normalizedTitles[section.document] === normalizedQuery;
+          const headings = section.headings.map((text, ordinal) => ({ text, ordinal, count: terms.filter(term => fold(text).includes(term)).length, exact: phrase(text) === normalizedQuery }));
+          headings.sort((a, b) => Number(b.exact) - Number(a.exact) || b.count - a.count || a.ordinal - b.ordinal);
+          ranked.push({ id, doc, section, heading: headings[0]?.text || '', category: exactTitle ? 0 : headingHits ? 1 : 2, exactHeading: Number(headings[0]?.exact || false), headingHits, bodyHits });
+        }
+        ranked.sort((a, b) => a.category - b.category || b.exactHeading - a.exactHeading || b.headingHits - a.headingHits || b.bodyHits - a.bodyHits || compare(a.doc.bundleId, b.doc.bundleId) || compare(a.doc.path, b.doc.path) || a.section.ordinal - b.section.ordinal);
+        const results = ranked.slice(0, Math.max(0, limit)).map(item => {
+          const excerpt = preview(item.section.text, terms);
+          const title = item.doc.title || item.doc.path;
+          return { bundleId: item.doc.bundleId, path: item.doc.path, sectionId: item.section.sectionId, title, heading: item.heading, preview: excerpt, category: ['title', 'heading', 'body'][item.category], highlights: { title: searchHighlightRanges(title, terms), heading: searchHighlightRanges(item.heading, terms), preview: searchHighlightRanges(excerpt, terms) } };
+        });
+        return { total: ranked.length, documents: new Set(ranked.map(item => item.section.document)).size, results };
+      },
+    };
+  }
+  Object.assign(globalThis.pFlow, { buildMarkdownSearchIndex, createMarkdownSearcher, searchHighlightRanges, searchTerms: tokens });
+}());
+
+;
+/* Search previews delegate activation to the existing Viewer navigation API. */
+(function () {
+  const api = globalThis.pFlow;
+  const control = document.getElementById('search-control');
+  const input = document.getElementById('global-search');
+  const popup = document.getElementById('search-popup');
+  const list = document.getElementById('search-results');
+  const status = document.getElementById('search-status');
+  const empty = document.getElementById('search-empty');
+  const clear = document.getElementById('search-clear');
+  const bundleTitles = new Map((globalThis.pFlowSamples || []).map(item => [item.key, item.title]));
+  let searcher, timer, previous, active = -1, invoker, results = [];
+  function highlighted(tag, text, ranges, className) {
+    const node = document.createElement(tag); if (className) node.className = className;
+    let offset = 0;
+    for (const range of ranges) {
+      node.append(document.createTextNode(text.slice(offset, range.start)));
+      const mark = document.createElement('mark'); mark.textContent = text.slice(range.start, range.end); node.append(mark); offset = range.end;
+    }
+    node.append(document.createTextNode(text.slice(offset))); return node;
+  }
+  function activate(index) {
+    active = index;
+    [...list.children].forEach((node, i) => node.setAttribute('aria-selected', String(i === active)));
+    const node = list.children[active];
+    if (!node) { input.removeAttribute('aria-activedescendant'); return; }
+    input.setAttribute('aria-activedescendant', node.id);
+    const row = node.getBoundingClientRect(), box = list.getBoundingClientRect();
+    if (row.bottom > box.bottom) list.scrollTop += row.bottom - box.bottom;
+    else if (row.top < box.top) list.scrollTop -= box.top - row.top;
+  }
+  function update() {
+    clearTimeout(timer); clear.hidden = !input.value;
+    if (previous === input.value) return;
+    previous = input.value;
+    const found = searcher.search(input.value); results = found.results;
+    const fragment = document.createDocumentFragment();
+    found.results.forEach((result, i) => {
+      const row = document.createElement('div'); row.className = 'search-result'; row.id = `search-result-${i}`; row.setAttribute('role', 'option'); row.setAttribute('aria-selected', 'false');
+      row.append(highlighted('h3', result.title, result.highlights.title));
+      if (result.heading && result.heading !== result.title) row.append(highlighted('p', result.heading, result.highlights.heading, 'search-result-heading'));
+      row.append(highlighted('p', result.preview || 'No paragraph text in this section.', result.highlights.preview, 'search-result-preview'));
+      const location = document.createElement('p'); location.className = 'search-result-location'; location.textContent = `${bundleTitles.get(result.bundleId) || result.bundleId} · ${result.path}${result.sectionId ? ` #${result.sectionId}` : ' · Document'}`; row.append(location);
+      row.addEventListener('mousedown', event => event.preventDefault());
+      row.addEventListener('click', () => openResult(i));
+      fragment.append(row);
+    });
+    list.replaceChildren(fragment); activate(-1);
+    status.textContent = found.total ? `${found.total} matching sections in ${found.documents} documents${found.total > found.results.length ? ` · Showing ${found.results.length}` : ''}` : 'Search documentation';
+    empty.hidden = !!found.total;
+    empty.textContent = !searcher.documentCount ? 'No Markdown documents are available.' : input.value.trim() ? 'No matching sections.' : 'Search titles, headings, and documentation text across all samples.';
+  }
+  function openResult(index, keyboard = false) {
+    // Flush a pending query before activation; never open an obsolete result row.
+    const changed = previous !== input.value; update();
+    if (changed && !keyboard) return;
+    const result = results[changed ? 0 : index];
+    if (!result) return;
+    close();
+    api.activateSearchResult(result, input.value);
+  }
+  function open() { popup.hidden = false; input.setAttribute('aria-expanded', 'true'); update(); }
+  function close(restore = false) {
+    clearTimeout(timer); popup.hidden = true; input.setAttribute('aria-expanded', 'false'); activate(-1);
+    if (restore && invoker?.isConnected) invoker.focus({ preventScroll: true });
+    invoker = undefined;
+  }
+  input.addEventListener('focus', open);
+  input.addEventListener('input', () => { popup.hidden = false; input.setAttribute('aria-expanded', 'true'); clearTimeout(timer); timer = setTimeout(update, 120); clear.hidden = !input.value; });
+  input.addEventListener('keydown', event => {
+    if (event.isComposing) return;
+    if (event.key === 'Escape') { event.preventDefault(); close(true); }
+    else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault(); open();
+      if (list.children.length) activate(active < 0 ? (event.key === 'ArrowDown' ? 0 : list.children.length - 1) : (active + (event.key === 'ArrowDown' ? 1 : -1) + list.children.length) % list.children.length);
+    } else if (event.key === 'Enter' && !popup.hidden) {
+      event.preventDefault(); openResult(active < 0 ? 0 : active, true);
+    }
+  });
+  clear.addEventListener('click', () => { input.value = ''; open(); input.focus({ preventScroll: true }); });
+  control.addEventListener('keydown', event => { if (event.key === 'Escape' && !event.defaultPrevented && !event.isComposing) { event.preventDefault(); close(true); } });
+  control.addEventListener('focusout', event => { if (!control.contains(event.relatedTarget)) close(); });
+  document.addEventListener('pointerdown', event => { if (!control.contains(event.target)) close(); });
+  document.addEventListener('keydown', event => {
+    if (!event.isComposing && !event.defaultPrevented && !event.altKey && !event.shiftKey && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault(); if (!control.contains(document.activeElement)) invoker = document.activeElement;
+      input.focus({ preventScroll: true }); open();
+    }
+  });
+  function setIndex(index) { const next = api.createMarkdownSearcher(index); searcher = next; previous = undefined; update(); }
+  const payload = Object.entries(globalThis.pFlowDocuments || {}).flatMap(([bundleId, documents]) => Object.entries(documents || {}).map(([path, markdown]) => ({ bundleId, path, markdown })));
+  setIndex(globalThis.pFlowSearchIndex || api.buildMarkdownSearchIndex(payload));
+  api.search = { setIndex };
+}());
+</script></body>
+</html>

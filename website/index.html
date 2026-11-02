@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Understand how systems and teams work. pFlow turns code evidence and natural-language process descriptions into linked documentation and interactive HTML.">
+  <meta name="theme-color" content="#f4f3ec">
+  <title>pFlow — understand how systems and teams work</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">
+    <span data-lang="en">Skip to content</span>
+    <span data-lang="ko" hidden>본문으로 건너뛰기</span>
+  </a>
+
+  <header class="site-header">
+    <a class="brand" href="#overview" aria-label="pFlow home" data-en-aria="pFlow home" data-ko-aria="pFlow 홈">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>pFlow</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation" data-en-aria="Main navigation" data-ko-aria="주요 메뉴">
+      <a href="#overview"><span data-lang="en">Overview</span><span data-lang="ko" hidden>소개</span></a>
+      <a href="#features"><span data-lang="en">Features</span><span data-lang="ko" hidden>기능</span></a>
+      <a href="#how-to"><span data-lang="en">How to Use</span><span data-lang="ko" hidden>사용법</span></a>
+      <a href="#demos"><span data-lang="en">Live Demos</span><span data-lang="ko" hidden>데모</span></a>
+      <a href="https://github.com/itsbysean/pFlow" target="_blank" rel="noopener noreferrer">
+        <span data-lang="en">GitHub ↗</span><span data-lang="ko" hidden>GitHub ↗</span>
+      </a>
+    </nav>
+    <div class="language-switch" role="group" aria-label="Choose page language" data-en-aria="Choose page language" data-ko-aria="페이지 언어 선택">
+      <button type="button" data-language="en" aria-pressed="true">EN</button>
+      <button type="button" data-language="ko" aria-pressed="false">한국어</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero section-wrap" id="overview" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">
+          <span data-lang="en">An AI agent Skill for process documentation</span>
+          <span data-lang="ko" hidden>프로세스 문서를 만드는 AI 에이전트 스킬</span>
+        </p>
+        <h1 id="hero-title">
+          <span data-lang="en">Understand how <em>systems and teams work.</em></span>
+          <span data-lang="ko" hidden>시스템과 팀의 <em>업무 흐름을 이해하세요.</em></span>
+        </h1>
+        <p class="hero-description">
+          <span data-lang="en">pFlow turns code evidence or a process you describe in natural language into clear documentation and an interactive HTML Viewer.</span>
+          <span data-lang="ko" hidden>pFlow는 코드 근거나 자연어로 설명한 프로세스를 읽기 쉬운 문서와 인터랙티브 HTML Viewer로 만듭니다.</span>
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#demos">
+            <span data-lang="en">Explore live demos</span><span data-lang="ko" hidden>인터랙티브 데모 보기</span><span aria-hidden="true">↘</span>
+          </a>
+          <a class="button button-secondary" href="#how-to">
+            <span data-lang="en">Get started</span><span data-lang="ko" hidden>사용 시작하기</span>
+          </a>
+          <a class="text-link" href="https://github.com/itsbysean/pFlow" target="_blank" rel="noopener noreferrer">
+            <span data-lang="en">View on GitHub ↗</span><span data-lang="ko" hidden>GitHub에서 보기 ↗</span>
+          </a>
+        </div>
+        <p class="hero-note">
+          <span data-lang="en">For coding agents with Skills support · Node.js 24+</span>
+          <span data-lang="ko" hidden>Skills를 지원하는 코딩 에이전트용 · Node.js 24 이상</span>
+        </p>
+      </div>
+
+      <aside class="output-panel" aria-label="pFlow output formats" data-en-aria="pFlow output formats" data-ko-aria="pFlow 결과물 형식">
+        <div class="panel-heading">
+          <span class="panel-mark" aria-hidden="true">pF</span>
+          <span>
+            <strong data-lang="en">One process, three outputs</strong>
+            <strong data-lang="ko" hidden>하나의 프로세스, 세 가지 결과물</strong>
+            <small data-lang="en">Built from inspected or supplied evidence</small>
+            <small data-lang="ko" hidden>분석하거나 제공한 근거를 바탕으로 생성</small>
+          </span>
+        </div>
+        <ul class="output-list">
+          <li>
+            <span class="file-badge file-json">JSON</span>
+            <span><strong data-lang="en">Architecture graph</strong><strong data-lang="ko" hidden>아키텍처 그래프</strong><small data-lang="en">JSON · structured context for AI and tools</small><small data-lang="ko" hidden>JSON · AI와 도구를 위한 구조화된 문맥</small></span>
+            <span class="file-type">DATA</span>
+          </li>
+          <li>
+            <span class="file-badge file-md">MD</span>
+            <span><strong>Markdown docs</strong><small data-lang="en">Linked context and evidence</small><small data-lang="ko" hidden>근거가 연결된 문맥</small></span>
+            <span class="file-type">TEXT</span>
+          </li>
+          <li>
+            <span class="file-badge file-html">HTML</span>
+            <span><strong>architecture.html</strong><small data-lang="en">Interactive Viewer · people</small><small data-lang="ko" hidden>인터랙티브 Viewer · 사람용</small></span>
+            <span class="file-type">VIEW</span>
+          </li>
+        </ul>
+        <p class="panel-foot">
+          <span data-lang="en">pFlow reports the selected output paths. The HTML Viewer works offline after it is built.</span>
+          <span data-lang="ko" hidden>pFlow가 선택된 출력 경로를 안내합니다. HTML Viewer는 생성 후 오프라인에서 열 수 있습니다.</span>
+        </p>
+      </aside>
+    </section>
+
+    <section class="section-wrap features-section" id="features" aria-labelledby="features-title">
+      <div class="section-heading">
+        <p class="section-kicker"><span data-lang="en">What pFlow does</span><span data-lang="ko" hidden>pFlow가 하는 일</span></p>
+        <h2 id="features-title">
+          <span data-lang="en">See the flow. Read the evidence.</span>
+          <span data-lang="ko" hidden>흐름을 보고, 근거를 확인하세요.</span>
+        </h2>
+        <p class="section-intro">
+          <span data-lang="en">Use repository analysis for software systems. Use a natural-language description for any other process.</span>
+          <span data-lang="ko" hidden>소프트웨어 시스템은 저장소를 분석하고, 그 밖의 프로세스는 자연어로 설명해 도식화할 수 있습니다.</span>
+        </p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="feature-number">01</span>
+          <h3><span data-lang="en">Explore code architecture</span><span data-lang="ko" hidden>코드 아키텍처 탐색</span></h3>
+          <p><span data-lang="en">Follow confirmed entry points, internal calls, decisions, external boundaries, and asynchronous links.</span><span data-lang="ko" hidden>확인된 진입점, 내부 호출, 분기, 외부 경계와 비동기 연결을 따라갑니다.</span></p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">02</span>
+          <h3><span data-lang="en">Map any described process</span><span data-lang="ko" hidden>설명한 프로세스 도식화</span></h3>
+          <p><span data-lang="en">Describe business, service, team, or everyday steps. pFlow uses the facts you provide and asks about important gaps.</span><span data-lang="ko" hidden>비즈니스, 서비스, 팀, 일상 프로세스를 설명하세요. pFlow는 제공한 사실을 사용하고 중요한 정보가 빠지면 질문합니다.</span></p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">03</span>
+          <h3><span data-lang="en">Navigate interactive flows</span><span data-lang="ko" hidden>인터랙티브 흐름 탐색</span></h3>
+          <p><span data-lang="en">Select nodes, follow branches, and open reusable detail flows in the generated Viewer.</span><span data-lang="ko" hidden>생성된 Viewer에서 노드를 선택하고, 분기를 살펴보고, 연결된 상세 흐름을 엽니다.</span></p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">04</span>
+          <h3><span data-lang="en">Link diagrams and documents</span><span data-lang="ko" hidden>다이어그램과 문서 연결</span></h3>
+          <p><span data-lang="en">Move between a diagram selection and its related Markdown section. Search the included documentation.</span><span data-lang="ko" hidden>다이어그램에서 연결된 Markdown 문서로, 문서에서 관련 항목으로 이동하고 포함된 문서를 검색합니다.</span></p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">05</span>
+          <h3><span data-lang="en">Keep references visible</span><span data-lang="ko" hidden>근거 참조 확인</span></h3>
+          <p><span data-lang="en">Review source snippets for repository analysis and captured statements for prompt-based processes when available.</span><span data-lang="ko" hidden>가능한 경우 저장소 분석은 소스 발췌를, 프롬프트 기반 프로세스는 기록된 설명을 근거로 확인합니다.</span></p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-number">06</span>
+          <h3><span data-lang="en">Share a standalone Viewer</span><span data-lang="ko" hidden>독립 실행형 Viewer 공유</span></h3>
+          <p><span data-lang="en">Open the single HTML output in a browser. It includes its Viewer assets and does not need a server.</span><span data-lang="ko" hidden>단일 HTML 결과물을 브라우저에서 여세요. Viewer 리소스가 포함되어 서버가 필요하지 않습니다.</span></p>
+        </article>
+      </div>
+      <div class="feature-note">
+        <span class="feature-note-icon" aria-hidden="true">↗</span>
+        <p><strong><span data-lang="en">Built as an AI Coding Agent Skill.</span><span data-lang="ko" hidden>AI 코딩 에이전트 Skill로 만들었습니다.</span></strong>
+          <span data-lang="en"> Markdown and graph JSON give agents structured context; the interactive HTML is for people.</span>
+          <span data-lang="ko" hidden> Markdown과 그래프 JSON은 에이전트가 읽는 구조화된 문맥이고, 인터랙티브 HTML은 사람이 살펴보는 결과물입니다.</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="how-section" id="how-to" aria-labelledby="how-title">
+      <div class="section-wrap">
+        <div class="section-heading">
+          <p class="section-kicker"><span data-lang="en">How to use pFlow</span><span data-lang="ko" hidden>pFlow 사용 방법</span></p>
+          <h2 id="how-title"><span data-lang="en">Start with a Skill. Ask in plain language.</span><span data-lang="ko" hidden>Skill을 설치하고 자연어로 요청하세요.</span></h2>
+          <p class="section-intro"><span data-lang="en">No pFlow command is needed to invoke the Skill. Ask your Skills-enabled coding agent for the work you want.</span><span data-lang="ko" hidden>Skill을 실행하는 pFlow 전용 명령은 없습니다. Skills를 지원하는 코딩 에이전트에게 필요한 작업을 자연어로 요청하세요.</span></p>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <span class="step-number">01</span>
+            <div><h3><span data-lang="en">Install the Skill folder</span><span data-lang="ko" hidden>Skill 폴더 설치</span></h3>
+              <p><span data-lang="en">Copy the repository's <code>skill/</code> folder into the Skills directory supported by your agent. Name the installed folder <code>pflow</code>. Keep <code>SKILL.md</code>, <code>references/</code>, and <code>scripts/pflow.mjs</code> together.</span><span data-lang="ko" hidden>저장소의 <code>skill/</code> 폴더를 사용하는 에이전트가 지원하는 Skills 디렉터리에 복사하세요. 설치 폴더 이름은 <code>pflow</code>로 둡니다. <code>SKILL.md</code>, <code>references/</code>, <code>scripts/pflow.mjs</code>를 함께 유지하세요.</span></p>
+              <p class="step-note"><span data-lang="en">The directory path depends on your agent. Use that agent's documented Skills location.</span><span data-lang="ko" hidden>디렉터리 경로는 에이전트마다 다릅니다. 해당 에이전트 문서에서 Skills 위치를 확인하세요.</span></p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">02</span>
+            <div><h3><span data-lang="en">Check the runtime</span><span data-lang="ko" hidden>런타임 확인</span></h3>
+              <p><span data-lang="en">pFlow requires Node.js 24 or newer. It does not need an npm install or a web server at runtime.</span><span data-lang="ko" hidden>pFlow에는 Node.js 24 이상이 필요합니다. 실행할 때 npm 설치나 웹 서버는 필요하지 않습니다.</span></p>
+              <pre class="inline-command"><code>node /path/to/pflow/scripts/pflow.mjs --help</code></pre>
+              <p class="step-note"><span data-lang="en">Replace the path with the installed Skill location. This checks the packaged CLI; the agent invokes the Skill through its own Skills workflow.</span><span data-lang="ko" hidden>설치한 Skill 경로로 바꾸세요. 이 명령은 패키지 CLI를 확인하며, 에이전트는 자체 Skills 방식으로 Skill을 실행합니다.</span></p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">03</span>
+            <div><h3><span data-lang="en">Choose the input mode</span><span data-lang="ko" hidden>입력 방식을 선택</span></h3>
+              <p><span data-lang="en">For a codebase, name the repository root and the entry point or area to trace. For another process, describe its steps, conditions, and outcomes directly.</span><span data-lang="ko" hidden>코드 저장소는 루트 경로와 추적할 진입점 또는 영역을 지정하세요. 다른 프로세스는 단계, 조건, 결과를 직접 설명하세요.</span></p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">04</span>
+            <div><h3><span data-lang="en">Answer material questions</span><span data-lang="ko" hidden>중요한 질문에 답변</span></h3>
+              <p><span data-lang="en">pFlow asks when a missing start, order, branch, or outcome changes the diagram. It does not fill gaps with assumed rules.</span><span data-lang="ko" hidden>시작점, 순서, 분기, 결과의 누락이 도식에 영향을 주면 pFlow가 질문합니다. 확인되지 않은 규칙을 임의로 채우지 않습니다.</span></p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">05</span>
+            <div><h3><span data-lang="en">Review the generated files</span><span data-lang="ko" hidden>생성된 파일 검토</span></h3>
+              <p><span data-lang="en">Review the Markdown and graph JSON as agent-readable context. Check that cited evidence supports each relationship.</span><span data-lang="ko" hidden>에이전트가 읽는 Markdown과 그래프 JSON을 검토하세요. 인용된 근거가 각 관계를 뒷받침하는지 확인하세요.</span></p>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">06</span>
+            <div><h3><span data-lang="en">Open and explore the HTML</span><span data-lang="ko" hidden>HTML 열고 탐색</span></h3>
+              <p><span data-lang="en">Open the reported <code>architecture.html</code> in a browser. Select a flow or node, follow linked docs, search, and switch the Viewer theme.</span><span data-lang="ko" hidden>에이전트가 안내한 <code>architecture.html</code>을 브라우저에서 여세요. Flow나 노드를 선택하고, 연결 문서와 검색을 이용하고, Viewer 테마를 바꿔 보세요.</span></p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="prompt-heading">
+          <div>
+            <p class="section-kicker"><span data-lang="en">Copyable prompts</span><span data-lang="ko" hidden>복사해서 사용할 프롬프트</span></p>
+            <h3><span data-lang="en">Tell the agent what to map.</span><span data-lang="ko" hidden>에이전트에게 도식화할 내용을 알려주세요.</span></h3>
+          </div>
+        </div>
+        <div class="prompt-grid">
+          <article class="prompt-card">
+            <span class="prompt-type"><span data-lang="en">CODEBASE</span><span data-lang="ko" hidden>코드 저장소</span></span>
+            <h4><span data-lang="en">Trace a software flow</span><span data-lang="ko" hidden>소프트웨어 흐름 추적</span></h4>
+            <div class="prompt-variant" data-lang="en">
+              <pre><code id="repo-prompt-en">Use pFlow in repository mode to document the [feature] flow in this codebase.
+Start at [entry point] and follow the relevant source and configuration.
+Cite evidence for each relationship. Mark unresolved parts.
+Validate the bundle and build the offline HTML.
+Save the output under [output folder].</code></pre>
+              <button class="copy-button" type="button" data-copy-target="repo-prompt-en" data-en-aria="Copy repository prompt" data-ko-aria="저장소 프롬프트 복사">
+                <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
+              </button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+            <div class="prompt-variant" data-lang="ko" hidden>
+              <pre><code id="repo-prompt-ko">pFlow 저장소 모드로 이 코드베이스의 [기능] 흐름을 문서화해줘.
+[진입점]에서 시작해 관련 소스와 설정을 따라가.
+각 관계의 근거를 남기고, 확인되지 않은 부분은 표시해줘.
+번들을 검증하고 오프라인 HTML을 만들어줘.
+결과는 [출력 폴더]에 저장해줘.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="repo-prompt-ko" data-en-aria="Copy repository prompt" data-ko-aria="저장소 프롬프트 복사">
+                <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
+              </button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+          <article class="prompt-card">
+            <span class="prompt-type"><span data-lang="en">ANY PROCESS</span><span data-lang="ko" hidden>일반 프로세스</span></span>
+            <h4><span data-lang="en">Map a process from a description</span><span data-lang="ko" hidden>설명에서 프로세스 도식화</span></h4>
+            <div class="prompt-variant" data-lang="en">
+              <pre><code id="process-prompt-en">Use pFlow prompt mode to map this process.
+Facts: [describe the steps, conditions, and outcomes].
+Use only the facts I provide. Ask when a missing fact changes a branch or outcome.
+Save the Markdown, graph JSON, and standalone HTML in [output folder].</code></pre>
+              <button class="copy-button" type="button" data-copy-target="process-prompt-en" data-en-aria="Copy process prompt" data-ko-aria="프로세스 프롬프트 복사">
+                <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
+              </button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+            <div class="prompt-variant" data-lang="ko" hidden>
+              <pre><code id="process-prompt-ko">pFlow 설명 모드로 이 프로세스를 도식화해줘.
+사실: [단계, 조건, 결과를 설명].
+내가 제공한 사실만 사용해. 누락된 내용이 분기나 결과를 바꾸면 질문해줘.
+Markdown, 그래프 JSON, 독립 실행형 HTML을 [출력 폴더]에 저장해줘.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="process-prompt-ko" data-en-aria="Copy process prompt" data-ko-aria="프로세스 프롬프트 복사">
+                <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
+              </button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+        </div>
+        <div class="update-note">
+          <strong><span data-lang="en">Updating existing docs</span><span data-lang="ko" hidden>기존 문서 업데이트</span></strong>
+          <p><span data-lang="en">For repository-based docs, ask pFlow to update the changed scope. It can use its impact, regeneration, and rebuild workflows with review checks. Prompt-based process docs support full generation only; if existing content has unclear ownership, pFlow asks before replacing it.</span><span data-lang="ko" hidden>저장소 기반 문서는 변경된 범위를 pFlow에 업데이트해 달라고 요청하세요. 영향 분석, 재생성, 재빌드 흐름을 검토 단계와 함께 사용할 수 있습니다. 프롬프트 기반 프로세스 문서는 전체 생성만 지원하며, 기존 내용의 소유 범위가 불분명하면 교체 전에 확인합니다.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-wrap demos-section" id="demos" aria-labelledby="demos-title">
+      <div class="section-heading">
+        <p class="section-kicker"><span data-lang="en">Live demos</span><span data-lang="ko" hidden>인터랙티브 데모</span></p>
+        <h2 id="demos-title"><span data-lang="en">Explore the output, not a screenshot.</span><span data-lang="ko" hidden>이미지가 아닌 실제 결과물을 탐색하세요.</span></h2>
+        <p class="section-intro"><span data-lang="en">Explore each pFlow-generated Viewer here, or open it as a full page. The demo Viewers and their source documentation are in English.</span><span data-lang="ko" hidden>pFlow가 생성한 Viewer를 여기서 살펴보거나 전체 화면으로 여세요. 데모 Viewer와 원본 문서는 영어로 제공됩니다.</span></p>
+      </div>
+      <div class="demo-grid">
+        <article class="demo-card">
+          <div class="demo-preview-heading">
+            <div>
+              <strong><span data-lang="en">Interactive HTML · for people</span><span data-lang="ko" hidden>인터랙티브 HTML · 사람용</span></strong>
+              <p><span data-lang="en">Generated from Demo A · Synchronous fixture</span><span data-lang="ko" hidden>데모 A · 동기식 fixture에서 생성</span></p>
+            </div>
+            <a class="demo-full-link" href="./demos/architecture/index.html" target="_blank" rel="noopener noreferrer"><span data-lang="en">Open full demo</span><span data-lang="ko" hidden>전체 데모 열기</span><span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="demo-frame-wrap">
+            <iframe src="./demos/architecture/index.html" title="Interactive architecture demo: synchronous refresh flow" data-title-en="Interactive architecture demo: synchronous refresh flow" data-title-ko="인터랙티브 아키텍처 데모: 동기식 refresh 흐름" loading="eager" referrerpolicy="no-referrer"></iframe>
+          </div>
+          <div class="demo-card-top">
+            <span class="demo-index">DEMO A</span>
+            <span class="demo-kind"><span data-lang="en">CODE ARCHITECTURE</span><span data-lang="ko" hidden>코드 아키텍처</span></span>
+          </div>
+          <h3><span data-lang="en">Trace a synchronous refresh flow</span><span data-lang="ko" hidden>동기식 refresh 흐름 추적</span></h3>
+          <p><span data-lang="en">Follow a registered command through a reusable component to input validation and a state-service request. The illustrative Python fixture includes a decision, return paths, an exception path, and an external boundary.</span><span data-lang="ko" hidden>등록된 명령에서 재사용 컴포넌트, 입력 검증, 상태 서비스 요청까지 따라갑니다. 예시 Python fixture에는 분기, 반환 경로, 예외 경로, 외부 경계가 있습니다.</span></p>
+          <div class="demo-facts">
+            <span><span data-lang="en">3 linked flows</span><span data-lang="ko" hidden>연결된 Flow 3개</span></span>
+            <span><span data-lang="en">8 source snippets</span><span data-lang="ko" hidden>소스 발췌 8개</span></span>
+            <span><span data-lang="en">Illustrative fixture</span><span data-lang="ko" hidden>설명용 fixture</span></span>
+          </div>
+        </article>
+        <article class="demo-card demo-card-accent">
+          <div class="demo-preview-heading">
+            <div>
+              <strong><span data-lang="en">Interactive HTML · for people</span><span data-lang="ko" hidden>인터랙티브 HTML · 사람용</span></strong>
+              <p><span data-lang="en">Generated from Demo B · Deployment process</span><span data-lang="ko" hidden>데모 B · 배포 프로세스에서 생성</span></p>
+            </div>
+            <a class="demo-full-link" href="./demos/process/index.html" target="_blank" rel="noopener noreferrer"><span data-lang="en">Open full demo</span><span data-lang="ko" hidden>전체 데모 열기</span><span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="demo-frame-wrap">
+            <iframe src="./demos/process/index.html" title="Interactive team process demo: deployment process" data-title-en="Interactive team process demo: deployment process" data-title-ko="인터랙티브 팀 프로세스 데모: 배포 프로세스" loading="lazy" referrerpolicy="no-referrer"></iframe>
+          </div>
+          <div class="demo-card-top">
+            <span class="demo-index">DEMO B</span>
+            <span class="demo-kind"><span data-lang="en">TEAM PROCESS</span><span data-lang="ko" hidden>팀 프로세스</span></span>
+          </div>
+          <h3><span data-lang="en">Map a deployment process</span><span data-lang="ko" hidden>배포 프로세스 도식화</span></h3>
+          <p><span data-lang="en">A natural-language sample describes package preparation, verification, and two outcomes. No approver, retry, or rollback is shown because the source description does not specify them.</span><span data-lang="ko" hidden>자연어 예시는 패키지 준비, 검증, 두 가지 결과를 설명합니다. 원본 설명에 없으므로 승인자, 재시도, 롤백은 표시하지 않습니다.</span></p>
+          <div class="demo-facts">
+            <span><span data-lang="en">1 process flow</span><span data-lang="ko" hidden>프로세스 Flow 1개</span></span>
+            <span><span data-lang="en">4 evidence references</span><span data-lang="ko" hidden>근거 참조 4개</span></span>
+            <span><span data-lang="en">Sample description</span><span data-lang="ko" hidden>예시 설명</span></span>
+          </div>
+        </article>
+      </div>
+      <p class="demo-disclaimer"><span data-lang="en">These are examples for learning. They do not describe a production system or a company's operating policy.</span><span data-lang="ko" hidden>두 데모는 사용 방법을 보여주는 예시이며, 실제 운영 시스템이나 회사 정책을 설명하지 않습니다.</span></p>
+    </section>
+
+    <section class="closing-section">
+      <div class="section-wrap closing-card">
+        <div>
+          <p class="section-kicker"><span data-lang="en">Ready to map a process?</span><span data-lang="ko" hidden>프로세스를 도식화해 보세요</span></p>
+          <h2><span data-lang="en">Start with the facts you have.</span><span data-lang="ko" hidden>가지고 있는 사실에서 시작하세요.</span></h2>
+          <p><span data-lang="en">Install the Skill, describe the scope, and review the evidence with your agent.</span><span data-lang="ko" hidden>Skill을 설치하고 범위를 설명한 뒤, 에이전트와 근거를 검토하세요.</span></p>
+        </div>
+        <div class="closing-actions">
+          <a class="button button-light" href="#how-to"><span data-lang="en">Read the guide</span><span data-lang="ko" hidden>사용 안내 보기</span><span aria-hidden="true">↑</span></a>
+          <a class="button button-outline-light" href="https://github.com/itsbysean/pFlow" target="_blank" rel="noopener noreferrer"><span data-lang="en">Get pFlow on GitHub</span><span data-lang="ko" hidden>GitHub에서 pFlow 보기</span><span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="#overview" aria-label="pFlow home" data-en-aria="pFlow home" data-ko-aria="pFlow 홈">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>pFlow</span>
+    </a>
+    <p><span data-lang="en">Evidence-led architecture and process documentation.</span><span data-lang="ko" hidden>근거를 바탕으로 아키텍처와 프로세스를 문서화합니다.</span></p>
+    <a href="https://github.com/itsbysean/pFlow" target="_blank" rel="noopener noreferrer"><span data-lang="en">GitHub ↗</span><span data-lang="ko" hidden>GitHub ↗</span></a>
+  </footer>
+</body>
+</html>
