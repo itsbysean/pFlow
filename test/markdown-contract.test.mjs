@@ -64,7 +64,9 @@ for (const [name, mutate, message] of [
     const n = documentedNode(f);
     const re = new RegExp(`<a id="${n.id}"></a>\\n### [^\\n]+\\n\\n[^\\n]+\\n`);
     const section = f.text().match(re)[0];
-    f.edit(text => text.replace(section, '').replace(`<a id="${f.data.flows[1].id}"></a>`, section + `\n<a id="${f.data.flows[1].id}"></a>`));
+    const other = f.data.flows.find(flow => !flow.nodes.includes(n));
+    const heading = `<a id="${other.id}"></a>\n## ${other.label}\n`;
+    f.edit(text => text.replace(section, '').replace(heading, heading + '\n' + section));
   }, /nested under its owning Flow/],
   ['index omits a detail Flow', f => f.index(text => text.split('\n').filter(line => !line.includes(f.data.flows[2].id)).join('\n')), /Index must link to Flow/],
   ['index links to the wrong document', f => f.index(text => text.replace('execution.md#', 'index.md#')), /Missing navigation section/],

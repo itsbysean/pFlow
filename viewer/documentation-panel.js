@@ -186,7 +186,11 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
   function locateSelection() {
     const entity = selected?.entity;
     clearSearchHighlights();
-    if (!entity) { markSection(flow?.id, { move: false }); return; }
+    if (!entity) {
+      const reference = flow?.docs?.find(ref => ref.anchor === flow.id) || flow?.docs?.[0];
+      byId('document-reference').textContent = reference ? reference.path + (reference.anchor ? '#' + reference.anchor : '') : '';
+      markSection(flow?.id, { move: false }); return;
+    }
     const canonical = entity.docs?.find(ref => ref.anchor === entity.id);
     let notice = 'No element documentation link. Showing Flow documentation';
     if (canonical && selected.ownerFlow?.id === flow?.id) {
@@ -197,13 +201,16 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
         else {
           const { association, notice: invalid } = globalThis.pFlow.resolveDocumentAssociation(sample.architecture, reference, currentView.rendered);
           if (association?.entity === entity && association.flowId === flow?.id) {
-            byId('document-status').textContent = ''; markSection(entity.id, { flash: true }); return;
+            byId('document-status').textContent = '';
+            byId('document-reference').textContent = reference.path + '#' + entity.id;
+            markSection(entity.id, { flash: true }); return;
           }
           notice = invalid || notice;
         }
       } catch (error) { notice = error.message; }
     } else if (selected.remote) notice = 'The selected target belongs to another Flow. Showing current Flow documentation';
     byId('document-status').textContent = notice + '.';
+    byId('document-reference').textContent = currentView?.path ? currentView.path + (flow?.id ? '#' + flow.id : '') : '';
     markSection(flow?.id, { move: false });
   }
   function openDocument(reference, prepared) {
@@ -219,20 +226,22 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     byId('document-picker').replaceChildren(...references.map((ref, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = ref.path + (ref.anchor ? `#${ref.anchor}` : ''); return option; }));
     byId('document-picker').disabled = references.length === 0;
   }
-  function setContext(nextSample, nextFlow, nextSelection, activate = false, locate = true) {
+  function setContext(nextSample, nextFlow, nextSelection, refresh = false, locate = true) {
     sample = nextSample; flow = nextFlow; selected = nextSelection;
     const entity = selected?.entity || flow;
     const sameProcess = currentView?.sample === sample && currentView.path === (flow?.docs?.find(ref => ref.anchor === flow.id) || flow?.docs?.[0])?.path && currentView.markdown === documents()[currentView.path] && currentView.html === globalThis.pFlowContent?.[sample?.key]?.documents[currentView.path]?.html;
     references = [...(flow?.docs || [])];
     const canonical = references.findIndex(ref => ref.anchor === flow?.id);
     if (canonical > 0) references.unshift(references.splice(canonical, 1)[0]);
-    byId('document-context').textContent = flow ? `Flow documentation: ${flow.label}.` : 'Architecture documentation';
+    byId('document-context').textContent = selected ? `${entity.label || entity.kind} · ${flow?.label || 'Process'}` : flow ? `Flow documentation: ${flow.label}.` : 'Architecture documentation';
     byId('document-context').title = byId('document-context').textContent;
     populateDocuments();
-    if (!sameProcess || activate) renderDocument(references[0]);
+    if (!sameProcess || refresh) renderDocument(references[0]);
     if (locate && currentView) locateSelection();
     if (selected && byId('document-status').textContent) byId('document-context').textContent = byId('document-status').textContent;
-    sourceIds = [...new Set(globalThis.pFlow.evidenceIds(entity))]; populateSources();
+    const previousSource = byId('source-picker').value;
+    const evidence = selected ? globalThis.pFlow.evidenceIds(entity) : flow ? [...(flow.nodes || []), ...(flow.edges || [])].flatMap(globalThis.pFlow.evidenceIds) : [];
+    sourceIds = [...new Set(evidence)]; populateSources(sourceIds.includes(previousSource) ? previousSource : undefined);
     byId('summary-title').textContent = flow?.label || 'No process flow';
     const pairs = flow ? [['Nodes', flow.nodes.length], ['Relationships', flow.edges.length], ['Branches', flow.edges.filter(edge => edge.kind === 'branch').length]] : [];
     byId('flow-summary').replaceChildren(...pairs.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = String(value); return [dt, dd]; }));
@@ -240,7 +249,6 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     byId('summary-exits').previousElementSibling.hidden = !byId('summary-exits').children.length;
     const facts = [['Model', sample.architecture.modelVersion], ...(flow ? [['Flow', flow.label]] : []), ...(selected ? [['Selected ID', selected.entity.id]] : [])];
     byId('artifact-facts').replaceChildren(...facts.flatMap(([key, value]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = key; dd.textContent = value; return [dt, dd]; }));
-    if (activate) showTab('documentation');
     if (locate && selected) reveal();
   }
   byId('source-picker').addEventListener('change', renderSource);

@@ -8,32 +8,32 @@ Collect details and check completeness. Complete details lead to access preparat
 <a id="node_p01"></a>
 ### Collect employee details
 
-Collect employee details. Evidence: [src_p01].
+After an offer is accepted, collect the employee details, including names such as José and 민지. The next step checks whether those details are complete. Evidence: [src_p01].
 
 <a id="node_p02"></a>
 ### Details complete?
 
-Details complete?. Evidence: [src_p02].
+Check the submitted details for completeness. Complete details lead to access preparation; missing details lead to a request for more information. Evidence: [src_p02].
 
 <a id="node_p03"></a>
 ### Prepare access
 
-Prepare access. Evidence: [src_p03], [src_p04].
+For complete details, create an account and then send a sign-in link. Open the detail flow to inspect these two supported substeps. Responsibility is not supplied. Evidence: [src_p03], [src_p04].
 
 <a id="node_p04"></a>
 ### Finish onboarding
 
-Finish onboarding. Evidence: [src_p03].
+Complete onboarding after access preparation. The supplied description does not add other completion checks. Evidence: [src_p03].
 
 <a id="node_p05"></a>
 ### Request missing details
 
-Request missing details. Evidence: [src_p05].
+Ask for the details missing from the submission. The clarification states that this attempt then stops; do not assume an automatic retry. Evidence: [src_p05].
 
 <a id="node_p06"></a>
 ### Stop this attempt
 
-Stop this attempt. Evidence: [src_p90].
+End the incomplete-details attempt after requesting more information. A later resubmission is explicitly outside this documented process. Evidence: [src_p90].
 
 <a id="flow_p02"></a>
 ## Prepare access
@@ -43,12 +43,12 @@ Create an account, then send a sign-in link. No assignee was specified. Evidence
 <a id="node_p07"></a>
 ### Create an account
 
-Create an account. Evidence: [src_p04].
+Create the account as the first access-preparation substep. The account system and responsible person are not specified. Evidence: [src_p04].
 
 <a id="node_p08"></a>
 ### Send a sign-in link
 
-Send a sign-in link. Evidence: [src_p04].
+After account creation, send a sign-in link. The delivery tool, recipient identity and delivery guarantee are not specified. Evidence: [src_p04].
 
 ## Source evidence
 

@@ -8,27 +8,27 @@ Prepare the package and run verification. Publish only on pass; abort on failure
 <a id="node_p01"></a>
 ### Prepare package
 
-Prepare package. Evidence: [src_p01].
+When deployment is requested, prepare the package before running verification. No packaging tool or responsible person is specified. Evidence: [src_p01].
 
 <a id="node_p02"></a>
 ### Run verification
 
-Run verification. Evidence: [src_p02].
+Run verification after package preparation. Its result determines whether the package can be published. The verification tool and checks are unspecified. Evidence: [src_p02].
 
 <a id="node_p03"></a>
 ### Verification passes?
 
-Verification passes?. Evidence: [src_p02], [src_p03], [src_p04].
+A passing result leads to package publication. A failing result leads to aborting this deployment; no approval or retry is described. Evidence: [src_p02], [src_p03], [src_p04].
 
 <a id="node_p04"></a>
 ### Publish package and finish
 
-Publish package and finish. Evidence: [src_p03].
+Publish the prepared package only after verification passes, then finish. The supplied description does not specify a destination or additional approval. Evidence: [src_p03].
 
 <a id="node_p05"></a>
 ### Abort deployment and finish
 
-Abort deployment and finish. Evidence: [src_p04].
+Stop the deployment when verification fails. No package publication, rollback or retry is described for this outcome. Evidence: [src_p04].
 
 ## Source evidence
 

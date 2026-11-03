@@ -205,7 +205,7 @@ test('SVG categories and directed edges remain intact during conditional-node se
   await page.getByLabel('Displayed flow').selectOption({ label: 'Read state' });
   assert.equal(await page.locator('.diagram-node').count(), 6);
   assert.equal(await page.locator('.diagram-edge').count(), 5);
-  assert.equal(await page.locator('.node-condition polygon').count(), 1);
+  assert.equal(await page.locator('.node-condition polygon.diagram-node-shape').count(), 1);
   const fills = await page.locator('.diagram-node-shape').evaluateAll(items => items.map(item => getComputedStyle(item).fill));
   assert.equal(new Set(fills).size, 4);
   assert.equal(await page.locator('.node-system path.diagram-node-shape').count(), 1);
@@ -587,8 +587,8 @@ test('selection and explicit expansion are separate actions in both the SVG and 
   await selectNode(page, 'Invoke refresh component').click();
   assert.equal(await page.locator('#workspace-title').textContent(), 'Refresh command');
   assert.equal(await page.locator('#node-name').textContent(), 'Invoke refresh component');
-  assert.match(await page.locator('#document-context').textContent(), /No element documentation link/);
-  assert.equal(await page.locator('.doc-target').getAttribute('id'), samples[0].architecture.flows[0].id);
+  assert.match(await page.locator('#document-context').textContent(), /Invoke refresh component/);
+  assert.equal(await page.locator('.doc-target').getAttribute('id'), samples[0].architecture.flows[0].nodes.find(n=>n.label==='Invoke refresh component').id);
   await page.getByRole('tab',{name:'Details',exact:true}).click();
   await page.getByRole('button', { name: 'Open detail: Refresh component', exact: true }).click();
   assert.equal(await page.locator('#workspace-title').textContent(), 'Refresh component');
@@ -1282,7 +1282,7 @@ test('standalone data preserves closing sequences and Unicode as inert graph, Ma
     const json = path.join(root, 'examples/a-sync/architecture.json'), data = JSON.parse(readFileSync(json, 'utf8'));
     data.flows[2].nodes.find(node => node.id === 'node_d1e0f061c044').label = attack; writeFileSync(json, JSON.stringify(data));
     const markdown = path.join(root, 'examples/a-sync/docs/execution.md');
-    writeFileSync(markdown, readFileSync(markdown, 'utf8').replace('## Source evidence', 'Malicious prose <img src=x onerror="globalThis.generatedInjected=1"> & café 日本語.\n\n## Source evidence'));
+    writeFileSync(markdown, readFileSync(markdown, 'utf8').replace('### State service', '### State service\n\nMalicious prose <img src=x onerror="globalThis.generatedInjected=1"> & café 日本語.'));
     const source = path.join(root, 'examples/a-sync/sources/state.py.txt'), lines = readFileSync(source, 'utf8').split('\n'); lines[5] = `    value = ${JSON.stringify(attack)}`; writeFileSync(source, lines.join('\n'));
   } });
   const page = await openGenerated(t, file);
