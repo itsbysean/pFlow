@@ -1,4 +1,4 @@
-// Offline demo snapshots. Tests compare each architecture with its M1 artifact.
+/* Approved example artifacts for offline development. */
 globalThis.pFlowSamples = [
   {
     "key": "a-sync",
@@ -35,6 +35,12 @@ globalThis.pFlowSamples = [
               "kind": "operation",
               "sourceIds": [
                 "src_9eeed4e44319"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_352296cd82d5"
+                }
               ]
             },
             {
@@ -45,7 +51,13 @@ globalThis.pFlowSamples = [
                 "src_9eeed4e44319",
                 "src_e8a62f5a06fa"
               ],
-              "expandFlowId": "flow_df8ae1187700"
+              "expandFlowId": "flow_df8ae1187700",
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_8b15c706f980"
+                }
+              ]
             },
             {
               "id": "node_4810507d3d99",
@@ -53,6 +65,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_9eeed4e44319"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_4810507d3d99"
+                }
               ]
             },
             {
@@ -61,6 +79,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_9eeed4e44319"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_a750a397fbb6"
+                }
               ]
             }
           ],
@@ -115,6 +139,12 @@ globalThis.pFlowSamples = [
               "kind": "operation",
               "sourceIds": [
                 "src_e8a62f5a06fa"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_8a44645d4337"
+                }
               ]
             },
             {
@@ -125,7 +155,13 @@ globalThis.pFlowSamples = [
                 "src_e8a62f5a06fa",
                 "src_1def2254d126"
               ],
-              "expandFlowId": "flow_844c0963da42"
+              "expandFlowId": "flow_844c0963da42",
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_a92196d6ef71"
+                }
+              ]
             },
             {
               "id": "node_6f458592ca7a",
@@ -133,6 +169,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_e8a62f5a06fa"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_6f458592ca7a"
+                }
               ]
             },
             {
@@ -141,6 +183,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_e8a62f5a06fa"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_f76637525363"
+                }
               ]
             }
           ],
@@ -252,6 +300,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_9c29a4625764"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_61a961f4ac47"
+                }
               ]
             },
             {
@@ -260,6 +314,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_58fcca3eb0d2"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_3e4fe1d913f7"
+                }
               ]
             },
             {
@@ -268,6 +328,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_35f0bded3992"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_e9162329f133"
+                }
               ]
             }
           ],
@@ -440,6 +506,12 @@ globalThis.pFlowSamples = [
               "kind": "operation",
               "sourceIds": [
                 "src_cd50bc1a2640"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_0e7cc113b65d"
+                }
               ]
             },
             {
@@ -469,6 +541,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_eef0c1c8de4a"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_baa95457c989"
+                }
               ]
             }
           ],
@@ -532,6 +610,12 @@ globalThis.pFlowSamples = [
               "sourceIds": [
                 "src_cb7eb44009b5",
                 "src_4e211161c2b5"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_787c595615f3"
+                }
               ]
             },
             {
@@ -561,6 +645,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_3007021966f4"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_fae9e45838b8"
+                }
               ]
             }
           ],
@@ -673,6 +763,12 @@ globalThis.pFlowSamples = [
               "sourceIds": [
                 "src_32bed10ef9e0",
                 "src_eae3e0bb6cfb"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_31a244ce4c93"
+                }
               ]
             },
             {
@@ -682,6 +778,12 @@ globalThis.pFlowSamples = [
               "sourceIds": [
                 "src_d346d8984be7",
                 "src_d2d9d64232f1"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_dff9cc696735"
+                }
               ]
             },
             {
@@ -694,7 +796,13 @@ globalThis.pFlowSamples = [
                 "src_d346d8984be7",
                 "src_101537a07182"
               ],
-              "expandFlowId": "flow_6dc031d9e806"
+              "expandFlowId": "flow_6dc031d9e806",
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_9a2347f940fd"
+                }
+              ]
             },
             {
               "id": "node_453c6bcced56",
@@ -702,6 +810,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_d346d8984be7"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_453c6bcced56"
+                }
               ]
             }
           ],
@@ -778,6 +892,12 @@ globalThis.pFlowSamples = [
               "kind": "terminal",
               "sourceIds": [
                 "src_101537a07182"
+              ],
+              "docs": [
+                {
+                  "path": "execution.md",
+                  "anchor": "node_8817fbc8a8cf"
+                }
               ]
             }
           ],

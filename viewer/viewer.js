@@ -45,7 +45,14 @@ globalThis.pFlow = globalThis.pFlow || {};
     byId('clear-selection').hidden = !selected;
     inspector.render(currentSample.architecture, flow, selected, state?.path.map(frame => frame.flowId) || []);
     documentation.setContext(currentSample, flow, selected, false, locateDocumentation);
-    if (locateDocumentation) { globalThis.pFlow.layout.reveal('right'); showTab(byId('tab-documentation')); }
+    if (locateDocumentation) {
+      globalThis.pFlow.layout.reveal('right');
+      // Reveal after restoring/resizing the panel, when its reading area has dimensions.
+      requestAnimationFrame(() => {
+        documentation.reveal();
+        for (const id of ['view-source', 'view-details']) if (!byId(id).hidden) byId(id).scrollTop = 0;
+      });
+    }
   }
   byId('clear-selection').addEventListener('click', () => {
     selectEntity(undefined); byId('diagram-container').querySelector('.diagram-svg')?.focus({ preventScroll: true });
@@ -109,7 +116,7 @@ globalThis.pFlow = globalThis.pFlow || {};
       byId(item.getAttribute('aria-controls')).hidden = !selected;
     }
     if (focus) tab.focus();
-    if (tab.id === 'tab-documentation') documentation.reveal();
+    if (tab.id === 'tab-documentation') { documentation.reveal(); requestAnimationFrame(() => documentation.reveal()); }
   }
   function setWorkspaceState(state, model) {
     const loading = state === 'loading'; const empty = !model || model.entryCount === 0;
@@ -212,7 +219,6 @@ globalThis.pFlow = globalThis.pFlow || {};
       else if (flows[0]) navigation.selectFlow(flows[0].id);
     } catch (error) { setText('navigation-notice', error.message); }
     renderNavigation();
-    showTab(byId('tab-documentation'));
     return model;
   }
   const tabs = [...document.querySelectorAll('[role="tab"]')];

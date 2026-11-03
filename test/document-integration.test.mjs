@@ -21,7 +21,7 @@ function fixture(t,{kind='prompt',mutate}={}){
  const graphPath=path.join(bundle,'architecture.json'),graph=JSON.parse(readFileSync(graphPath));
  const docPath=graph.flows[0].docs.find(ref=>ref.anchor===graph.flows[0].id).path,doc=path.join(bundle,'docs',docPath);
  // Extra copies of already evidenced prose make scrolling meaningful without new steps.
- if(kind==='prompt')writeFileSync(doc,readFileSync(doc,'utf8').replace('Collect employee details. Evidence:',('Collect employee details. '.repeat(180))+'Evidence:'));
+ if(kind==='prompt')writeFileSync(doc,readFileSync(doc,'utf8').replace('After an offer is accepted, collect the employee details, including names such as José and 민지. The next step checks whether those details are complete. Evidence:',('Collect employee details. '.repeat(180))+'Evidence:'));
  mutate?.({graph,doc,bundle});writeFileSync(graphPath,JSON.stringify(graph));
  const file=path.join(parent,'architecture.html');writeStandaloneHTML(prepareBuild({input:bundle,repositoryRoot:root,output:file}));return {parent,root,bundle,graph,file,docPath};
 }

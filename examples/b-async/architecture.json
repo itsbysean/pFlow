@@ -45,6 +45,12 @@
           "kind": "operation",
           "sourceIds": [
             "src_cd50bc1a2640"
+          ],
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_0e7cc113b65d"
+            }
           ]
         },
         {
@@ -74,6 +80,12 @@
           "kind": "terminal",
           "sourceIds": [
             "src_eef0c1c8de4a"
+          ],
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_baa95457c989"
+            }
           ]
         }
       ],
@@ -137,6 +149,12 @@
           "sourceIds": [
             "src_cb7eb44009b5",
             "src_4e211161c2b5"
+          ],
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_787c595615f3"
+            }
           ]
         },
         {
@@ -166,6 +184,12 @@
           "kind": "terminal",
           "sourceIds": [
             "src_3007021966f4"
+          ],
+          "docs": [
+            {
+              "path": "execution.md",
+              "anchor": "node_fae9e45838b8"
+            }
           ]
         }
       ],

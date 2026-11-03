@@ -57,7 +57,34 @@ test('large graph and long Markdown reuse mounted content through repeated selec
 test('keyboard focus remains visible in both themes and short workspace controls remain reachable',async t=>{
  const page=await open(t,fixture(t));for(const theme of ['light','dark']){
   if(theme==='dark')await page.getByRole('button',{name:'Use dark theme'}).click();await page.keyboard.press('Tab');
-  for(const selector of ['#resize-right','#zoom-fit','.diagram-node-select']){await page.locator(selector).first().focus();assert.equal(await page.locator(selector).first().evaluate(el=>{const s=getComputedStyle(el);return el.matches(':focus-visible')&&s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>=2;}),true);}
+  for(const selector of ['#resize-right','#zoom-fit','.diagram-node-select']){await page.locator(selector).first().focus();assert.equal(await page.locator(selector).first().evaluate(el=>{const s=getComputedStyle(el);if(el.matches('.diagram-node-select')){const ring=getComputedStyle(el.querySelector('.diagram-node-focus'));return el.matches(':focus-visible')&&ring.display!=='none'&&ring.fill==='none'&&parseFloat(ring.strokeWidth)>=2;}return el.matches(':focus-visible')&&s.outlineStyle!=='none'&&parseFloat(s.outlineWidth)>=2;}),true);}
  }
  await page.setViewportSize({width:800,height:300});await page.locator('#zoom-fit').focus();await page.keyboard.press('Enter');const fit=await page.locator('#zoom-fit').boundingBox();assert.ok(fit.y>=0&&fit.y+fit.height<=300);await page.locator('.diagram-svg').focus();await page.keyboard.press('ArrowDown');assert.ok((await page.locator('#diagram-container').boundingBox()).height>=80);
+});
+
+for(const theme of ['light','dark']) test(`${theme}: selection retains each node shape and category while adding fill and soft glow`,async t=>{
+ const f=fixture(t,'code'),page=await open(t,f);if(theme==='dark')await page.getByRole('button',{name:'Use dark theme'}).click();
+ const verify=async selector=>{
+  if(await page.locator('#clear-selection').isVisible())await page.locator('#clear-selection').click();
+  const node=page.locator(selector).first(),target=node.locator('.diagram-node-select');await page.mouse.move(20,15);
+  const snapshot=()=>node.evaluate(el=>{const shape=el.querySelector('.diagram-node-shape'),style=getComputedStyle(shape),box=shape.getBBox();return {tag:shape.tagName,geometry:[box.x,box.y,box.width,box.height],points:shape.getAttribute('points'),path:shape.getAttribute('d'),radius:shape.getAttribute('rx'),stroke:style.stroke,fill:style.fill,filter:style.filter,transform:el.getAttribute('transform')};});
+  const before=await snapshot(),view=await page.locator('.diagram-scene').getAttribute('transform');await target.click();await page.mouse.move(20,15);const after=await snapshot();
+  assert.notEqual(after.fill,before.fill);assert.notEqual(after.filter,'none');assert.equal(before.filter,'none');
+  for(const key of ['tag','geometry','points','path','radius','stroke','transform'])assert.deepEqual(after[key],before[key],key);
+  assert.equal(await page.locator('.diagram-node.is-selected').count(),1);assert.equal(await target.getAttribute('aria-pressed'),'true');assert.equal(await page.locator('.diagram-selection-ring').count(),0);
+  assert.equal(await target.evaluate(el=>getComputedStyle(el).outlineStyle),'none');assert.equal(await page.locator('.diagram-scene').getAttribute('transform'),view);
+ };
+ await verify('.diagram-node.node-internal');await page.locator('#flow-picker').selectOption(f.graph.flows[2].id);
+ for(const category of ['library','condition','system','terminal'])await verify('.diagram-node.node-'+category);
+ await page.locator('#zoom-in').click();assert.equal(await page.locator('.diagram-node.is-selected .diagram-node-shape').evaluate(el=>getComputedStyle(el).filter!=='none'),true);
+});
+test('keyboard focus follows the diamond and remains distinct from persistent selection',async t=>{
+ const f=fixture(t,'code'),page=await open(t,f);await page.locator('#flow-picker').selectOption(f.graph.flows[2].id);
+ const node=page.locator('.diagram-node.node-condition'),target=node.locator('.diagram-node-select');await page.keyboard.press('Tab');await target.focus();
+ assert.equal(await target.getAttribute('aria-pressed'),'false');
+ const focus=()=>node.evaluate(el=>{const shape=el.querySelector('.diagram-node-shape'),ring=el.querySelector('.diagram-node-focus'),style=getComputedStyle(ring);return {tag:ring.tagName,shape:shape.tagName,points:ring.getAttribute('points'),shapePoints:shape.getAttribute('points'),visible:style.display!=='none',fill:style.fill,dashes:style.strokeDasharray};});
+ const before=await focus();assert.equal(before.visible,true);assert.equal(before.tag,before.shape);assert.equal(before.points,before.shapePoints);assert.equal(before.fill,'none');assert.notEqual(before.dashes,'none');
+ await page.keyboard.press('Space');assert.equal(await target.getAttribute('aria-pressed'),'true');assert.equal((await focus()).visible,true);
+ const id=await node.getAttribute('data-node-id');assert.equal(await page.locator('.doc-target').getAttribute('id'),id);
+ await page.locator('#zoom-fit').focus();assert.equal((await focus()).visible,false);assert.equal(await target.getAttribute('aria-pressed'),'true');assert.notEqual(await node.locator('.diagram-node-shape').evaluate(el=>getComputedStyle(el).filter),'none');
 });

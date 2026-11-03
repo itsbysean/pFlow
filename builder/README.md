@@ -1,6 +1,6 @@
 # Offline HTML Builder
 
-M4-03 discovers and validates artifacts, processes Markdown and bounded snippets, then writes one self-contained architecture.html with the existing Viewer. The generated HTML needs no original input files, neighboring assets, runtime dependencies, web server or network connection. The source CLI uses this checkout and its development dependencies; the portable Skill below requires neither at runtime.
+the Builder discovers and validates artifacts, processes Markdown and bounded snippets, then writes one self-contained architecture.html with the existing Viewer. The generated HTML needs no original input files, neighboring assets, runtime dependencies, web server or network connection. The source CLI uses this checkout and its development dependencies; the portable Skill below requires neither at runtime.
 
 Use Node.js 24. In the pFlow source checkout, install development dependencies with `npm ci --ignore-scripts`. The source CLI can run from any working directory and does not need npm installation in the target repository.
 
@@ -11,7 +11,7 @@ npm run archdoc -- build --input . --output architecture.html
 node builder/cli.mjs build --input examples/a-sync --repository-root . --output architecture.html
 ```
 
-Paths resolve from the calling working directory. Quote paths with spaces. `--input` and `--output` are required. `--repository-root` selects the source repository; it defaults to `--input` to retain M4-01 behavior. For another project:
+Paths resolve from the calling working directory. Quote paths with spaces. `--input` and `--output` are required. `--repository-root` selects the source repository; it defaults to `--input` to retain the Builder behavior. For another project:
 
 ```sh
 node builder/cli.mjs build --input /project/docs/architecture --repository-root /project --output /project/architecture.html
@@ -25,7 +25,7 @@ Help and version need no target artifacts. Invalid commands/options, duplicate f
 
 Discovery follows physical directories below `--input`, excludes `.git`, and does not traverse directory symlinks. Every file named `architecture.json` is a candidate. A directory or special file with that name is an error; candidate file symlinks must stay inside input. Unrelated JSON is outside the architecture corpus. Use a physical tree rather than linked-directory discovery.
 
-The existing M1 sample arrangement is:
+The existing the data contract sample arrangement is:
 
 ```text
 repository/                         --repository-root
@@ -42,7 +42,7 @@ repository/                         --repository-root
 
 That legacy layout remains supported without migration. New bundles use root index.md and flows/, with diagrams/architecture.json. The shared bundle-layout.mjs resolver selects the Markdown root: bundle root for flat output, sibling docs/ for legacy output. Its corpus is index.md plus unique entity docs paths, including nested paths where used; evidence/*.md is not promoted into canonical/search documents. Competing graph locations or Markdown roots fail rather than being guessed. A complete independent nested legacy bundle named diagrams remains a separate envelope. Multiple envelopes stay separate; IDs are not merged across them. Files/records and diagnostics use stable case-sensitive code-unit path order. Original graph array order and IDs are retained.
 
-Shared `validation/validate-artifact.mjs` and `validation/validate-documentation.mjs` retain the approved Draft 2020-12 schema, semantic checks and M1-03 profile. Test-support wrappers use the same code. Schema 1.0.0 is unchanged. The optional bounded source-text reader lets validation and extraction share file reads without changing public artifacts. A truly empty file has zero lines; CRLF, LF and CR delimiters are recognized without a phantom final line.
+Shared `validation/validate-artifact.mjs` and `validation/validate-documentation.mjs` retain the approved Draft 2020-12 schema, semantic checks and the data contract profile. Test-support wrappers use the same code. Schema 1.0.0 is unchanged. The optional bounded source-text reader lets validation and extraction share file reads without changing public artifacts. A truly empty file has zero lines; CRLF, LF and CR delimiters are recognized without a phantom final line.
 
 Artifact JSON and Markdown stay inside input; document references also stay in their own bundle. Source paths stay inside the configured repository root. Markdown evidence definitions may leave docs only to resolve to the exact contained SourceReference file/range. Real paths and regular-file checks reject symlink escapes and special files. No source code, Markdown expression or artifact JSON is executed. No server or network resource is used.
 
@@ -52,11 +52,11 @@ Output is explicitly user-selected and may be outside input. It needs an existin
 
 `builder/markdown.mjs` calls the existing `viewer/markdown.js` renderer with a supplied [LinkeDOM document](https://github.com/WebReflection/linkedom). LinkeDOM is pinned as a source-tool development dependency. It provides DOM construction/serialization in Node; it is not loaded by the offline Viewer. There is no second Markdown parser or browser runtime dependency.
 
-The small M1-03 profile supports headings, paragraphs, simple ordered/unordered lists, tables, inline code, fenced code, strong/emphasis, document links and evidence citations. It does not implement full CommonMark or nested inline syntax. Explicit entity anchors become exact `section` IDs. No heading slug is generated. Inline code and source indentation remain text.
+The small the data contract profile supports headings, paragraphs, simple ordered/unordered lists, tables, inline code, fenced code, strong/emphasis, document links and evidence citations. It does not implement full CommonMark or nested inline syntax. Explicit entity anchors become exact `section` IDs. No heading slug is generated. Inline code and source indentation remain text.
 
-Only a fixed, trusted shell is parsed as HTML. Markdown enters through native text nodes and an allowlisted set of renderer-created elements. Raw HTML is escaped, including scripts, SVG, images and event attributes. Supported links become buttons with validated `data-document-path` / optional `data-document-section`; evidence controls use `data-source-id`. No untrusted `href`, `src` or event-handler attribute is emitted. The M1 validator rejects unsupported navigation URLs in authored bundles; the renderer also makes them inert when called independently.
+Only a fixed, trusted shell is parsed as HTML. Markdown enters through native text nodes and an allowlisted set of renderer-created elements. Raw HTML is escaped, including scripts, SVG, images and event attributes. Supported links become buttons with validated `data-document-path` / optional `data-document-section`; evidence controls use `data-source-id`. No untrusted `href`, `src` or event-handler attribute is emitted. The the data contract validator rejects unsupported navigation URLs in authored bundles; the renderer also makes them inert when called independently.
 
-Serialized controls carry associations, not event listeners. The existing renderer module now hydrates them in an inert document, validates allowed elements/attributes/targets and binds the same Viewer document/source callbacks. The live source preview continues to render raw Markdown with native callbacks. Class names, literal IDs and section structure remain compatible with M2/M3. Raw Markdown is retained for the existing search index and highlighting; no search/navigation implementation is duplicated here.
+Serialized controls carry associations, not event listeners. The existing renderer module now hydrates them in an inert document, validates allowed elements/attributes/targets and binds the same Viewer document/source callbacks. The live source preview continues to render raw Markdown with native callbacks. Class names, literal IDs and section structure remain compatible with the Viewer/search. Raw Markdown is retained for the existing search index and highlighting; no search/navigation implementation is duplicated here.
 
 ## Source snippets and diagnostics
 
@@ -99,7 +99,7 @@ This is in-memory Builder state, not a second public schema or a persisted inter
 
 ## Standalone packaging
 
-`builder/html.mjs` reads the existing Viewer index/template and declared JS/CSS order. Sample fixtures are replaced by validated build data. It embeds unchanged M1 envelopes, raw Markdown for existing M3 search, rendered fragments, numbered snippets and source warning metadata. Bundle keys are artifact-relative paths; titles come from authored index headings. No Builder input/repository/output absolute locations, timestamp or random identifier is embedded. Authored text is preserved, including any paths that authors put in their own code or prose.
+`builder/html.mjs` reads the existing Viewer index/template and declared JS/CSS order. Sample fixtures are replaced by validated build data. It embeds unchanged the data contract envelopes, raw Markdown for existing search search, rendered fragments, numbered snippets and source warning metadata. Bundle keys are artifact-relative paths; titles come from authored index headings. No Builder input/repository/output absolute locations, timestamp or random identifier is embedded. Authored text is preserved, including any paths that authors put in their own code or prose.
 
 The output contains one inline stylesheet, inert JSON data and the existing runtime scripts in one ordered inline block. JSON escapes `<`, `>`, `&`, U+2028 and U+2029, including script-closing sequences. CSP uses exact SHA-256 hashes for trusted scripts/styles, denies connections and external runtime assets, and allows neither unsafe-inline nor unsafe-eval. No CDN or LinkeDOM code is shipped to the browser. A template with missing assets or unexpected external resource references fails packaging.
 
@@ -125,11 +125,11 @@ node --test test/builder.test.mjs test/content-processing.test.mjs
 npm test
 ```
 
-Tests use real temporary artifacts, CLI subprocesses, source files and offline Chromium. Generated-file tests move the HTML and delete the inputs before exercising Viewer interactions. They assert that only the HTML itself is requested, with the browser context offline. They check supported/safe rendering, stable navigation attributes, actual browser equivalence, UTF-8/line endings/range precision, deduplication, file-level/limit warnings, fatal stale/missing/unreadable evidence, roots/path safety, deterministic integration, no writes, and existing M1–M3 behavior.
+Tests use real temporary artifacts, CLI subprocesses, source files and offline Chromium. Generated-file tests move the HTML and delete the inputs before exercising Viewer interactions. They assert that only the HTML itself is requested, with the browser context offline. They check supported/safe rendering, stable navigation attributes, actual browser equivalence, UTF-8/line endings/range precision, deduplication, file-level/limit warnings, fatal stale/missing/unreadable evidence, roots/path safety, deterministic integration, no writes, and existing the data contract–search behavior.
 
-The renderer is intentionally limited to M1-03; the validators do not prove source meaning, dynamic execution or historical identity. Discovery is not a Git-ignore engine or arbitrary filename loader. There is no watch mode, whole-file fallback, source-language inference, AI analysis or prebuilt Node/Skill distribution in M4-03.
+The renderer is intentionally limited to the data contract; the validators do not prove source meaning, dynamic execution or historical identity. Discovery is not a Git-ignore engine or arbitrary filename loader. There is no watch mode, whole-file fallback, source-language inference, AI analysis or prebuilt Node/Skill distribution in the Builder.
 
-Stop after M4-03. M5 needs separate approval.
+Stop after the Builder. analysis needs separate approval.
 
 ## Output policy and both bundle layouts
 
@@ -151,9 +151,9 @@ Builder CLI flags stay unchanged. Supply --input <bundle>, --repository-root <ev
 
 JSON documentation paths remain relative to resolved docsRoot; source paths remain relative to evidenceRoot. Rebase evidence definitions when authoring the new layout: a flat flows/name.md uses ../evidence/request.md, while legacy docs/flows/name.md uses ../../evidence/request.md. Do not migrate an old bundle or duplicate the same Markdown into both roots.
 
-Preparation adds only internal filesystem metadata (layout, graphPath, docsRoot and bundle-relative paths). Public graph schema and embedded Viewer payload are unchanged. HTML input protection and rebuild freshness use those actual roots. M6 repository apply resolves baseline/current/staged paths, requires matching layouts and preserves provenance, source/output separation, manual merging and rollback. External repository full builds work; external or prompt targeted apply remains unsupported.
+Preparation adds only internal filesystem metadata (layout, graphPath, docsRoot and bundle-relative paths). Public graph schema and embedded Viewer payload are unchanged. HTML input protection and rebuild freshness use those actual roots. incremental updates repository apply resolves baseline/current/staged paths, requires matching layouts and preserves provenance, source/output separation, manual merging and rollback. External repository full builds work; external or prompt targeted apply remains unsupported.
 
-## Portable Skill distribution (M8-04)
+## Portable Skill distribution
 
 From the development checkout, run `npm ci` then `npm run build:skill`. This creates `dist/pflow/` with one Skill entry point, necessary Markdown references and exactly `scripts/pflow.mjs`. Copy that directory to the chosen Skill installation location; do not copy the source checkout or node_modules. Node.js 24+ is the only runtime requirement for full generation. Repository incremental work also requires local Git. Source CLI and library imports remain supported.
 

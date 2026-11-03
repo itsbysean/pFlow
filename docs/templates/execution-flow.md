@@ -13,7 +13,7 @@ Evidence: [{{src_id}}].
 <a id="{{node_id}}"></a>
 ### {{important step, condition or boundary}}
 
-{{The supported action or alternatives, outcome and any limit. Link to actual detail when available; do not repeat every graph node in prose.}}
+{{Explain this component specifically: what it receives or checks, what it does, and the result or next handoff. State actual branch outcomes, failure behavior or unknowns when relevant. Use a short paragraph or bullets; do not repeat the Flow overview. Link to supported detail when available.}}
 Evidence: [{{src_id}}].
 
 ## Source evidence

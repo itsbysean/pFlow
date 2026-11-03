@@ -98,3 +98,40 @@ for(const width of [1100,900,720,640,420])test(`narrow ${width}px shell keeps re
  await page.locator('#toggle-left').click();await page.locator('#toggle-right').click();assert.ok((await box(page,'#diagram-container')).width>0);
  await page.keyboard.press('Control+k');assert.equal(await page.locator('#global-search').evaluate(el=>el===document.activeElement),true);
 });
+
+for (const tabName of ['Evidence references','Process summary','Details']) test(`${tabName} stays selected through selection, drill-down, Back and entry changes`,async t=>{
+ const page=await open(t);await page.getByRole('tab',{name:tabName,exact:true}).click();
+ const stays=async()=>assert.equal(await page.getByRole('tab',{name:tabName,exact:true}).getAttribute('aria-selected'),'true');
+ await page.getByRole('button',{name:/^Select node Invoke refresh component\./}).click();await stays();
+ if(tabName==='Evidence references')assert.ok(await page.locator('#source-picker option').count()>0);
+ await page.locator('.diagram-expand-control').first().click();await stays();await page.getByRole('button',{name:'Back',exact:true}).click();await stays();
+ await page.locator('.entry-button').last().click();await stays();
+ if(tabName==='Evidence references')assert.ok(await page.locator('#source-picker option').count()>0);
+ await page.getByRole('button',{name:'Docs',exact:true}).click();assert.equal(await page.getByRole('tab',{name:'Documentation',exact:true}).getAttribute('aria-selected'),'true');assert.match(await page.locator('#document-reference').textContent(),/#flow_/);
+});
+test('components in one flow expose distinct cited text and canonical references without replacing the mounted document',async t=>{
+ const page=await open(t);await page.evaluate(()=>{globalThis.keptDocument=document.querySelector('#document-body').firstElementChild;});
+ const descriptions=[],references=[];
+ for(const label of ['Receive command','Invoke refresh component']){
+  await page.getByRole('button',{name:new RegExp('^Select node '+label+'\\.')}).click();
+  descriptions.push(await page.locator('.doc-target > p').first().textContent());references.push(await page.locator('#document-reference').textContent());
+  assert.ok(await page.locator('.doc-target .source-link').count()>0);assert.match(await page.locator('#document-context').textContent(),new RegExp(label));
+ }
+ assert.notEqual(descriptions[0],descriptions[1]);assert.notEqual(references[0],references[1]);assert.equal(await page.evaluate(()=>keptDocument===document.querySelector('#document-body').firstElementChild),true);
+});
+
+test('Documentation reveals each component after restoring a collapsed panel and after tab changes',async t=>{
+ const page=await open(t);await page.locator('#flow-picker').selectOption('flow_844c0963da42');
+ const movesTo=async id=>{
+  await page.waitForFunction(id=>{const target=document.querySelector('.doc-target'),article=document.querySelector('#document-article');if(target?.id!==id)return false;const y=target.getBoundingClientRect().top-article.getBoundingClientRect().top;return y>=0&&y<22;},id);
+  assert.equal(await page.getByRole('tab',{name:'Documentation',exact:true}).getAttribute('aria-selected'),'true');assert.match(await page.locator('#document-reference').textContent(),new RegExp('#'+id+'$'));
+ };
+ const select=id=>page.locator(`[data-node-id="${id}"] .diagram-node-select`).click();
+ await select('node_d1e0f061c044');await movesTo('node_d1e0f061c044');
+ await page.getByRole('button',{name:'Collapse process documentation'}).click();await select('node_687dd127f403');await movesTo('node_687dd127f403');
+ await select('node_b5b0dd797025');await movesTo('node_b5b0dd797025');
+ await page.getByRole('tab',{name:'Evidence references',exact:true}).click();await page.locator('#view-source').evaluate(el=>el.scrollTop=500);
+ await select('node_d1e0f061c044');assert.equal(await page.getByRole('tab',{name:'Evidence references',exact:true}).getAttribute('aria-selected'),'true');
+ assert.match(await page.locator('#source-fields').textContent(),/state.py.txt/);assert.ok(await page.locator('#source-snippet').textContent().then(text=>text.includes('http.get')));
+ await page.getByRole('tab',{name:'Documentation',exact:true}).click();await movesTo('node_d1e0f061c044');
+});

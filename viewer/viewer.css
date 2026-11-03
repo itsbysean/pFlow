@@ -21,6 +21,9 @@
   --green: #4b8264;
   --grid-dot: #dde5f0;
   --shadow: 0 1px 4px #22375b06;
+  --node-hover-mix: 10%;
+  --node-selection-mix: 18%;
+  --node-glow-mix: 25%;
   --radius: 7px;
   --space-1: 4px;
   --space-2: 8px;
@@ -110,13 +113,20 @@ h3 { font-size: 12px; font-weight: 650; }
 .diagram-node-shape { fill: var(--node-fill); stroke: var(--node-color); stroke-width: 1.4; }
 .node-expandable { cursor: pointer; }
 .diagram-node-select, .diagram-edge, .diagram-edge-label, .diagram-expand-control { cursor: pointer; }
-.diagram-node-select:hover .diagram-node-shape, .diagram-node-select:focus-visible .diagram-node-shape { stroke-width: 2.4; }
+.diagram-node-select:hover .diagram-node-shape { fill: color-mix(in srgb, var(--node-color) var(--node-hover-mix), var(--node-fill)); }
+.diagram-node.is-selected .diagram-node-shape {
+  fill: color-mix(in srgb, var(--node-color) var(--node-selection-mix), var(--node-fill));
+  stroke-width: 2;
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--node-color) var(--node-glow-mix), transparent));
+}
+/* A keyboard-only contour follows the actual shape; selection has no outer box. */
+.diagram-node-select, .diagram-node-select:focus-visible { outline: none; }
+.diagram-node-focus { display: none; fill: none; stroke: var(--blue); stroke-width: 5; stroke-dasharray: 3 3; pointer-events: none; }
+.diagram-node-select:focus-visible .diagram-node-focus { display: block; }
 .diagram-node-select:focus-visible, .diagram-expand-control:focus-visible, .diagram-edge:focus-visible { outline-offset: 3px; }
 .node-recursive .diagram-expand-control { cursor: help; }
 .diagram-expand-control rect { fill: var(--surface); stroke: var(--node-color); stroke-width: 1; }
 .diagram-expand-control:hover rect, .diagram-expand-control:focus-visible rect { stroke-width: 2.5; }
-.diagram-selection-ring { fill: none; stroke: var(--blue); stroke-width: 2; display: none; pointer-events: none; }
-.is-selected .diagram-selection-ring { display: block; }
 .diagram-expand-hint { font: 600 13px var(--sans); fill: var(--node-color); pointer-events: none; }
 .node-unresolved .diagram-node-shape { stroke-dasharray: 3 3; }
 .node-remote .diagram-node-shape { stroke-dasharray: 8 4; }
