@@ -6,7 +6,7 @@ pFlow documents how systems work and how teams work. A coding agent uses reposit
 
 [Download the latest Skill ZIP](https://github.com/itsbysean/pFlow/releases/latest/download/pflow.zip), extract it, and copy the `pflow/` folder into your agent's Skills location. Keep `SKILL.md`, `references/` and `scripts/pflow.mjs` together.
 
-Node.js 24+ is required. The installed Skill needs no npm install or web server. Repository incremental updates also require Git. GitHub's source-code archive is a development checkout, not the installed Skill.
+Node.js 24+ is required. The installed Skill needs no npm install or web server. The common documentation lifecycle needs no Git or SVN. GitHub's source-code archive is a development checkout, not the installed Skill.
 
 ## Use
 
@@ -40,11 +40,12 @@ docs/architecture/
   diagrams/architecture.json
   evidence/                 # captured prompt evidence, when applicable
   architecture.html
+  snapshot.json             # versioned coverage and fingerprint baseline
 ```
 
 Explicit output paths are final bundle destinations. Otherwise pFlow prefers an existing root `docs/`, then `doc/`, or creates `docs/`. Legacy bundles remain supported. See [output policy](docs/output-bundle-evaluation.md).
 
-Repository updates can use Git-based impact planning, reviewed targeted regeneration and safe HTML rebuilds. Prompt updates require explicit full generation; uncertain ownership or manual edits need a safe replacement decision. pFlow does not run target scripts, install target dependencies or contact infrastructure to discover architecture.
+pFlow can update code, natural-language or mixed-evidence documentation using a portable Snapshot and current file fingerprints. It reanalyzes affected flows, preserves unrelated information and publishes validated Markdown, graph, Snapshot and HTML together. Ambiguous requests, manual changes or unsafe impact require clarification or reviewed full reanalysis. The established Git-based tools remain available. See [documentation lifecycle](skills/pflow/references/lifecycle.md). pFlow does not run target scripts, install target dependencies or contact infrastructure to discover architecture.
 
 ## Develop
 

@@ -15,7 +15,7 @@ const refs = graph => [...graph.entryPoints, ...graph.flows.flatMap(f => [f,...f
 const text = file => { try { return readFileSync(file,'utf8'); } catch(e) { if(e.code==='ENOENT')return undefined;throw e; } };
 const relative = p => { if(typeof p!=='string'||!p||path.posix.isAbsolute(p)||p.includes('\\')||p.split('/').includes('..')||/^[A-Za-z]:/.test(p))fail(`unsafe relative path ${JSON.stringify(p)}`);return path.posix.normalize(p); };
 // Literal M1 Flow block boundaries only, fence aware; not a Markdown renderer.
-function flowBlocks(markdown='') {
+export function flowBlocks(markdown='',prefix='flow_') {
   const lines=markdown.match(/[^\n]*\n|[^\n]+$/g)??[],blocks=new Map(),stack=[];let fence,pending;
   const append=items=>{if(stack.length)blocks.get(stack.at(-1).id).push(...items);};
   for(const raw of lines){
@@ -26,7 +26,7 @@ function flowBlocks(markdown='') {
     if(a){pending={id:a[1],lines:[raw]};continue;}
     if(pending&&!line.trim()){pending.lines.push(raw);continue;}
     const h=line.match(/^(#{1,6})\s+\S/);
-    if(h){const level=h[1].length;while(stack.length&&stack.at(-1).level>=level)stack.pop();if(pending?.id.startsWith('flow_')){blocks.set(pending.id,[]);stack.push({id:pending.id,level});}}
+    if(h){const level=h[1].length;while(stack.length&&stack.at(-1).level>=level)stack.pop();if(pending?.id.startsWith(prefix)){blocks.set(pending.id,[]);stack.push({id:pending.id,level});}}
     if(pending){append(pending.lines);pending=undefined;}append([raw]);
   }
   if(pending)append(pending.lines);return new Map([...blocks].map(([id,lines])=>[id,lines.join('')]));

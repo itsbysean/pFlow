@@ -25,3 +25,7 @@ Use the supported small Markdown profile and local navigation, not raw executabl
 Give each significant selectable component its own canonical Node section and exact docs backlink. Repeating a Flow overview under several Node anchors does not explain those components. Explain what the component receives or checks, the work it performs, and the result or next handoff, using only evidence already gathered. For a decision, state the actual alternatives and their outcomes. For an external boundary, state the recorded operation, verified destination or unresolved configuration, and relevant failure behavior. Use a short paragraph or a few bullets; do not fill missing information with boilerplate or invented facts.
 
 A component with supported substeps can link to its existing detail Flow. Trivial steps need no artificial explanation; when there is no component-level account, leave the link absent and report that limit. Before building, compare two component sections in the same Flow: their text and citations must support their different roles rather than repeat the same summary.
+
+## Lifecycle baseline and updates
+
+Follow [documentation lifecycle](lifecycle.md) before writes. Generate complete reviewed coverage and source scopes with initial artifacts. Use the common publisher to validate, build and record snapshot.json together. For updates, reanalyze affected Flows from current evidence, preserve unrelated sections/identities and publish all related artifacts as one recoverable transaction. Do not merely replace words in existing Markdown.

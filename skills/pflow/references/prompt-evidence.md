@@ -24,4 +24,4 @@ Before generation, confirm file bytes match the supplied description/replies. Be
 
 ## Existing output and updates
 
-No prompt incremental regeneration is provided. New full-generation output must not overwrite manual/unknown existing documentation or evidence without a reviewed safe baseline/ownership decision. Stop and ask if that decision is missing. Do not route through M6 or weaken its rule rejecting source evidence inside generated output. A new explicit empty bundle can be proposed when preserving an existing one, but do not choose another workspace silently.
+Prompt updates use [documentation lifecycle](lifecycle.md). Preserve original statements and capture new amendments separately. Unknown/manual content requires a reviewed ownership decision before replacement. Do not route through M6 or weaken its rule rejecting source evidence inside generated output. Never choose another workspace silently.

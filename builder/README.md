@@ -167,3 +167,7 @@ node /installed/pflow/scripts/pflow.mjs build --input /target/docs/architecture 
 The build uses pinned development esbuild and embeds schema/version JSON, Viewer assets and third-party JavaScript. Node built-ins remain external. The existing optional Canvas and CSSOM add-ons are fixed to their existing non-addon fallbacks; no ambient native/global package is loaded. Third-party license notices are embedded in the executable. Reference documents and templates are copied with checked local links, not fetched at runtime. The distribution directory is generated/ignored; source modules and tests remain authoritative.
 
 Development assets remain file-backed. Packaged assets are immutable embedded strings. Safe rebuild fingerprints/protects the installed executable instead of looking for a neighboring Viewer directory. Both paths use the same Builder, safe Markdown and Viewer code. Replacing the executable requires fresh inspection/review before safe rebuild. The standalone HTML remains independent of the Skill after generation.
+
+## Documentation lifecycle
+
+The single packaged runtime also exposes VCS-independent detect, plan and publish commands for code, prompt and mixed evidence. They reuse this Builder and existing validators; graph schema 1.0.0 is unchanged. See [lifecycle instructions](../skills/pflow/references/lifecycle.md) and [runtime commands](../skills/pflow/references/runtime.md). Publication stages all canonical artifacts and HTML together and retains the previous bundle on recoverable failure.

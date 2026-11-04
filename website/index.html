@@ -216,14 +216,14 @@
             <span class="prompt-type"><span data-lang="en">CODEBASE</span><span data-lang="ko" hidden>코드 저장소</span></span>
             <h4><span data-lang="en">Document a code flow</span><span data-lang="ko" hidden>코드 실행 흐름 문서화</span></h4>
             <div class="prompt-variant" data-lang="en">
-              <pre><code id="repo-prompt-en">Use pFlow to explain how [feature] works in this repository.</code></pre>
+              <pre><code id="repo-prompt-en">Use pFlow to document the order creation flow in this repository.</code></pre>
               <button class="copy-button" type="button" data-copy-target="repo-prompt-en" data-en-aria="Copy repository prompt" data-ko-aria="저장소 프롬프트 복사">
                 <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
               </button>
               <span class="copy-status" aria-live="polite"></span>
             </div>
             <div class="prompt-variant" data-lang="ko" hidden>
-              <pre><code id="repo-prompt-ko">pFlow로 이 저장소의 [기능] 흐름을 문서화해줘.</code></pre>
+              <pre><code id="repo-prompt-ko">pFlow로 이 프로젝트의 주문 생성 흐름을 문서화해줘.</code></pre>
               <button class="copy-button" type="button" data-copy-target="repo-prompt-ko" data-en-aria="Copy repository prompt" data-ko-aria="저장소 프롬프트 복사">
                 <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
               </button>
@@ -234,24 +234,53 @@
             <span class="prompt-type"><span data-lang="en">ANY PROCESS</span><span data-lang="ko" hidden>일반 프로세스</span></span>
             <h4><span data-lang="en">Document a process</span><span data-lang="ko" hidden>프로세스 문서화</span></h4>
             <div class="prompt-variant" data-lang="en">
-              <pre><code id="process-prompt-en">Use pFlow to document this process: [steps and decisions].</code></pre>
+              <pre><code id="process-prompt-en">Use pFlow to document our onboarding process. A new employee requests an account, their manager approves it, and IT creates the account. If rejected, the employee is asked to revise the request.</code></pre>
               <button class="copy-button" type="button" data-copy-target="process-prompt-en" data-en-aria="Copy process prompt" data-ko-aria="프로세스 프롬프트 복사">
                 <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
               </button>
               <span class="copy-status" aria-live="polite"></span>
             </div>
             <div class="prompt-variant" data-lang="ko" hidden>
-              <pre><code id="process-prompt-ko">pFlow로 이 프로세스를 문서화해줘: [단계와 조건].</code></pre>
+              <pre><code id="process-prompt-ko">pFlow로 온보딩 과정을 문서화해줘. 입사자가 계정을 신청하면 팀장이 승인하고, IT팀이 계정을 생성해. 반려되면 신청자에게 수정 요청을 보내.</code></pre>
               <button class="copy-button" type="button" data-copy-target="process-prompt-ko" data-en-aria="Copy process prompt" data-ko-aria="프로세스 프롬프트 복사">
                 <span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span>
               </button>
               <span class="copy-status" aria-live="polite"></span>
             </div>
           </article>
+          <article class="prompt-card">
+            <span class="prompt-type"><span data-lang="en">PROJECT OVERVIEW</span><span data-lang="ko" hidden>프로젝트 개요</span></span>
+            <h4><span data-lang="en">Understand a project</span><span data-lang="ko" hidden>프로젝트 전체 문서화</span></h4>
+            <div class="prompt-variant" data-lang="en">
+              <pre><code id="overview-prompt-en">Use pFlow to document this project’s main entry points and processing flows.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="overview-prompt-en" data-en-aria="Copy overview prompt" data-ko-aria="프로젝트 전체 문서화 프롬프트 복사"><span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span></button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+            <div class="prompt-variant" data-lang="ko" hidden>
+              <pre><code id="overview-prompt-ko">pFlow로 주요 진입점과 처리 흐름을 분석해서 문서화해줘.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="overview-prompt-ko" data-en-aria="Copy overview prompt" data-ko-aria="프로젝트 전체 문서화 프롬프트 복사"><span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span></button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
+          <article class="prompt-card">
+            <span class="prompt-type"><span data-lang="en">UPDATE</span><span data-lang="ko" hidden>업데이트</span></span>
+            <h4><span data-lang="en">Update existing documentation</span><span data-lang="ko" hidden>기존 문서 업데이트</span></h4>
+            <div class="prompt-variant" data-lang="en">
+              <pre><code id="update-prompt-en">Use pFlow to review code changes since the previous analysis and update the affected documentation and HTML.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="update-prompt-en" data-en-aria="Copy update prompt" data-ko-aria="기존 문서 업데이트 프롬프트 복사"><span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span></button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+            <div class="prompt-variant" data-lang="ko" hidden>
+              <pre><code id="update-prompt-ko">pFlow로 이전 문서화 이후 변경된 코드를 확인하고, 영향받는 문서와 HTML을 업데이트해줘.</code></pre>
+              <button class="copy-button" type="button" data-copy-target="update-prompt-ko" data-en-aria="Copy update prompt" data-ko-aria="기존 문서 업데이트 프롬프트 복사"><span data-lang="en">Copy prompt</span><span data-lang="ko" hidden>프롬프트 복사</span></button>
+              <span class="copy-status" aria-live="polite"></span>
+            </div>
+          </article>
         </div>
+        <p class="section-intro"><span data-lang="en">To choose a location, add: “Save the output to [path].”</span><span data-lang="ko" hidden>저장 위치를 정하려면 “결과는 [경로]에 저장해줘.”를 덧붙이세요.</span></p>
         <div class="update-note">
           <strong><span data-lang="en">Updating existing docs</span><span data-lang="ko" hidden>기존 문서 업데이트</span></strong>
-          <p><span data-lang="en">Repository docs can be updated by scope through pFlow's impact, regeneration, and rebuild workflows. Prompt-based process docs support full generation only. pFlow asks before replacing content when ownership is unclear.</span><span data-lang="ko" hidden>저장소 기반 문서는 범위를 지정해 영향 분석, 재생성, 재빌드 흐름으로 업데이트할 수 있습니다. 프롬프트 기반 프로세스 문서는 전체 생성만 지원합니다. 기존 내용의 소유 범위가 불분명하면 pFlow가 교체 전에 확인합니다.</span></p>
+          <p><span data-lang="en">pFlow can update code, process, or mixed-evidence documentation using a saved Snapshot. No Git or SVN is required. It asks when the target or changes are unclear and protects existing documentation when validation fails.</span><span data-lang="ko" hidden>코드, 업무 프로세스 또는 혼합 증거 문서를 저장된 Snapshot 기준으로 업데이트할 수 있습니다. Git이나 SVN은 필수가 아닙니다. 대상이나 변경 사항이 불명확하면 확인하고, 검증에 실패하면 기존 문서를 보존합니다.</span></p>
         </div>
       </div>
     </section>
