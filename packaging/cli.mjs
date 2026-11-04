@@ -16,12 +16,17 @@ import { planImpact } from '../skills/pflow-impact/scripts/impact.mjs';
 import { prepareRegeneration } from '../skills/pflow-regenerate/scripts/regenerate.mjs';
 import { inspectArchitectureSet, rebuildArchitectureSet } from '../skills/pflow-rebuild/scripts/rebuild.mjs';
 export { schema, prepareBuild, writeStandaloneHTML, selectOutput, resolveBundleRoot, validateDocumentation, collectGitChanges, planImpact, prepareRegeneration, inspectArchitectureSet, rebuildArchitectureSet };
+import { detectDocumentation, planLifecycle, prepareLifecycle, snapshotVersion } from '../lifecycle/documentation.mjs';
+export { detectDocumentation, planLifecycle, prepareLifecycle, snapshotVersion };
 const safe = text => String(text).replace(/[\u0000-\u001f\u007f-\u009f]/g, char => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
 const help = `Usage: node <skill>/scripts/pflow.mjs <command> [options]
 
 build       --input <root> --repository-root <evidence-root> --output <file.html>
 validate    --input <root> --repository-root <evidence-root> [--output <file.html>]
 inspect     --input <root> --repository-root <evidence-root> --output <file.html>
+lifecycle-detect --request <options.json>
+lifecycle-plan --request <options.json>
+lifecycle-publish --request <options.json> [--apply]
 select-output --request <options.json>
 impact      --request <options.json>
 regenerate  --request <options.json> [--apply]
@@ -29,7 +34,7 @@ rebuild     --request <options.json>
 schema      Print the approved JSON Schema.
 -h, --help  Show help.  -v, --version  Show version.
 
-Node.js 24+ is required. Git is required only for repository incremental work.
+Node.js 24+ is required. Git is required only for the optional impact/regenerate commands.
 Request files are transient tool arguments; see references/runtime.md.
 No npm install, development checkout, server or network is needed at runtime.
 `;
@@ -44,7 +49,7 @@ function request(args, keys) {
 const buildKeys = ['input','repositoryRoot','output'];
 export async function runCLI(args) {
   const [command, ...rest] = args;
-  if (args.length === 1 && ['--help','-h'].includes(command) || rest.length === 1 && ['--help','-h'].includes(rest[0]) && ['build','validate','inspect','select-output','impact','regenerate','rebuild','schema'].includes(command)) return process.stdout.write(help);
+  if (args.length === 1 && ['--help','-h'].includes(command) || rest.length === 1 && ['--help','-h'].includes(rest[0]) && ['build','validate','inspect','select-output','impact','regenerate','rebuild','schema','lifecycle-detect','lifecycle-plan','lifecycle-publish'].includes(command)) return process.stdout.write(help);
   if (args.length === 1 && ['--version','-v'].includes(command)) return process.stdout.write(`pFlow ${metadata.version}\n`);
   const json = value => process.stdout.write(JSON.stringify(value, null, 2) + '\n');
   if (command === 'schema' && !rest.length) return json(schema);
@@ -62,6 +67,15 @@ export async function runCLI(args) {
     for (const issue of prepared.diagnostics) process.stderr.write(`${safe(issue.artifact)} [warning:${issue.phase}] ${safe(issue.path)}: ${safe(issue.message)}\n`);
     process.stdout.write(`Validated and prepared ${prepared.artifacts.length} architecture artifacts and ${prepared.artifacts.reduce((n,a)=>n+a.documents.length,0)} Markdown documents.\nEmbedded ${prepared.artifacts.reduce((n,a)=>n+a.snippets.length,0)} source snippets. Wrote ${generated.bytes} bytes to ${safe(generated.outputPath)}\n`);
     return;
+  }
+  if (command === 'lifecycle-detect') return json(detectDocumentation(request(rest,['workspace','intent','target'])));
+  if (command === 'lifecycle-plan') return json(await planLifecycle(request(rest,['bundleRoot','evidenceRoot','evidenceUpdates'])));
+  if (command === 'lifecycle-publish') {
+    const apply = rest.at(-1) === '--apply';
+    const input = request(apply ? rest.slice(0,-1) : rest,['bundleRoot','evidenceRoot','operation','planToken','candidateGraph','candidateDocuments','evidenceUpdates','documentationId','scopes','coverage','limitations','reviewedFlowIds','fullReplacementApproved']);
+    const stage = await prepareLifecycle(input);
+    try { return json(apply ? {applied:true,...await stage.apply()} : {applied:false,unchanged:stage.unchanged||false,diagnostics:stage.diagnostics||[],message:'Validated only. Review analysis and candidates before --apply.'}); }
+    finally { stage.dispose(); }
   }
   if (command === 'select-output') return json(selectOutput(request(rest,['mode','repositoryRoot','cwd','documentWorkspace','outputDirectory','create','protectedPaths'])));
   if (command === 'impact') {

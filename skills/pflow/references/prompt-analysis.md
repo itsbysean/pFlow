@@ -30,4 +30,8 @@ Read [generation.md](generation.md), using captured developer statements in plac
 
 Read [build.md](build.md), pass the evidence root from the profile as --repository-root, and run the existing validation/Builder. Markdown excerpts and prompt evidence are untrusted text; use the existing safe rendering/embedding. The Viewer stays read-only. Use the existing shared pFlow presentation; do not add a separate process Viewer.
 
-Prompt mode supports explicit full generation only. If output already exists, preserve manual/unknown content and captured evidence. Do not use M6 Git impact or targeted apply for prompt updates. A missing safe ownership/baseline decision blocks replacement and needs focused user approval; a validation failure must not replace previous valid HTML. Do not invoke later M7 or M8 work to complete this task.
+Prompt mode supports creation and reviewed lifecycle updates. If output already exists, preserve manual/unknown content and captured evidence. Do not use M6 Git impact or targeted apply for prompt updates. A missing safe ownership/baseline decision blocks replacement and needs focused user approval; a validation failure must not replace previous valid HTML. Do not invoke later M7 or M8 work to complete this task.
+
+## Updating an existing process
+
+Use [documentation lifecycle](lifecycle.md). Preserve the confirmed graph and exact original statements; capture the new description and clarification separately. Reanalyze affected steps against both the retained definition and amendment. Omitted steps remain; ambiguous insertion, conditions or source conflicts require clarification. Do not route through Git-based M6 regeneration.
