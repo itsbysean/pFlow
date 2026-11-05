@@ -301,12 +301,20 @@ export async function prepareLifecycle({bundleRoot,evidenceRoot,operation='updat
     const id=/^doc_[A-Za-z0-9_-]+$/.test(baseline?.documentationId||'')?baseline.documentationId:documentationId;
     if(typeof id!=='string'||!/^doc_[A-Za-z0-9_-]+$/.test(id)) fail('supply a retained opaque doc_ identity');
     // Only copy actual cited evidence. No target scripts, VCS commands or evaluation.
-    for(const source of candidateGraph.sources) {
+    let findingSources=[];
+    if(existsSync(path.join(staged,'findings.json'))) {
+      const retained=JSON.parse(readFileSync(path.join(staged,'findings.json'),'utf8'));
+      findingSources=(retained.findings||[]).flatMap(f=>(f.evidence||[]).map(e=>e.source));
+    }
+    for(const source of [...candidateGraph.sources,...findingSources]) {
       const absolute=path.join(evidence,relative(source.path)), destination=path.join(shadowEvidence,source.path);
       if(containsPath(bundle,absolute)) {
         if(!containsPath(path.join(bundle,'evidence'),absolute)) fail('generated documentation cannot be evidence for itself');
         if(!existsSync(destination)) fail(`missing captured evidence ${source.path}`);
-      } else {const bytes=bytesAt(evidence,source.path);mkdirSync(path.dirname(destination),{recursive:true});writeFileSync(destination,bytes);}
+      } else {
+        try {const bytes=bytesAt(evidence,source.path);mkdirSync(path.dirname(destination),{recursive:true});writeFileSync(destination,bytes);}
+        catch(error){if(candidateGraph.sources.some(s=>relative(s.path)===relative(source.path)))throw error;/* Retained stale finding evidence can be unavailable. */}
+      }
     }
     const prepared=prepareBuild({input:staged,repositoryRoot:shadowEvidence,output:path.join(staged,'architecture.html')});
     if(prepared.artifacts.length!==1) fail('one lifecycle bundle must contain one connected graph envelope');

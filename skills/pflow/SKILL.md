@@ -1,11 +1,13 @@
 ---
 name: pflow
-description: Generate evidence-backed Markdown, Diagram JSON and standalone offline HTML from a repository or a developer-described process. Use one pFlow pipeline for source analysis or prompt-described workflows, including supported hierarchy, branches and VCS-independent documentation updates.
+description: Generate evidence-backed Markdown, Diagram JSON and standalone offline HTML from a repository or a developer-described process. Use one pFlow pipeline for source analysis or prompt-described workflows, including supported hierarchy, branches, VCS-independent documentation updates and optional source-backed potential-bug reports when requested.
 ---
 
 # pFlow architecture and process documentation
 
 Before writes, read [documentation lifecycle](references/lifecycle.md), detect existing bundles in the selected workspace and resolve create versus update intent. Ask only if the target or intent is ambiguous. Updates use the existing Snapshot and current evidence; preserve unrelated documentation.
+
+For a findings-only request, use the existing valid architecture bundle as context and follow [code potential issues](references/potential-bugs.md). Do not regenerate base documentation merely to add or review findings. Resolve a missing/invalid bundle or unclear target before dependent work.
 
 Confirm the input mode and requested scope from the user's request. A repository path alone does not change a clearly prompt-described task into code analysis. If the intended input is materially ambiguous, ask which mode is wanted before analysis. Keep one evidence ledger and graph, with retained opaque IDs and the approved model. Use [shared output selection](references/output.md) for the confirmed roots and bundle before writes.
 
@@ -32,4 +34,4 @@ This full-generation request authorizes the selected stages. Component stop mark
 
 For creation, record explicit coverage and source scopes in Snapshot through the lifecycle publisher. Common updates use its fingerprint plan, targeted AI reanalysis, candidate validation and transactional publication, including HTML. Existing repository-only [pflow-impact](../pflow-impact/SKILL.md), [pflow-regenerate](../pflow-regenerate/SKILL.md) and [pflow-rebuild](../pflow-rebuild/SKILL.md) retain their Git provenance/safety contracts; they are optional established tools, not prerequisites for lifecycle updates. Missing/incompatible Snapshot or unsafe impact requires reviewed full reanalysis. Rebuild-only work can use the current valid bundle without reanalysis.
 
-Report the mode, containment/evidence root, bundle/HTML paths, evidence captured, coverage, clarifications or unresolved limits, counts, actual validation/build results, snippet warnings and offline checks performed. Distinguish structural validation from evidence accuracy and fixture checks from AI/runtime behavior. Stop after the requested run; no M9 findings, review-status or bug-visualization work.
+Report the mode, containment/evidence root, bundle/HTML paths, evidence captured, coverage, clarifications or unresolved limits, counts, actual validation/build results, snippet warnings and offline checks performed. Distinguish structural validation from evidence accuracy and fixture checks from AI/runtime behavior. Stop after the requested run. Potential-bug analysis is opt-in: when explicitly requested, follow [code potential issues](references/potential-bugs.md) after the architecture scope is validated. Keep findings separate from base Markdown/Graph JSON; prompt-only process gap analysis is not included. Normal generation never enables it automatically.

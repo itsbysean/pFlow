@@ -11,6 +11,8 @@
   <script src="sample-adapter.js" defer></script>
   <script src="graph-layout.js" defer></script>
   <script src="diagram-viewport.js" defer></script>
+  <script src="tooltip.js" defer></script>
+  <script src="findings.js" defer></script>
   <script src="diagram.js" defer></script>
   <script src="flow-navigation.js" defer></script>
   <script src="details-inspector.js" defer></script>
@@ -42,18 +44,16 @@
         <p class="search-help">↑ ↓ review · Enter open · Esc close.</p>
       </section>
     </div>
-    <div class="header-actions"><button id="open-docs" type="button" title="Open the current flow’s full documentation">Docs</button><button id="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true">☾</span></button></div>
+    <div class="header-actions"><button id="open-findings" type="button" hidden>Potential issues</button><button id="open-docs" type="button" title="Open the current flow’s full documentation">Docs</button><button id="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true">☾</span></button></div>
   </header>
 
   <main class="app-layout" id="app-layout">
     <nav class="panel navigator" id="process-explorer" aria-labelledby="navigator-title">
       <div class="panel-heading"><h2 id="navigator-title">Process starts</h2><span class="count" id="entry-count">0</span><button id="toggle-left" class="panel-toggle" type="button" aria-controls="explorer-content" aria-expanded="true" aria-label="Collapse process explorer">«</button></div>
       <div id="explorer-content" class="explorer-content">
-      <div class="explorer-filter"><label class="sr-only" for="process-filter">Filter processes</label><input id="process-filter" type="search" placeholder="Filter processes…"><label class="sr-only" for="category-filter">Starting condition</label><select id="category-filter"><option value="">All starts</option></select></div>
-      <p class="panel-note">Grouped by recorded starting condition</p>
+
       <div id="entry-groups" class="entry-groups"></div>
-      <div class="navigator-footer" id="navigator-footer"><span class="evidence-dot" aria-hidden="true"></span>Select a start to explore</div>
-      <p id="filter-empty" class="panel-empty" hidden>No matching process starts.</p>
+
       </div>
     </nav>
     <div id="resize-left" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process explorer" aria-orientation="vertical" aria-controls="process-explorer" aria-valuemin="180" aria-valuemax="420" aria-valuenow="260"></div>
@@ -74,7 +74,7 @@
       </div>
       <div class="workspace-toolbar" aria-label="Diagram controls">
         <div class="flow-chooser"><label class="sr-only" for="flow-picker">Displayed flow</label><select id="flow-picker"></select><span id="flow-count" class="toolbar-label"></span></div>
-        <div class="toolbar-actions"><button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button><output id="zoom-level" aria-live="polite" aria-label="Zoom level">100%</output><button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button><span class="toolbar-divider"></span><button id="zoom-fit" type="button" disabled>Fit view</button><button id="zoom-reset" type="button" disabled title="Reset to 100% and align the diagram">Reset zoom</button></div>
+        <div class="toolbar-actions"><label class="exception-toggle"><input id="show-exceptions" type="checkbox" checked> Show exceptions</label><button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button><output id="zoom-level" aria-live="polite" aria-label="Zoom level">100%</output><button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button><span class="toolbar-divider"></span><button id="zoom-fit" type="button" disabled>Fit view</button><button id="zoom-reset" type="button" disabled title="Reset to 100% and align the diagram">Reset zoom</button></div>
       </div>
       <p class="panel-note" id="diagram-help">Select a step or arrow for details and evidence. Use ↗ for supported detail; Back returns to the previous level.</p>
       <div class="diagram-container" id="diagram-container" aria-busy="false">
@@ -99,35 +99,30 @@
 
     <div id="resize-right" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process documentation" aria-orientation="vertical" aria-controls="process-documentation" aria-valuemin="280" aria-valuemax="640" aria-valuenow="400"></div>
     <section class="panel documentation" id="process-documentation" aria-label="Documentation and evidence">
-      <div class="panel-heading"><h2 id="documentation-title">Process documentation</h2><button id="clear-selection" type="button" hidden>Clear selection</button><button id="toggle-right" class="panel-toggle" type="button" aria-controls="documentation-content" aria-expanded="true" aria-label="Collapse process documentation">»</button></div>
+      <div class="panel-heading"><h2 id="documentation-title">Process explanation</h2><button id="clear-selection" type="button" hidden>Clear selection</button><button id="toggle-right" class="panel-toggle" type="button" aria-controls="documentation-content" aria-expanded="true" aria-label="Collapse process documentation">»</button></div>
       <div id="documentation-content" class="documentation-content">
       <div class="document-toolbar">
-        <div class="document-tabs" role="tablist" aria-label="Documentation views">
-          <button id="tab-documentation" role="tab" type="button" aria-selected="true" aria-controls="view-documentation">Documentation</button>
-          <button id="tab-source" role="tab" type="button" aria-selected="false" aria-controls="view-source" tabindex="-1">Evidence references</button>
-          <button id="tab-summary" role="tab" type="button" aria-selected="false" aria-controls="view-summary" tabindex="-1">Process summary</button>
-          <button id="tab-details" role="tab" type="button" aria-selected="false" aria-controls="view-details" tabindex="-1">Details</button>
-        </div>
+
         <span class="muted-label" id="document-context"></span>
       </div>
-      <div id="view-documentation" class="document-view" role="tabpanel" aria-labelledby="tab-documentation" tabindex="0">
-        <nav id="document-outline" class="document-outline" aria-label="Document sections"></nav>
+      <div id="view-documentation" class="document-view" tabindex="0">
+        <details id="document-contents"><summary>Contents</summary><nav id="document-outline" class="document-outline" aria-label="Document sections"></nav></details>
         <article class="document-article" id="document-article">
           <label class="sr-only" for="document-picker">Documentation reference</label><select id="document-picker"></select>
           <p id="document-reference" class="document-reference"></p>
           <p id="document-status" class="document-status" role="status"></p>
           <div id="document-body"></div>
         </article>
-        <aside class="document-facts" aria-label="Documentation context"><h3>Context</h3><dl id="artifact-facts" class="metadata-grid"></dl></aside>
+        <details class="document-facts"><summary>Document context</summary><dl id="artifact-facts" class="metadata-grid"></dl></details>
       </div>
-      <div id="view-source" class="document-view source-view" role="tabpanel" aria-labelledby="tab-source" tabindex="0" hidden>
+      <details id="evidence-disclosure" class="explanation-disclosure"><summary id="tab-source">Evidence references</summary><div id="view-source" class="source-view">
         <h2>Evidence references</h2><label for="source-picker">Recorded evidence</label><select id="source-picker"></select>
         <dl id="source-fields" class="metadata-grid"></dl><ol id="source-snippet" class="source-snippet" aria-label="Evidence excerpt" tabindex="0" hidden></ol><p id="source-unavailable" class="panel-empty" role="status"></p>
       </div>
-      <div id="view-summary" class="document-view summary-view" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden>
+      </details><details class="explanation-disclosure" id="summary-disclosure"><summary id="tab-summary">Process summary</summary><div id="view-summary" class="summary-view">
         <h2 id="summary-title">Process summary</h2><dl id="flow-summary" class="metadata-grid"></dl><h3>Documented outcomes</h3><ul id="summary-exits"></ul>
       </div>
-    <div id="view-details" class="document-view inspector" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
+      </details><details class="explanation-disclosure" id="technical-disclosure"><summary id="tab-details">Technical details</summary><div id="view-details" class="inspector">
       <div class="panel-heading"><h2 id="inspector-title">Details inspector</h2></div>
       <div id="inspector-empty" class="panel-empty" hidden><h3>No selection</h3><p>Select a node or relationship to inspect its recorded details and evidence.</p></div>
       <div id="inspector-content">
@@ -141,8 +136,10 @@
         <section class="inspector-section"><h3>Referenced detail Flow</h3><div id="detail-flow"></div></section>
         <section class="inspector-section"><h3>Documentation</h3><div id="inspector-documentation"></div></section>
       </div>
+
     </div>
 
+      </details><details id="findings-disclosure" class="explanation-disclosure" hidden><summary>Findings</summary><section id="findings-report" class="findings-report" aria-label="Potential code issues" hidden></section></details>
       </div>
     </section>
   </main>

@@ -38,7 +38,7 @@ M7-03 implements new flat output with index.md, flows/, diagrams/architecture.js
 
 ### Proposed task sequence
 
-M7-01 and M7-02 are complete; their reports retain their original implementation boundaries. M7-03 adds the shared selector and compatible flat/legacy resolution; see its [completion record](design/m7-03-review.md). M7-04 adds generic presentation and templates; see its [completion record](design/m7-04-review.md). M7-05 completes the [bounded compatibility evaluation](m7-05-compatibility-evaluation.md) and recommends initial real-team use with limitations. M7 closure remains a developer decision; M8-01 through M8-04 are complete within their recorded validation limits. M9 requires separate approval.
+M7-01 and M7-02 are complete; their reports retain their original implementation boundaries. M7-03 adds the shared selector and compatible flat/legacy resolution; see its [completion record](design/m7-03-review.md). M7-04 adds generic presentation and templates; see its [completion record](design/m7-04-review.md). M7-05 completes the [bounded compatibility evaluation](m7-05-compatibility-evaluation.md) and recommends initial real-team use with limitations. M7 closure remains a developer decision; M8-01 through M8-04 are complete within their recorded validation limits. The developer approved the optional code findings and tooltip scope on 5 November 2026; the implementation is described below.
 
 | Task | Scope | Reviewable completion |
 |---|---|---|
@@ -63,7 +63,7 @@ See [the M8-01 plan](design/m8-01-plan.md) and [completion/review record](design
 
 ## M8.5 layout stabilization
 
-Approved after M8 completion and before M9. The existing deterministic renderer now reserves label-aware corridors and outside lanes, checks hidden route segments, fits diamond text using native line bounds, and keeps actual frame geometry independent of viewport size. No engine, dependency, schema or Viewer redesign is introduced. See [root causes and completion/review](design/m8-5-review.md), including 620 passing tests and bounded offline/dense/cyclic graph evaluations. M9 remains deferred and requires separate approval.
+Approved after M8 completion and before M9. The existing deterministic renderer now reserves label-aware corridors and outside lanes, checks hidden route segments, fits diamond text using native line bounds, and keeps actual frame geometry independent of viewport size. No engine, dependency, schema or Viewer redesign is introduced. See [root causes and completion/review](design/m8-5-review.md), including 620 passing tests and bounded offline/dense/cyclic graph evaluations. M9 code findings were subsequently approved; the scope below remains separate from process-gap analysis.
 
 ## M9 preserved scope
 
@@ -82,4 +82,4 @@ M9 remains optional and separate from M7/M8. No findings implementation, review-
 
 Stable graph IDs and artifact/revision matching remain the foundation for findings associations. An unchanged ID alone does not prove that an old finding still applies; removed targets must not attach to unrelated replacements. See the existing [M1 findings compatibility decision](design/m1-01-common-architecture-data-model.md#stable-identity-and-incremental-updates).
 
-M9 task numbering, schema details and implementation plans are deferred. This roadmap preserves requirements without starting analysis or adding findings.json, review controls, warning rendering or report code.
+The optional code-based implementation now uses findings schema 1.0.0, retained review decisions, source/graph freshness checks, a read-only offline report and graph warnings. Normal documentation generation does not initiate analysis. Natural-language process omission/contradiction analysis remains outside this scope. The Graph schema is unchanged. See [implementation and validation](potential-issues-evaluation.md).

@@ -5,7 +5,7 @@ globalThis.pFlow = globalThis.pFlow || {};
   const setText = (id, text) => { byId(id).textContent = text; };
   let currentSample, navigation, selection;
   const documentation = globalThis.pFlow.createDocumentationPanel({
-    showTab: name => showTab(byId(`tab-${name}`)),
+    showSection: openExplanationSection,
     onSelectSection: (sample, association) => activateDocumentSection(sample, association),
     onOpenDetail: (sample, association) => { showAssociation(sample, association); navigate(() => navigation.openDetail(association.entity.id)); },
   });
@@ -14,9 +14,17 @@ globalThis.pFlow = globalThis.pFlow || {};
     onDocumentation: ref => documentation.openDocument(ref),
     onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
   });
+  const findings=globalThis.pFlow.createFindingsPanel({onOpen: target=>{
+    const association={flowId:target.flowId,type:target.nodeId?'node':target.edgeId?'edge':'flow',entity:{id:target.nodeId||target.edgeId||target.flowId}};
+    showAssociation(currentSample,association);
+    if(association.type!=='flow')selectEntity({type:association.type,id:association.entity.id});else selectEntity(undefined);
+    diagram.revealSelection();findings.reveal();
+  }});
+  byId('open-findings').addEventListener('click',()=>{globalThis.pFlow.layout.reveal('right');findings.showAll();});
   const controls = ['zoom-in', 'zoom-out', 'zoom-fit', 'zoom-reset'];
   const diagram = globalThis.pFlow.createDiagram(byId('diagram-container'), {
     onSelect: next => selectEntity(next),
+    onFinding: next => {selectEntity(next);findings.reveal();},
     onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
     onZoom: scale => setText('zoom-level', `${Math.round(scale * 100)}%`),
     onStatus: (state, message) => {
@@ -32,6 +40,10 @@ globalThis.pFlow = globalThis.pFlow || {};
       }
     },
   });
+  byId('show-exceptions').addEventListener('change', () => {
+    diagram.showExceptions(byId('show-exceptions').checked);
+    if (selection && byId('diagram-container').querySelector('.is-selected.exception-hidden')) selectEntity(undefined);
+  });
   byId('zoom-in').addEventListener('click', () => diagram.zoom(1.25));
   byId('zoom-out').addEventListener('click', () => diagram.zoom(.8));
   byId('zoom-fit').addEventListener('click', () => diagram.fit());
@@ -41,7 +53,11 @@ globalThis.pFlow = globalThis.pFlow || {};
     const flow = currentSample.architecture.flows.find(item => item.id === state?.flowId);
     const selected = globalThis.pFlow.resolveSelection(currentSample.architecture, flow?.id, next);
     selection = selected ? next : undefined;
+    if (selected && byId('diagram-container').querySelector(`[data-${next.type}-id="${next.id}"].exception-hidden`)) {
+      byId('show-exceptions').checked = true; diagram.showExceptions(true);
+    }
     diagram.setSelection(selection);
+    findings.setContext(currentSample,flow,selected);
     byId('clear-selection').hidden = !selected;
     inspector.render(currentSample.architecture, flow, selected, state?.path.map(frame => frame.flowId) || []);
     documentation.setContext(currentSample, flow, selected, false, locateDocumentation);
@@ -57,6 +73,19 @@ globalThis.pFlow = globalThis.pFlow || {};
   byId('clear-selection').addEventListener('click', () => {
     selectEntity(undefined); byId('diagram-container').querySelector('.diagram-svg')?.focus({ preventScroll: true });
   });
+  function updateTreeSelection() {
+    const state = navigation?.getState();
+    const currentPath = state?.path.slice(1).map(frame => frame.viaNodeId) || [];
+    for (const tree of document.querySelectorAll('.navigator-branch')) {
+      const path = JSON.parse(tree.dataset.path);
+      if (tree.dataset.bundleKey === (currentSample?.key || '') && tree.dataset.entryId === (state?.entryId || state?.path[0]?.flowId) && path.length < currentPath.length && path.every((id, i) => currentPath[i] === id)) tree.open = true;
+    }
+    for (const button of document.querySelectorAll('.detail-flow-button')) {
+      const path = state?.path.slice(1).map(frame => frame.viaNodeId) || [];
+      const active = button.dataset.bundleKey === (currentSample?.key || '') && button.dataset.entryId === (state?.entryId || state?.path[0]?.flowId) && button.dataset.path === JSON.stringify(path);
+      button.setAttribute('aria-pressed', String(active));
+    }
+  }
   function renderNavigation(focus = false) {
     const state = navigation?.getState() || { path: [], canBack: false, canForward: false };
     const architecture = currentSample.architecture;
@@ -84,6 +113,7 @@ globalThis.pFlow = globalThis.pFlow || {};
       button.disabled = !navigation;
       button.setAttribute('aria-pressed', String(button.dataset.bundleKey === (currentSample.key || '') && button.dataset.entryId === state.entryId));
     }
+    updateTreeSelection();
     if (flow) byId('flow-picker').value = flow.id;
     setText('workspace-title', flow?.label || 'Process overview');
     byId('workspace-title').title = byId('workspace-title').textContent;
@@ -93,7 +123,8 @@ globalThis.pFlow = globalThis.pFlow || {};
     const context = entry ? `Start: ${entry.label}` : flow ? 'Direct flow' : '';
     setText('workspace-description', [currentSample.title, context, via ? `via ${via.label}` : ''].filter(Boolean).join(' · '));
     byId('workspace-description').title = byId('workspace-description').textContent;
-    const result = diagram.render(architecture, state.flowId, { pathFlowIds: state.path.map(frame => frame.flowId) });
+    findings.setContext(currentSample,flow,undefined);
+    const result = diagram.render(architecture, state.flowId, { pathFlowIds: state.path.map(frame => frame.flowId), findings:findings.active() });
     selection = undefined; byId('clear-selection').hidden = true;
     inspector.render(architecture, flow, undefined);
     documentation.setContext(currentSample, flow, undefined, true);
@@ -108,15 +139,12 @@ globalThis.pFlow = globalThis.pFlow || {};
   byId('navigation-back').addEventListener('click', () => navigate(() => navigation.back()));
   byId('navigation-forward').addEventListener('click', () => navigate(() => navigation.forward()));
   byId('navigation-root').addEventListener('click', () => navigate(() => navigation.root()));
-  function showTab(tab, focus = false) {
-    const tabs = [...document.querySelectorAll('[role="tab"]')];
-    for (const item of tabs) {
-      const selected = item === tab;
-      item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1;
-      byId(item.getAttribute('aria-controls')).hidden = !selected;
-    }
-    if (focus) tab.focus();
-    if (tab.id === 'tab-documentation') { documentation.reveal(); requestAnimationFrame(() => documentation.reveal()); }
+  function openExplanationSection(name) {
+    const disclosure = name === 'source' ? byId('evidence-disclosure') : name === 'details' ? byId('technical-disclosure') : name === 'summary' ? byId('summary-disclosure') : undefined;
+    if (disclosure) {
+      disclosure.open = true;
+      disclosure.scrollIntoView({ block: 'nearest' });
+    } else { documentation.reveal(); requestAnimationFrame(() => documentation.reveal()); }
   }
   function setWorkspaceState(state, model) {
     const loading = state === 'loading'; const empty = !model || model.entryCount === 0;
@@ -131,30 +159,8 @@ globalThis.pFlow = globalThis.pFlow || {};
     setText('workspace-state-message', loading ? 'Process information is being prepared.' : empty ? 'Recorded process starts will appear here. Use the flow chooser when no start is recorded.' : 'Diagram rendering will appear here. Explore the sample context in the panels below.');
     setText('workspace-state-caption', loading ? 'Loading process documentation' : empty ? 'No process diagram available' : `${model.flowCount} flows · ${model.nodeCount} recorded nodes`);
   }
-  function filterExplorer() {
-    const query = byId('process-filter').value.trim().toLocaleLowerCase();
-    const trigger = byId('category-filter').value;
-    let visible = 0;
-    for (const group of byId('entry-groups').querySelectorAll('.entry-group')) {
-      let count = 0;
-      for (const item of group.querySelectorAll('li')) {
-        const match = (!trigger || group.dataset.trigger === trigger) && (!query || item.dataset.search.includes(query));
-        item.hidden = !match; if (match) count++;
-      }
-      group.hidden = count === 0; visible += count;
-    }
-    byId('filter-empty').hidden = visible > 0;
-  }
-  byId('process-filter').addEventListener('input', filterExplorer);
-  byId('category-filter').addEventListener('change', filterExplorer);
   function renderExplorer(activeSample) {
     const available = samples.some(item => item.key === activeSample.key) ? samples.map(item => item.key === activeSample.key ? activeSample : item) : [activeSample];
-    const allTriggers = [...new Set(available.flatMap(item => globalThis.pFlow.adaptSample(item).groups.map(group => group.label)))];
-    const previous = byId('category-filter').value;
-    byId('category-filter').replaceChildren(...['', ...allTriggers].map(trigger => {
-      const option = document.createElement('option'); option.value = trigger; option.textContent = trigger || 'All starts'; return option;
-    }));
-    if (allTriggers.includes(previous)) byId('category-filter').value = previous;
     setText('entry-count', available.reduce((sum, item) => sum + item.architecture.entryPoints.length, 0));
     byId('entry-groups').replaceChildren();
     for (const sample of available) {
@@ -177,12 +183,43 @@ globalThis.pFlow = globalThis.pFlow || {};
             if (currentSample !== sample) initializeSample(sample);
             navigate(() => group.direct ? navigation.selectFlow(entry.id) : navigation.selectEntry(entry.id));
           });
+          function appendDetails(parent, flowId, path, seen) {
+            const flow = sample.architecture.flows.find(flow => flow.id === flowId);
+            if (!flow) return;
+            const expandable = flow.nodes.filter(node => node.expandFlowId);
+            if (!expandable.length) return;
+            const tree = document.createElement('details'); tree.className = 'navigator-branch';
+            tree.dataset.path = JSON.stringify(path); tree.dataset.entryId = entry.id; tree.dataset.bundleKey = sample.key || '';
+            const summary = document.createElement('summary'); summary.textContent = 'Subprocesses'; tree.append(summary);
+            const children = document.createElement('ul'); tree.append(children); parent.append(tree);
+            tree.addEventListener('toggle', () => {
+              if (!tree.open || children.childElementCount) return;
+              for (const node of expandable) {
+                const row = document.createElement('li'), target = sample.architecture.flows.find(f => f.id === node.expandFlowId);
+                if (!target) continue;
+                const child = document.createElement('button'); child.type = 'button'; child.className = 'detail-flow-button'; child.textContent = node.label;
+                child.dataset.path = JSON.stringify([...path, node.id]); child.dataset.entryId = entry.id; child.dataset.bundleKey = sample.key || ''; child.dataset.flowId = target.id;
+                if (seen.has(target.id)) { child.disabled = true; child.textContent += ' (already in this path)'; }
+                else {
+                  child.addEventListener('click', () => {
+                    if (currentSample !== sample) initializeSample(sample);
+                    navigate(() => { group.direct ? navigation.selectFlow(entry.id) : navigation.selectEntry(entry.id); for (const id of [...path, node.id]) navigation.openDetail(id); });
+                  });
+                }
+                row.append(child); children.append(row);
+                if (!seen.has(target.id)) appendDetails(row, target.id, [...path, node.id], new Set([...seen, target.id]));
+              }
+              updateTreeSelection();
+            });
+          }
           item.append(button); entries.append(item);
+          const rootFlowId = group.direct ? entry.id : sample.architecture.entryPoints.find(item => item.id === entry.id)?.flowId;
+          appendDetails(item, rootFlowId, [], new Set([rootFlowId]));
         }
         section.append(heading, entries); byId('entry-groups').append(section);
       }
     }
-    filterExplorer();
+
   }
   byId('open-docs').addEventListener('click', () => {
     const flow = currentSample?.architecture.flows.find(item => item.id === navigation?.getState().flowId);
@@ -192,7 +229,7 @@ globalThis.pFlow = globalThis.pFlow || {};
     globalThis.pFlow.layout.reveal('right');
     if (reference) documentation.openDocument(reference);
     else if (Object.hasOwn(globalThis.pFlowDocuments?.[currentSample?.key] || {}, 'index.md')) documentation.openDocument({ path: 'index.md' });
-    else { showTab(byId('tab-documentation')); setText('document-status', 'No documentation is available for this process.'); }
+    else { openExplanationSection('documentation'); setText('document-status', 'No documentation is available for this process.'); }
     byId('document-article').tabIndex = -1; byId('document-article').focus({ preventScroll: true });
   });
   function initializeSample(sample) {
@@ -221,14 +258,6 @@ globalThis.pFlow = globalThis.pFlow || {};
     renderNavigation();
     return model;
   }
-  const tabs = [...document.querySelectorAll('[role="tab"]')];
-  tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => showTab(tab));
-    tab.addEventListener('keydown', event => {
-      const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : undefined;
-      if (next !== undefined) { event.preventDefault(); showTab(tabs[next], true); }
-    });
-  });
   function showAssociation(sample, association) {
     const plan = globalThis.pFlow.planSearchFlow(sample.architecture, association.flowId, currentSample === sample ? navigation?.getState() : {}, association.type === 'entry' ? association.entity.id : undefined);
     if (currentSample !== sample) initializeSample(sample);

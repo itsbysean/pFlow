@@ -1,3 +1,4 @@
+import { revealExplanation } from './support/explanation.mjs';
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { cpSync, existsSync, readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
@@ -17,7 +18,7 @@ const context = vm.createContext({});
 vm.runInContext(readFileSync(path.join(viewer, 'sample-data.js'), 'utf8'), context);
 vm.runInContext(readFileSync(path.join(viewer, 'sample-adapter.js'), 'utf8'), context);
 vm.runInContext(readFileSync(path.join(viewer, 'sample-documents.js'), 'utf8'), context);
-const runtimeFiles = ['sample-data.js', 'sample-documents.js', 'sample-adapter.js', 'graph-layout.js', 'diagram-viewport.js', 'diagram.js', 'flow-navigation.js', 'details-inspector.js', 'markdown.js', 'documentation-panel.js', 'search-navigation.js', 'layout.js', 'viewer.js', 'markdown-search.js', 'search.js'];
+const runtimeFiles = ['sample-data.js', 'sample-documents.js', 'sample-adapter.js', 'graph-layout.js', 'diagram-viewport.js', 'tooltip.js', 'findings.js', 'diagram.js', 'flow-navigation.js', 'details-inspector.js', 'markdown.js', 'documentation-panel.js', 'search-navigation.js', 'layout.js', 'viewer.js', 'markdown-search.js', 'search.js'];
 const samples = JSON.parse(JSON.stringify(context.pFlowSamples));
 let browser;
 before(async () => {
@@ -49,9 +50,9 @@ async function selectBundle(page, key) {
 }
 async function inspectorEmpty(page) {
   const previous = await page.evaluateHandle(() => document.activeElement);
-  await page.getByRole('tab', { name: 'Details', exact: true }).click();
+  await revealExplanation(page,'details');
   const visible = await page.locator('#inspector-empty').isVisible();
-  await page.getByRole('tab', { name: 'Documentation', exact: true }).click();
+  await page.locator('#tab-details').click();
   await previous.evaluate(el => el?.focus({preventScroll:true}));
   return visible;
 }
@@ -144,17 +145,16 @@ test('entry selection displays its root and clears the inspector', async t => {
   assert.equal(await page.locator('#node-name').textContent(), node);
 });
 
-test('documentation tabs support pointer and keyboard selection', async t => {
+test('evidence and technical information disclose independently without replacing the narrative', async t => {
   const page = await open(t);
-  await page.getByRole('tab', { name: 'Documentation', exact: true }).focus();
-  await page.keyboard.press('ArrowRight');
-  assert.equal(await page.getByRole('tab', { name: 'Evidence references', exact: true }).getAttribute('aria-selected'), 'true');
-  assert.equal(await page.locator('#view-documentation').isVisible(), false);
-  assert.match(await page.locator('#source-unavailable').textContent(), /Evidence text is not embedded/);
-  await page.keyboard.press('ArrowRight');
-  assert.equal(await page.getByRole('tab', { name: 'Process summary' }).getAttribute('aria-selected'), 'true');
-  await page.getByRole('tab', { name: 'Documentation', exact: true }).click();
-  assert.equal(await page.locator('[role="tabpanel"]:visible').count(), 1);
+  await page.locator('#tab-source').focus(); await page.keyboard.press('Enter');
+  assert.equal(await page.locator('#view-source').isVisible(), true);
+  assert.equal(await page.locator('#view-documentation').isVisible(), true);
+  await revealExplanation(page,'details');
+  assert.equal(await page.locator('#view-details').isVisible(), true);
+  await page.locator('#tab-source').click();
+  assert.equal(await page.locator('#view-source').isVisible(), false);
+  assert.equal(await page.locator('[role="tab"]').count(), 0);
 });
 
 test('empty and loading states replace the sample presentation', async t => {
@@ -164,7 +164,7 @@ test('empty and loading states replace the sample presentation', async t => {
   assert.equal(await page.locator('#workspace-state-title').textContent(), 'No process flows documented');
   assert.equal(await page.locator('#inspector-content').isVisible(), false);
   assert.equal(await inspectorEmpty(page), true);
-  await page.getByRole('tab', { name: 'Evidence references', exact: true }).click();
+  await revealExplanation(page,'source');
   assert.match(await page.locator('#source-unavailable').textContent(), /No evidence reference/);
   await page.evaluate(() => pFlow.setWorkspaceState('loading'));
   assert.equal(await page.locator('#diagram-container').getAttribute('aria-busy'), 'true');
@@ -576,7 +576,7 @@ test('node selection updates real metadata and its Markdown section without repl
   assert.match(await page.locator('#external-metadata').textContent(), /\$\{STATE_URL\}\/state/);
   assert.match(await page.locator('#node-conditions').textContent(), /Input valid\? → valid/);
   assert.match(await page.locator('#node-calls').textContent(), /exception · sync/);
-  await page.getByRole('tab',{name:'Details',exact:true}).click();
+  await revealExplanation(page,'details');
   assert.equal(await page.locator('#node-description').isVisible(), false);
   assert.equal(await page.locator('.doc-target').getAttribute('id'), node.id);
   assert.match(await page.locator('.doc-target').textContent(), /Send a synchronous GET/);
@@ -589,7 +589,7 @@ test('selection and explicit expansion are separate actions in both the SVG and 
   assert.equal(await page.locator('#node-name').textContent(), 'Invoke refresh component');
   assert.match(await page.locator('#document-context').textContent(), /Invoke refresh component/);
   assert.equal(await page.locator('.doc-target').getAttribute('id'), samples[0].architecture.flows[0].nodes.find(n=>n.label==='Invoke refresh component').id);
-  await page.getByRole('tab',{name:'Details',exact:true}).click();
+  await revealExplanation(page,'details');
   await page.getByRole('button', { name: 'Open detail: Refresh component', exact: true }).click();
   assert.equal(await page.locator('#workspace-title').textContent(), 'Refresh component');
   assert.equal(await inspectorEmpty(page), true);
@@ -626,7 +626,7 @@ test('async edge selection shows only recorded messaging metadata and opens its 
   assert.doesNotMatch(await page.locator('#external-metadata').textContent(), /http.method/);
   assert.equal(await page.locator('#source-references button').count(), 3);
   assert.equal(await page.locator('.doc-target').getAttribute('id'), edge.id);
-  await page.getByRole('tab',{name:'Documentation',exact:true}).click();
+  await revealExplanation(page,'documentation');
   await page.locator('.doc-target').getByRole('button', { name: 'consumer', exact: true }).click();
   assert.equal(await page.locator('.doc-target').getAttribute('id'), samples[1].architecture.flows[1].id);
   assert.equal(await page.locator('#workspace-title').textContent(), 'Publish job');
@@ -636,8 +636,8 @@ test('async edge selection shows only recorded messaging metadata and opens its 
 test('source reference actions show exact paths, line ranges, and symbols with unavailable text', async t => {
   const page = await open(t); await page.getByLabel('Displayed flow').selectOption({ label: 'Refresh component' });
   await selectNode(page, 'Invoke read_state').click();
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
-  assert.equal(await page.getByRole('tab', { name: 'Evidence references', exact: true }).getAttribute('aria-selected'), 'true');
+  await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
+  assert.equal(await page.locator('#tab-source').evaluate(el=>String(el.parentElement.open)), 'true');
   const fields = await page.locator('#source-fields').textContent();
   assert.match(fields, /Pathexamples\/a-sync\/sources\/component.py.txt/); assert.match(fields, /Lines2–3/); assert.match(fields, /Symbolexecute/);
   assert.match(await page.locator('#source-unavailable').textContent(), /Evidence text is not embedded/);
@@ -682,7 +682,8 @@ test('literal Markdown IDs survive renamed headings and document links do not na
   await page.getByLabel('Displayed flow').selectOption({ label: 'Read state' }); await selectNode(page, 'Fetch state').click();
   assert.match(await page.locator('.doc-target').textContent(), /Renamed boundary/);
   assert.equal(await page.locator('#document-status').textContent(), '');
-  await page.getByRole('tab',{name:'Documentation',exact:true}).click();
+  await revealExplanation(page,'documentation');
+  await page.locator('#document-contents > summary').click();
   await page.getByRole('navigation', { name: 'Document sections' }).getByRole('button', { name: 'Refresh component', exact: true }).click();
   assert.equal(await page.locator('.doc-target').getAttribute('id'), samples[0].architecture.flows[1].id);
   assert.equal(await page.locator('#workspace-title').textContent(), 'Read state');
@@ -724,14 +725,14 @@ test('Enter selects, Tab reaches the explicit expansion control, and Space expan
 test('irrelevant inspector sections disappear when changing from a boundary to a normal terminal', async t => {
   const page = await open(t); await page.getByLabel('Displayed flow').selectOption({ label: 'Read state' });
   await selectNode(page, 'Fetch state').click();
-  await page.getByRole('tab',{name:'Details',exact:true}).click();
+  await revealExplanation(page,'details');
   assert.equal(await page.locator('#external-metadata').isVisible(), true);
   await selectNode(page, 'Return state').click();
-  await page.getByRole('tab',{name:'Details',exact:true}).click();
+  await revealExplanation(page,'details');
   assert.equal(await page.locator('#external-metadata').isVisible(), false);
   assert.equal(await page.locator('#node-conditions').isVisible(), false);
   assert.equal(await page.locator('#detail-flow').isVisible(), false);
-  await page.getByRole('tab',{name:'Details',exact:true}).click();
+  await revealExplanation(page,'details');
   assert.equal(await page.locator('#node-description').isVisible(), false);
   assert.match(await page.locator('#node-calls').textContent(), /return · sync/);
 });
@@ -795,7 +796,7 @@ test('supporting architecture-index Markdown renders its table and links offline
 test('file-level evidence without a symbol does not invent line or symbol fields', async t => {
   const page = await open(t);
   await page.evaluate(() => { const sample = structuredClone(pFlowSamples[0]); const id = sample.architecture.flows[0].nodes[0].sourceIds[0]; const source = sample.architecture.sources.find(item => item.id === id); delete source.symbol; delete source.startLine; delete source.endLine; pFlow.initializeSample(sample); });
-  await selectNode(page, 'Receive command').click(); await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
+  await selectNode(page, 'Receive command').click(); await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
   assert.deepEqual(await page.locator('#source-fields dt').allTextContents(), ['Path']);
   assert.match(await page.locator('#source-unavailable').textContent(), /not embedded/);
 });
@@ -812,7 +813,7 @@ test('long paths and external metadata wrap without widening the narrow Viewer',
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   assert.match(await page.locator('#source-references').textContent(), /long-segment\/long-segment/);
   assert.match(await page.locator('#external-metadata').textContent(), /long-part\/long-part/);
-  await page.getByRole('tab',{name:'Documentation',exact:true}).click();
+  await revealExplanation(page,'documentation');
   assert.ok(await page.locator('#document-article').evaluate(el => el.scrollHeight > el.clientHeight));
   assert.ok(await page.locator('.documentation').evaluate(el => { const r=el.getBoundingClientRect(); return r.top >= document.querySelector('.app-header').getBoundingClientRect().bottom && r.bottom <= innerHeight; }));
 });
@@ -834,7 +835,7 @@ test('library, database, and custom external boundaries retain only their record
     await selectBundle(page, sample); await page.getByLabel('Displayed flow').selectOption({ label: flow }); await selectNode(page, node).click();
     assert.match(await page.locator('#external-metadata').textContent(), expected);
     assert.doesNotMatch(await page.locator('#external-metadata').textContent(), /http.method|http.urlTemplate/);
-    await page.getByRole('tab',{name:'Details',exact:true}).click();
+    await revealExplanation(page,'details');
   assert.equal(await page.locator('#node-description').isVisible(), false);
   }
 });
@@ -1037,7 +1038,7 @@ test('long body matches scroll to the first passage, preserve inline formatting 
   await page.locator('#document-article').evaluate(el => { el.scrollTop = 0; });
   assert.equal(await page.locator('#document-article').evaluate(el => el.scrollTop), 0);
   assert.match(await page.evaluate(() => pFlowDocuments['a-sync']['execution.md']), /\*\*CAFÉ\*\*/);
-  await page.locator('#document-outline button').first().click();
+  await page.locator('#document-contents > summary').click(); await page.locator('#document-outline button').first().click();
   assert.equal(await page.locator('mark.search-match').count(), 0);
 });
 
@@ -1136,8 +1137,8 @@ test('search highlights stay in the indexed section and update or clear with ord
   assert.equal(await page.locator('.doc-target .markdown-section mark.search-match').count(), 0);
   await openSearchHit(page, 'host unresolved');
   assert.deepEqual(await page.locator('mark.search-match').allTextContents(), ['host', 'unresolved']);
-  await page.getByRole('tab', { name: 'Evidence references', exact: true }).click();
-  await page.getByRole('tab', { name: 'Documentation', exact: true }).click();
+  await revealExplanation(page,'source');
+  await revealExplanation(page,'documentation');
   assert.equal(await page.locator('mark.search-match').count(), 2);
   await selectNode(page, 'Validate with input_rules').click();
   assert.equal(await page.locator('mark.search-match').count(), 0);
@@ -1196,7 +1197,7 @@ test('EntryPoint result activates its explicit root and highlighted source citat
   assert.deepEqual(await crumbs(page).allTextContents(), [samples[2].architecture.entryPoints[0].label]);
   assert.equal(await page.locator('.diagram-node.is-selected').count(), 0);
   await page.locator('.doc-target .source-link').first().click();
-  assert.equal(await page.getByRole('tab', { name: 'Evidence references', exact: true }).getAttribute('aria-selected'), 'true');
+  assert.equal(await page.locator('#tab-source').evaluate(el=>String(el.parentElement.open)), 'true');
   assert.match(await page.locator('#source-fields').textContent(), /tasks\.xml/);
   assert.match(await page.locator('#source-unavailable').textContent(), /not embedded/);
 });
@@ -1254,7 +1255,7 @@ test('relocated standalone HTML preserves diagrams, navigation, inspector, proce
   await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
   assert.notEqual(await page.locator('.diagram-scene').getAttribute('transform'), before);
   await page.getByRole('button', { name: 'Fit view', exact: true }).click();
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
+  await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
   assert.equal(await page.locator('#source-snippet').isVisible(), true);
   assert.equal(await page.locator('#source-snippet li').first().getAttribute('value'), '6');
   assert.match(await page.locator('#source-snippet code').textContent(), /http\.get\(STATE_URL/);
@@ -1267,7 +1268,7 @@ test('relocated standalone HTML preserves diagrams, navigation, inspector, proce
   await selectBundle(page, 'examples/b-async/architecture.json');
   const edge = page.locator('.diagram-edge[data-edge-id="edge_3656a413844b"]'); await edge.focus(); await page.keyboard.press('Enter');
   assert.equal(await page.locator('#node-kind').textContent(), 'receive · async');
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').filter({ hasText: 'bindings.xml' }).click();
+  await revealExplanation(page,'details'); await page.locator('#source-references button').filter({ hasText: 'bindings.xml' }).click();
   assert.match(await page.locator('#source-snippet').textContent(), /<subscription channel="jobs"/);
   await selectBundle(page, 'examples/c-custom/architecture.json');
   await page.keyboard.press('Control+k'); await page.locator('#global-search').fill('archive service performs'); await page.keyboard.press('Enter');
@@ -1290,7 +1291,7 @@ test('standalone data preserves closing sequences and Unicode as inert graph, Ma
   assert.equal(await page.locator('#node-name').textContent(), attack);
   assert.equal(await page.locator('#document-body img, #document-body script').count(), 0);
   assert.match(await page.locator('#document-body').textContent(), /<img src=x onerror=/);
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
+  await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
   assert.match(await page.locator('#source-snippet').textContent(), /<\/script><script>globalThis.generatedInjected/);
   assert.equal(await page.locator('#source-snippet script, #source-snippet img').count(), 0);
   assert.equal(await page.evaluate(() => globalThis.generatedInjected), undefined);
@@ -1301,9 +1302,9 @@ test('standalone data preserves closing sequences and Unicode as inert graph, Ma
 test('embedded warning states clear stale snippets while retaining accurate source metadata', async t => {
   const page = await openGenerated(t, generatedFixture(t, { limits: { snippetLines: 1 } }));
   await page.keyboard.press('Control+k'); await page.locator('#global-search').fill('host unresolved'); await page.keyboard.press('Enter');
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click(); assert.equal(await page.locator('#source-snippet').isVisible(), true);
+  await revealExplanation(page,'details'); await page.locator('#source-references button').first().click(); assert.equal(await page.locator('#source-snippet').isVisible(), true);
   await page.getByRole('button', { name: 'Top level: return to first flow in this path', exact: true }).click();
-  await selectNode(page, 'Invoke refresh component').click(); await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
+  await selectNode(page, 'Invoke refresh component').click(); await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
   assert.equal(await page.locator('#source-snippet').isVisible(), false); assert.equal(await page.locator('#source-snippet li').count(), 0);
   assert.match(await page.locator('#source-unavailable').textContent(), /Range exceeds 1 lines/);
   assert.match(await page.locator('#source-fields').textContent(), /command.py.txt/);
@@ -1324,7 +1325,7 @@ test('fragment hydration rejects active markup and unsafe control targets before
 test('generated evidence controls and snippet remain visible in the right documentation column', async t => {
   const page = await openGenerated(t, generatedFixture(t), 900);
   await page.keyboard.press('Control+k'); await page.locator('#global-search').fill('host unresolved'); await page.keyboard.press('Enter');
-  await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').first().click();
+  await revealExplanation(page,'details'); await page.locator('#source-references button').first().click();
   assert.equal(await page.locator('#source-picker').evaluate(el => el === document.activeElement), true);
   assert.ok(await page.locator('#source-picker').evaluate(el => { const box = el.getBoundingClientRect(), header = document.querySelector('.app-header').getBoundingClientRect(); return box.top >= header.bottom && box.bottom < innerHeight; }));
   assert.ok(await page.locator('#source-snippet').evaluate(el => { const box = el.getBoundingClientRect(); return box.top >= 0 && box.bottom < innerHeight; }));

@@ -18,7 +18,7 @@ function readAsset(root, name) {
 const bootstrap = `const embedded = JSON.parse(document.getElementById('pflow-data').textContent);
 globalThis.pFlowSamples = embedded.map(item => ({ key: item.key, title: item.title, architecture: item.architecture }));
 globalThis.pFlowDocuments = Object.fromEntries(embedded.map(item => [item.key, Object.fromEntries(item.documents.map(doc => [doc.path, doc.markdown]))]));
-globalThis.pFlowContent = Object.fromEntries(embedded.map(item => [item.key, { documents: Object.fromEntries(item.documents.map(doc => [doc.path, { html: doc.html, sections: doc.sections }])), snippets: item.snippets, diagnostics: item.diagnostics }]));
+globalThis.pFlowContent = Object.fromEntries(embedded.map(item => [item.key, { documents: Object.fromEntries(item.documents.map(doc => [doc.path, { html: doc.html, sections: doc.sections }])), snippets: item.snippets, diagnostics: item.diagnostics, findings: item.findings }]));
 `;
 export function generateHTML(prepared, { viewerRoot = defaultViewerRoot } = {}) {
   if (!prepared.artifacts?.length) throw fail('.', 'packaging', 'No prepared architecture artifacts are available.');
@@ -40,6 +40,7 @@ export function generateHTML(prepared, { viewerRoot = defaultViewerRoot } = {}) 
     architecture: artifact.architecture,
     documents: artifact.documents.map(({ path, markdown, html, sections }) => ({ path, markdown, html, sections })),
     snippets: artifact.snippets,
+    findings: artifact.findings?.rows || [],
     diagnostics: prepared.diagnostics.filter(issue => issue.artifact === artifact.path).map(({ path, message }) => ({ path, message })),
   }));
   const data = document.createElement('script'); data.id = 'pflow-data'; data.type = 'application/json'; data.textContent = serializeEmbeddedData(payload);
@@ -65,6 +66,7 @@ export function writeStandaloneHTML(prepared, options = {}) {
   for (const artifact of prepared.artifacts) {
     const json = path.join(prepared.inputRoot, artifact.path); protectedPaths.push(json);
     protectedPaths.push(...artifact.documents.map(doc => path.join(artifact.docsRoot, doc.path)));
+    if(artifact.findings)protectedPaths.push(artifact.findings.path,...artifact.findings.protectedPaths);
     protectedPaths.push(...artifact.architecture.sources.map(source => path.join(prepared.repositoryRoot, source.path)));
   }
   const destination = validateOutput(prepared.outputPath, protectedPaths);

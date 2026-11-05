@@ -41,11 +41,18 @@ docs/architecture/
   evidence/                 # captured prompt evidence, when applicable
   architecture.html
   snapshot.json             # versioned coverage and fingerprint baseline
+  findings.json             # optional code potential-issue report
 ```
 
 Explicit output paths are final bundle destinations. Otherwise pFlow prefers an existing root `docs/`, then `doc/`, or creates `docs/`. Legacy bundles remain supported. See [output policy](docs/output-bundle-evaluation.md).
 
 pFlow can update code, natural-language or mixed-evidence documentation using a portable Snapshot and current file fingerprints. It reanalyzes affected flows, preserves unrelated information and publishes validated Markdown, graph, Snapshot and HTML together. Ambiguous requests, manual changes or unsafe impact require clarification or reviewed full reanalysis. The established Git-based tools remain available. See [documentation lifecycle](skills/pflow/references/lifecycle.md). pFlow does not run target scripts, install target dependencies or contact infrastructure to discover architecture.
+
+## Optional potential issues
+
+Ask: “Use pFlow to find source-backed potential bugs in this documented flow.” Analysis runs only when requested. Findings remain separate from process Markdown and Graph JSON. The offline Viewer shows current warnings, code evidence, severity, confidence and retained review history. Stale results require revalidation; they are not attached to replacement nodes. The report is read-only and does not prove production failures. Prompt-only process gap analysis is not included.
+
+Hover or keyboard-focus a diagram node to read its full name at a zoom-independent text size. Press Escape to close the tooltip.
 
 ## Develop
 

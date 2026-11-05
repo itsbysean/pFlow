@@ -1,3 +1,4 @@
+import { revealExplanation } from './support/explanation.mjs';
 import assert from 'node:assert/strict';
 import {test,before,after} from 'node:test';
 import {cpSync,existsSync,mkdirSync,mkdtempSync,readFileSync,realpathSync,rmSync,writeFileSync} from 'node:fs';
@@ -76,7 +77,7 @@ test('repeated node selection relocates after manual scrolling and restarts a bo
 test('manual document scrolling and selection preserve scroll while evidence clicks do not select parent nodes',async t=>{
  const f=fixture(t),page=await open(t,f);await locationButton(page,'node_p02').scrollIntoViewIfNeeded();const before=await page.locator('#document-article').evaluate(el=>el.scrollTop);await locationButton(page,'node_p02').click();assert.equal(await page.locator('#document-article').evaluate(el=>el.scrollTop),before);
  await section(page,'node_p05').locator('.source-link').first().click();assert.equal(await activeNode(page),'node_p02');assert.equal(await page.locator('#view-source').isVisible(),true);assert.equal(await page.locator('#source-snippet').isVisible(),true);
- await page.getByRole('tab',{name:'Documentation',exact:true}).click();assert.equal(await page.locator('#view-documentation').isVisible(),true);
+ await revealExplanation(page,'documentation');assert.equal(await page.locator('#view-documentation').isVisible(),true);
 });
 test('collapse/restore, resize and themes retain the process, canonical selection and usable locate controls',async t=>{
  const f=fixture(t),page=await open(t,f);await node(page,'node_p05').click();const title=await page.locator('#workspace-title').textContent();await page.getByRole('button',{name:'Collapse process documentation'}).click();await page.getByRole('button',{name:'Restore process documentation'}).click();assert.equal(await activeNode(page),'node_p05');

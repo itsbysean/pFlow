@@ -4,6 +4,7 @@ import { validateStructure } from '../validation/validate-artifact.mjs';
 import { validateDocumentation } from '../validation/validate-documentation.mjs';
 import { processMarkdown } from './markdown.mjs';
 import { createSourceProcessor, sourceLimits } from './sources.mjs';
+import { loadFindings } from '../findings/validate.mjs';
 import { resolveBundleLayout } from './bundle-layout.mjs';
 
 const compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
@@ -113,7 +114,14 @@ export function prepareBuild({ input, output, repositoryRoot, limits }) {
       const issues = processed.diagnostics.map(issue => ({ artifact: file, ...issue }));
       errors.push(...issues.filter(issue => issue.severity === 'error'));
       diagnostics.push(...issues.filter(issue => issue.severity === 'warning'));
-      artifacts.push({ path: file, architecture, documents, snippets: processed.snippets, ...resolved });
+      let findings;
+      try {findings=loadFindings(resolved.bundleRoot,{architecture,repositoryRoot:sourceRoot});}
+      catch(error){errors.push(diagnostic(portable(path.relative(discovered.root,path.join(resolved.bundleRoot,'findings.json'))),'findings','/',error.message));continue;}
+      if(findings) {
+        protectedPaths.push(findings.path,...findings.protectedPaths);
+        diagnostics.push(...findings.diagnostics.map(issue=>({artifact:file,...issue})));
+      }
+      artifacts.push({ path: file, architecture, documents, snippets: processed.snippets, ...(findings?{findings}:{}), ...resolved });
     } catch (error) { errors.push(diagnostic(file, 'load', '/', error.message)); }
   }
   if (outputPath) {
