@@ -31,14 +31,14 @@ function mapping(){
  for(const name of stageNames){map.set(`skills/${name}/SKILL.md`,name==='pflow'?'SKILL.md':`references/${name.slice('pflow-'.length)}-workflow.md`);
   for(const f of readdirSync(path.join(root,'skills',name,'references')).sort())if(f.endsWith('.md'))map.set(`skills/${name}/references/${f}`,name==='pflow'?`references/${f}`:`references/${name.slice('pflow-'.length)}/${f}`);
  }
- map.set('docs/design/m1-01-common-architecture-data-model.md','references/contracts/model.md');map.set('docs/markdown-contract.md','references/contracts/markdown.md');map.set('schema/architecture-1.0.0.schema.json','references/contracts/schema.md');
+ map.set('docs/design/m1-01-common-architecture-data-model.md','references/contracts/model.md');map.set('docs/markdown-contract.md','references/contracts/markdown.md');map.set('schema/architecture-1.0.0.schema.json','references/contracts/schema.md');map.set('schema/findings-1.0.0.schema.json','references/contracts/findings-schema.md');
  for(const name of ['architecture-index.md','execution-flow.md'])map.set(`docs/templates/${name}`,`references/templates/${name}`);
  return map;
 }
 const sourceRuntime=/\b(?:builder\/[\w-]+\.mjs|validation\/[\w-]+\.mjs|skills\/[\w-]+\/scripts\/[\w-]+\.mjs)\b/g;
 function rewrite(source,destination,map){
  let text=readFileSync(path.join(root,source),'utf8');
- if(source.endsWith('.json'))return '# Approved architecture JSON Schema\n\nExact model 1.0.0 schema; also embedded in the executable.\n\n```json\n'+text.trimEnd()+'\n```\n';
+ if(source.endsWith('.json'))return '# '+(source.includes('/findings-')?'Optional code findings JSON Schema':'Approved architecture JSON Schema')+'\n\nVersion 1.0.0; also embedded in the executable. Findings reuse the architecture SourceReference definition in schema.md.\n\n```json\n'+text.trimEnd()+'\n```\n';
  if(source.endsWith('/SKILL.md')&&destination!=='SKILL.md')text=text.replace(/^---\n[\s\S]*?\n---\n\n/,'');
  let fence;
  text=text.split('\n').map(line=>{

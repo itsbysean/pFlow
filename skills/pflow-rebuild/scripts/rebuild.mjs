@@ -31,6 +31,7 @@ function snapshot(prepared, viewerRoot) {
   const files = [...viewerPaths(viewerRoot)];
   for (const artifact of prepared.artifacts) {
     const json = path.join(prepared.inputRoot, artifact.path);
+    if(artifact.findings)files.push(artifact.findings.path,...artifact.findings.protectedPaths);
     files.push(json, ...artifact.documents.map(doc => path.join(artifact.docsRoot, doc.path)), ...artifact.architecture.sources.map(source => path.join(prepared.repositoryRoot, source.path)));
   }
   const paths = [...new Set(files.map(file => path.resolve(file)))].sort();

@@ -7,6 +7,25 @@ globalThis.pFlow = globalThis.pFlow || {};
     left: { panel: byId('process-explorer'), content: byId('explorer-content'), button: byId('toggle-left'), handle: byId('resize-left'), min: 180, max: 420, width: 280, closed: false, name: 'process explorer' },
     right: { panel: byId('process-documentation'), content: byId('documentation-content'), button: byId('toggle-right'), handle: byId('resize-right'), min: 280, max: 640, width: 420, closed: false, name: 'process documentation' },
   };
+  const storageKey = 'pflow.presentation.v1';
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch {}
+  for (const key of ['left', 'right']) {
+    const value = saved?.[key], side = sides[key];
+    if (Number.isFinite(value?.width)) side.width = Math.max(side.min, Math.min(side.max, value.width));
+    if (typeof value?.closed === 'boolean') side.closed = value.closed;
+  }
+  function save() {
+    try { localStorage.setItem(storageKey, JSON.stringify({ theme: document.documentElement.dataset.theme || 'light',
+      left: { width: sides.left.width, closed: sides.left.closed }, right: { width: sides.right.width, closed: sides.right.closed } })); } catch {}
+  }
+  function theme(dark) {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    byId('theme-toggle').setAttribute('aria-pressed', String(dark));
+    byId('theme-toggle').setAttribute('aria-label', `Use ${dark ? 'light' : 'dark'} theme`);
+    byId('theme-toggle').firstElementChild.textContent = dark ? '☀' : '☾';
+  }
+  theme(saved?.theme === 'dark');
   const span = side => side.closed ? rail : side.width;
   const minimum = side => Math.min(side.min, Math.max(140, shell.clientWidth * .42));
   const centerMinimum = () => Math.min(320, Math.max(100, shell.clientWidth - rail - divider * 2 - minimum(sides.right)));
@@ -45,7 +64,7 @@ globalThis.pFlow = globalThis.pFlow || {};
   }
   function reveal(key) { sides[key].closed = false; fit(key); }
   for (const [key, side] of Object.entries(sides)) {
-    side.button.addEventListener('click', () => { side.closed = !side.closed; fit(key); });
+    side.button.addEventListener('click', () => { side.closed = !side.closed; fit(key); save(); });
     function resize(width) {
       const other = sides[key === 'left' ? 'right' : 'left'];
       side.width = Math.max(minimum(side), Math.min(side.max, available() - span(other), width)); apply();
@@ -64,22 +83,18 @@ globalThis.pFlow = globalThis.pFlow || {};
     function stop(event) {
       if (drag?.id !== event.pointerId) return;
       if (event.type === 'pointercancel') resize(drag.width);
-      drag = undefined; shell.classList.remove('is-resizing');
+      save(); drag = undefined; shell.classList.remove('is-resizing');
       if (side.handle.hasPointerCapture(event.pointerId)) side.handle.releasePointerCapture(event.pointerId);
     }
     for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) side.handle.addEventListener(event, stop);
     side.handle.addEventListener('keydown', event => {
       if (side.closed || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
-      resize(event.key === 'Home' ? minimum(side) : event.key === 'End' ? side.max : side.width + (event.key === 'ArrowRight' ? 20 : -20) * (key === 'left' ? 1 : -1));
+      resize(event.key === 'Home' ? minimum(side) : event.key === 'End' ? side.max : side.width + (event.key === 'ArrowRight' ? 20 : -20) * (key === 'left' ? 1 : -1)); save();
     });
   }
   byId('theme-toggle').addEventListener('click', () => {
-    const dark = document.documentElement.dataset.theme !== 'dark';
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    byId('theme-toggle').setAttribute('aria-pressed', String(dark));
-    byId('theme-toggle').setAttribute('aria-label', `Use ${dark ? 'light' : 'dark'} theme`);
-    byId('theme-toggle').firstElementChild.textContent = dark ? '☀' : '☾';
+    theme(document.documentElement.dataset.theme !== 'dark'); save();
   });
   new ResizeObserver(() => fit()).observe(shell);
   fit();

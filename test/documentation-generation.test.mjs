@@ -1,3 +1,4 @@
+import { revealExplanation } from './support/explanation.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -56,7 +57,7 @@ test('generated HTML preserves core exploration and Markdown search after inputs
  const select=n=>page.locator(`.diagram-node[data-node-id="${n.id}"] .diagram-node-select`);
  const flow=id=>graph.flows.find(f=>f.id===id);
  await page.getByLabel('Displayed flow').selectOption(roles.shipFlow);await select(node('billing')).click();assert.equal(await page.locator('#node-name').textContent(),node('billing').label);assert.match(await page.locator('#external-metadata').textContent(),/POST/);assert.equal(await page.locator('.doc-target').getAttribute('id'),node('billing').id);
- await page.getByRole('tab',{name:'Details',exact:true}).click(); await page.locator('#source-references button').filter({hasText:'app/handlers.mjs'}).first().click();assert.equal(await page.locator('#source-snippet').isVisible(),true);assert.match(await page.locator('#source-snippet li[value="4"] code').textContent(),/http\.request/);
+ await revealExplanation(page,'details'); await page.locator('#source-references button').filter({hasText:'app/handlers.mjs'}).first().click();assert.equal(await page.locator('#source-snippet').isVisible(),true);assert.match(await page.locator('#source-snippet li[value="4"] code').textContent(),/http\.request/);
  await page.getByLabel('Displayed flow').selectOption(roles.shipFlow);await page.locator(`.diagram-node[data-node-id="${roles.nodes.persistCall}"] .diagram-expand-control`).click();assert.equal(await page.locator('#workspace-title').textContent(),flow(node('persistCall').expandFlowId).label);await page.getByRole('button',{name:'Back',exact:true}).click();assert.equal(await page.locator('#workspace-title').textContent(),flow(roles.shipFlow).label);
  const transfer=page.locator(`.diagram-edge[data-edge-id="${roles.asyncEdge}"]`);await transfer.focus();await page.keyboard.press('Enter');assert.equal(await page.locator('#node-kind').textContent(),'receive · async');assert.match(await page.locator('#document-status').textContent(),/No element documentation link/);assert.equal(await page.locator('.doc-target').getAttribute('id'),roles.shipFlow);
  await page.getByRole('navigation',{name:'Process starts'}).getByRole('button',{name:roles.consumerEntryLabel,exact:true}).click();assert.equal(await page.locator('#workspace-title').textContent(),flow(roles.consumerFlow).label);

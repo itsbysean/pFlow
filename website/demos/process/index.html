@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-q3YWR01v1tT9ONuS8SGry3tZZ0rmdKvnngDdP2sEVNI='; style-src 'sha256-6BHO22I9ZNk16RiU6SsB7fdeUzxJ1MJoCPSMqCbEm78='; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-923KBSVZitmcRlhWihuaQH/7oyI7FTAjxvdq0lXsLAQ='; style-src 'sha256-Sku/ZU8WRQcv58SHDaJlgyh2r2wCGpGvPnO8X5jKMlY='; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>pFlow — Process explorer</title>
   <style>:root {
   color-scheme: light;
@@ -378,22 +378,53 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
   .workspace-navigation { padding: 5px; } .workspace-toolbar { padding: 5px; }
   .workspace-heading p, .toolbar-label { display: none; }
 }
+
+/* Tooltip text stays in viewport coordinates and never changes SVG geometry. */
+.diagram-tooltip { position: fixed; z-index: 1000; max-width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 8px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: 0 3px 12px color-mix(in srgb, var(--text) 15%, transparent); font: 13px/1.5 var(--sans); overflow-wrap: anywhere; }
+.diagram-warning-control { cursor: pointer; }
+.diagram-warning-control circle { fill: var(--orange-soft); stroke: var(--orange); stroke-width: 1.5; }
+.diagram-warning-control text { fill: var(--orange); font: bold 11px var(--sans); pointer-events: none; }
+.diagram-warning-control:focus-visible circle { stroke: var(--blue); stroke-width: 3; }
+.diagram-edge-label.has-finding rect { stroke: var(--orange); stroke-width: 2; }
+.findings-report { padding: 14px; }
+.finding-item { border-top: 1px solid var(--line); padding: 12px 0; overflow-wrap: anywhere; }
+.finding-item h4 { margin: 0 0 7px; }
+.finding-item p { margin: 7px 0; }
+.finding-item button { margin: 4px 5px 4px 0; }
+.finding-metadata, .finding-location { color: var(--muted); font-size: 11px; }
+.finding-stale { color: var(--orange); }
+.finding-item details { margin-top: 10px; }
+.finding-item summary { cursor: pointer; font-weight: 600; }
+
+.diagram-warning-control[data-severity="high"] circle, .diagram-warning-control[data-severity="critical"] circle { fill: var(--red-soft); stroke: var(--red); }
+.diagram-warning-control[data-severity="high"] text, .diagram-warning-control[data-severity="critical"] text { fill: var(--red); }
+.diagram-warning-control[data-severity="low"] circle { fill: var(--blue-soft); stroke: var(--blue); }
+.diagram-warning-control[data-severity="low"] text { fill: var(--blue); }
+
+.diagram-warning-control, .diagram-warning-control:focus-visible { outline: none; }
+
+/* One narrative, with evidence and technical information disclosed on demand. */
+.documentation-content { overflow-y: auto; }
+#view-documentation { flex: 1 0 360px; min-height: 260px; }
+#document-contents { flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+#document-contents > summary, .explanation-disclosure > summary, .document-facts > summary { padding: 10px 14px; cursor: pointer; font-weight: 600; }
+.explanation-disclosure { flex: 0 0 auto; border-top: 1px solid var(--line); }
+.document-facts { align-self: stretch; margin: 0; padding: 0; max-height: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.document-facts .metadata-grid { padding: 0 14px 10px; }
+.explanation-disclosure > div { max-height: 420px; overflow: auto; }
+.navigator-branch { margin: 3px 10px 6px 22px; font-size: 12px; }
+.navigator-branch summary { cursor: pointer; color: var(--muted); padding: 5px 0; }
+.navigator-branch ul { list-style: none; padding-left: 10px; border-left: 1px solid var(--line); }
+.detail-flow-button { width: 100%; border: 0; background: transparent; text-align: left; padding: 8px; overflow-wrap: anywhere; }
+.detail-flow-button[aria-pressed="true"] { background: var(--blue-soft); color: var(--blue); }
+.detail-flow-button:disabled { color: var(--muted); }
+.exception-toggle { display: flex; gap: 4px; align-items: center; font-size: 11px; color: var(--muted); }
+.diagram-node.is-muted, .diagram-edge.is-muted, .diagram-edge-label.is-muted { opacity: .25; }
+.diagram-edge.is-related .diagram-edge-path { stroke-width: 2.5; }
+.diagram-edge-label.is-related rect { stroke: var(--blue); }
+.diagram-node.is-muted:focus-within, .diagram-edge.is-muted:focus-visible { opacity: 1; }
+.exception-hidden { display: none; }
 </style>
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 </head>
 <body>
   <a class="skip-link" href="#workspace">Skip to process workspace</a>
@@ -415,18 +446,16 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
         <p class="search-help">↑ ↓ review · Enter open · Esc close.</p>
       </section>
     </div>
-    <div class="header-actions"><button id="open-docs" type="button" title="Open the current flow’s full documentation">Docs</button><button id="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true">☾</span></button></div>
+    <div class="header-actions"><button id="open-findings" type="button" hidden>Potential issues</button><button id="open-docs" type="button" title="Open the current flow’s full documentation">Docs</button><button id="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true">☾</span></button></div>
   </header>
 
   <main class="app-layout" id="app-layout">
     <nav class="panel navigator" id="process-explorer" aria-labelledby="navigator-title">
       <div class="panel-heading"><h2 id="navigator-title">Process starts</h2><span class="count" id="entry-count">0</span><button id="toggle-left" class="panel-toggle" type="button" aria-controls="explorer-content" aria-expanded="true" aria-label="Collapse process explorer">«</button></div>
       <div id="explorer-content" class="explorer-content">
-      <div class="explorer-filter"><label class="sr-only" for="process-filter">Filter processes</label><input id="process-filter" type="search" placeholder="Filter processes…"><label class="sr-only" for="category-filter">Starting condition</label><select id="category-filter"><option value="">All starts</option></select></div>
-      <p class="panel-note">Grouped by recorded starting condition</p>
+
       <div id="entry-groups" class="entry-groups"></div>
-      <div class="navigator-footer" id="navigator-footer"><span class="evidence-dot" aria-hidden="true"></span>Select a start to explore</div>
-      <p id="filter-empty" class="panel-empty" hidden>No matching process starts.</p>
+
       </div>
     </nav>
     <div id="resize-left" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process explorer" aria-orientation="vertical" aria-controls="process-explorer" aria-valuemin="180" aria-valuemax="420" aria-valuenow="260"></div>
@@ -447,7 +476,7 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
       </div>
       <div class="workspace-toolbar" aria-label="Diagram controls">
         <div class="flow-chooser"><label class="sr-only" for="flow-picker">Displayed flow</label><select id="flow-picker"></select><span id="flow-count" class="toolbar-label"></span></div>
-        <div class="toolbar-actions"><button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button><output id="zoom-level" aria-live="polite" aria-label="Zoom level">100%</output><button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button><span class="toolbar-divider"></span><button id="zoom-fit" type="button" disabled>Fit view</button><button id="zoom-reset" type="button" disabled title="Reset to 100% and align the diagram">Reset zoom</button></div>
+        <div class="toolbar-actions"><label class="exception-toggle"><input id="show-exceptions" type="checkbox" checked> Show exceptions</label><button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button><output id="zoom-level" aria-live="polite" aria-label="Zoom level">100%</output><button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button><span class="toolbar-divider"></span><button id="zoom-fit" type="button" disabled>Fit view</button><button id="zoom-reset" type="button" disabled title="Reset to 100% and align the diagram">Reset zoom</button></div>
       </div>
       <p class="panel-note" id="diagram-help">Select a step or arrow for details and evidence. Use ↗ for supported detail; Back returns to the previous level.</p>
       <div class="diagram-container" id="diagram-container" aria-busy="false">
@@ -472,35 +501,30 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
 
     <div id="resize-right" class="panel-divider" role="separator" tabindex="0" aria-label="Resize process documentation" aria-orientation="vertical" aria-controls="process-documentation" aria-valuemin="280" aria-valuemax="640" aria-valuenow="400"></div>
     <section class="panel documentation" id="process-documentation" aria-label="Documentation and evidence">
-      <div class="panel-heading"><h2 id="documentation-title">Process documentation</h2><button id="clear-selection" type="button" hidden>Clear selection</button><button id="toggle-right" class="panel-toggle" type="button" aria-controls="documentation-content" aria-expanded="true" aria-label="Collapse process documentation">»</button></div>
+      <div class="panel-heading"><h2 id="documentation-title">Process explanation</h2><button id="clear-selection" type="button" hidden>Clear selection</button><button id="toggle-right" class="panel-toggle" type="button" aria-controls="documentation-content" aria-expanded="true" aria-label="Collapse process documentation">»</button></div>
       <div id="documentation-content" class="documentation-content">
       <div class="document-toolbar">
-        <div class="document-tabs" role="tablist" aria-label="Documentation views">
-          <button id="tab-documentation" role="tab" type="button" aria-selected="true" aria-controls="view-documentation">Documentation</button>
-          <button id="tab-source" role="tab" type="button" aria-selected="false" aria-controls="view-source" tabindex="-1">Evidence references</button>
-          <button id="tab-summary" role="tab" type="button" aria-selected="false" aria-controls="view-summary" tabindex="-1">Process summary</button>
-          <button id="tab-details" role="tab" type="button" aria-selected="false" aria-controls="view-details" tabindex="-1">Details</button>
-        </div>
+
         <span class="muted-label" id="document-context"></span>
       </div>
-      <div id="view-documentation" class="document-view" role="tabpanel" aria-labelledby="tab-documentation" tabindex="0">
-        <nav id="document-outline" class="document-outline" aria-label="Document sections"></nav>
+      <div id="view-documentation" class="document-view" tabindex="0">
+        <details id="document-contents"><summary>Contents</summary><nav id="document-outline" class="document-outline" aria-label="Document sections"></nav></details>
         <article class="document-article" id="document-article">
           <label class="sr-only" for="document-picker">Documentation reference</label><select id="document-picker"></select>
           <p id="document-reference" class="document-reference"></p>
           <p id="document-status" class="document-status" role="status"></p>
           <div id="document-body"></div>
         </article>
-        <aside class="document-facts" aria-label="Documentation context"><h3>Context</h3><dl id="artifact-facts" class="metadata-grid"></dl></aside>
+        <details class="document-facts"><summary>Document context</summary><dl id="artifact-facts" class="metadata-grid"></dl></details>
       </div>
-      <div id="view-source" class="document-view source-view" role="tabpanel" aria-labelledby="tab-source" tabindex="0" hidden>
+      <details id="evidence-disclosure" class="explanation-disclosure"><summary id="tab-source">Evidence references</summary><div id="view-source" class="source-view">
         <h2>Evidence references</h2><label for="source-picker">Recorded evidence</label><select id="source-picker"></select>
         <dl id="source-fields" class="metadata-grid"></dl><ol id="source-snippet" class="source-snippet" aria-label="Evidence excerpt" tabindex="0" hidden></ol><p id="source-unavailable" class="panel-empty" role="status"></p>
       </div>
-      <div id="view-summary" class="document-view summary-view" role="tabpanel" aria-labelledby="tab-summary" tabindex="0" hidden>
+      </details><details class="explanation-disclosure" id="summary-disclosure"><summary id="tab-summary">Process summary</summary><div id="view-summary" class="summary-view">
         <h2 id="summary-title">Process summary</h2><dl id="flow-summary" class="metadata-grid"></dl><h3>Documented outcomes</h3><ul id="summary-exits"></ul>
       </div>
-    <div id="view-details" class="document-view inspector" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
+      </details><details class="explanation-disclosure" id="technical-disclosure"><summary id="tab-details">Technical details</summary><div id="view-details" class="inspector">
       <div class="panel-heading"><h2 id="inspector-title">Details inspector</h2></div>
       <div id="inspector-empty" class="panel-empty" hidden><h3>No selection</h3><p>Select a node or relationship to inspect its recorded details and evidence.</p></div>
       <div id="inspector-content">
@@ -514,16 +538,18 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
         <section class="inspector-section"><h3>Referenced detail Flow</h3><div id="detail-flow"></div></section>
         <section class="inspector-section"><h3>Documentation</h3><div id="inspector-documentation"></div></section>
       </div>
+
     </div>
 
+      </details><details id="findings-disclosure" class="explanation-disclosure" hidden><summary>Findings</summary><section id="findings-report" class="findings-report" aria-label="Potential code issues" hidden></section></details>
       </div>
     </section>
   </main>
   <noscript>Enable JavaScript to explore the embedded architecture documentation.</noscript>
-<script type="application/json" id="pflow-data">[{"key":"architecture.json","title":"Deployment process","architecture":{"modelVersion":"1.0.0","entryPoints":[{"id":"entry_p01","label":"Deployment requested","flowId":"flow_p01","sourceIds":["src_p01"],"trigger":"Deployment requested"}],"flows":[{"id":"flow_p01","label":"Deployment","startNodeId":"node_p01","nodes":[{"id":"node_p01","label":"Prepare package","kind":"operation","sourceIds":["src_p01"],"docs":[{"path":"flows/process.md","anchor":"node_p01"}]},{"id":"node_p02","label":"Run verification","kind":"operation","sourceIds":["src_p02"],"docs":[{"path":"flows/process.md","anchor":"node_p02"}]},{"id":"node_p03","label":"Verification passes?","kind":"decision","sourceIds":["src_p02","src_p03","src_p04"],"docs":[{"path":"flows/process.md","anchor":"node_p03"}]},{"id":"node_p04","label":"Publish package and finish","kind":"terminal","sourceIds":["src_p03"],"docs":[{"path":"flows/process.md","anchor":"node_p04"}]},{"id":"node_p05","label":"Abort deployment and finish","kind":"terminal","sourceIds":["src_p04"],"docs":[{"path":"flows/process.md","anchor":"node_p05"}]}],"edges":[{"id":"edge_p01","from":"node_p01","to":"node_p02","kind":"next","mode":"unknown","sourceIds":["src_p01","src_p02"]},{"id":"edge_p02","from":"node_p02","to":"node_p03","kind":"next","mode":"unknown","sourceIds":["src_p02","src_p03","src_p04"]},{"id":"edge_p03","from":"node_p03","to":"node_p04","kind":"branch","mode":"unknown","sourceIds":["src_p03"],"label":"passes"},{"id":"edge_p04","from":"node_p03","to":"node_p05","kind":"branch","mode":"unknown","sourceIds":["src_p04"],"label":"fails"}],"docs":[{"path":"flows/process.md","anchor":"flow_p01"}]}],"sources":[{"id":"src_p01","path":"architecture/evidence/request.md","startLine":1,"endLine":1},{"id":"src_p02","path":"architecture/evidence/request.md","startLine":2,"endLine":2},{"id":"src_p03","path":"architecture/evidence/request.md","startLine":3,"endLine":3},{"id":"src_p04","path":"architecture/evidence/request.md","startLine":4,"endLine":4}]},"documents":[{"path":"flows/process.md","markdown":"# Deployment process\n\n\u003ca id=\"flow_p01\"\u003e\u003c/a\u003e\n## Deployment\n\nPrepare the package and run verification. Publish only on pass; abort on failure. No additional approval, rollback or retry is described. Evidence: [src_p01], [src_p02], [src_p03], [src_p04].\n\n\u003ca id=\"node_p01\"\u003e\u003c/a\u003e\n### Prepare package\n\nWhen deployment is requested, prepare the package before running verification. No packaging tool or responsible person is specified. Evidence: [src_p01].\n\n\u003ca id=\"node_p02\"\u003e\u003c/a\u003e\n### Run verification\n\nRun verification after package preparation. Its result determines whether the package can be published. The verification tool and checks are unspecified. Evidence: [src_p02].\n\n\u003ca id=\"node_p03\"\u003e\u003c/a\u003e\n### Verification passes?\n\nA passing result leads to package publication. A failing result leads to aborting this deployment; no approval or retry is described. Evidence: [src_p02], [src_p03], [src_p04].\n\n\u003ca id=\"node_p04\"\u003e\u003c/a\u003e\n### Publish package and finish\n\nPublish the prepared package only after verification passes, then finish. The supplied description does not specify a destination or additional approval. Evidence: [src_p03].\n\n\u003ca id=\"node_p05\"\u003e\u003c/a\u003e\n### Abort deployment and finish\n\nStop the deployment when verification fails. No package publication, rollback or retry is described for this outcome. Evidence: [src_p04].\n\n## Source evidence\n\n[src_p01]: ../../evidence/request.md#L1\n[src_p02]: ../../evidence/request.md#L2\n[src_p03]: ../../evidence/request.md#L3\n[src_p04]: ../../evidence/request.md#L4\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eDeployment process\u003c/h1\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"flow_p01\"\u003e\u003ch2\u003eDeployment\u003c/h2\u003e\u003cp\u003ePrepare the package and run verification. Publish only on pass; abort on failure. No additional approval, rollback or retry is described. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p01\"\u003e\u003ch3\u003ePrepare package\u003c/h3\u003e\u003cp\u003eWhen deployment is requested, prepare the package before running verification. No packaging tool or responsible person is specified. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p02\"\u003e\u003ch3\u003eRun verification\u003c/h3\u003e\u003cp\u003eRun verification after package preparation. Its result determines whether the package can be published. The verification tool and checks are unspecified. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p03\"\u003e\u003ch3\u003eVerification passes?\u003c/h3\u003e\u003cp\u003eA passing result leads to package publication. A failing result leads to aborting this deployment; no approval or retry is described. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p04\"\u003e\u003ch3\u003ePublish package and finish\u003c/h3\u003e\u003cp\u003ePublish the prepared package only after verification passes, then finish. The supplied description does not specify a destination or additional approval. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p05\"\u003e\u003ch3\u003eAbort deployment and finish\u003c/h3\u003e\u003cp\u003eStop the deployment when verification fails. No package publication, rollback or retry is described for this outcome. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003c/section\u003e\u003ch2\u003eSource evidence\u003c/h2\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e — architecture/evidence/request.md:1\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e — architecture/evidence/request.md:2\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e — architecture/evidence/request.md:3\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e — architecture/evidence/request.md:4\u003c/p\u003e\u003c/div\u003e","sections":[{"id":"flow_p01","label":"Deployment"},{"id":"node_p01","label":"Prepare package"},{"id":"node_p02","label":"Run verification"},{"id":"node_p03","label":"Verification passes?"},{"id":"node_p04","label":"Publish package and finish"},{"id":"node_p05","label":"Abort deployment and finish"}]},{"path":"index.md","markdown":"# Deployment process\n\nDocumented from developer statements, not repository discovery or runtime verification.\n\n- [Deployment](flows/process.md#flow_p01)\n\n## Coverage\n\nOnly supplied steps, conditions and substeps are documented. Unspecified responsibilities, tools and timing are omitted.\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eDeployment process\u003c/h1\u003e\u003cp\u003eDocumented from developer statements, not repository discovery or runtime verification.\u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003cbutton data-document-section=\"flow_p01\" data-document-path=\"flows/process.md\" class=\"markdown-link\" type=\"button\"\u003eDeployment\u003c/button\u003e\u003c/li\u003e\u003c/ul\u003e\u003ch2\u003eCoverage\u003c/h2\u003e\u003cp\u003eOnly supplied steps, conditions and substeps are documented. Unspecified responsibilities, tools and timing are omitted.\u003c/p\u003e\u003c/div\u003e","sections":[]}],"snippets":[{"sourceIds":["src_p01"],"lines":[{"number":1,"text":"When deployment is requested, prepare the package."}]},{"sourceIds":["src_p02"],"lines":[{"number":2,"text":"Then run verification."}]},{"sourceIds":["src_p03"],"lines":[{"number":3,"text":"If verification passes, publish the package and finish."}]},{"sourceIds":["src_p04"],"lines":[{"number":4,"text":"If verification fails, abort deployment and finish."}]}],"diagnostics":[]}]</script><script>const embedded = JSON.parse(document.getElementById('pflow-data').textContent);
+<script type="application/json" id="pflow-data">[{"key":"architecture.json","title":"Deployment process","architecture":{"modelVersion":"1.0.0","entryPoints":[{"id":"entry_p01","label":"Deployment requested","flowId":"flow_p01","sourceIds":["src_p01"],"trigger":"Deployment requested"}],"flows":[{"id":"flow_p01","label":"Deployment","startNodeId":"node_p01","nodes":[{"id":"node_p01","label":"Prepare package","kind":"operation","sourceIds":["src_p01"],"docs":[{"path":"flows/process.md","anchor":"node_p01"}]},{"id":"node_p02","label":"Run verification","kind":"operation","sourceIds":["src_p02"],"docs":[{"path":"flows/process.md","anchor":"node_p02"}]},{"id":"node_p03","label":"Verification passes?","kind":"decision","sourceIds":["src_p02","src_p03","src_p04"],"docs":[{"path":"flows/process.md","anchor":"node_p03"}]},{"id":"node_p04","label":"Publish package and finish","kind":"terminal","sourceIds":["src_p03"],"docs":[{"path":"flows/process.md","anchor":"node_p04"}]},{"id":"node_p05","label":"Abort deployment and finish","kind":"terminal","sourceIds":["src_p04"],"docs":[{"path":"flows/process.md","anchor":"node_p05"}]}],"edges":[{"id":"edge_p01","from":"node_p01","to":"node_p02","kind":"next","mode":"unknown","sourceIds":["src_p01","src_p02"]},{"id":"edge_p02","from":"node_p02","to":"node_p03","kind":"next","mode":"unknown","sourceIds":["src_p02","src_p03","src_p04"]},{"id":"edge_p03","from":"node_p03","to":"node_p04","kind":"branch","mode":"unknown","sourceIds":["src_p03"],"label":"passes"},{"id":"edge_p04","from":"node_p03","to":"node_p05","kind":"branch","mode":"unknown","sourceIds":["src_p04"],"label":"fails"}],"docs":[{"path":"flows/process.md","anchor":"flow_p01"}]}],"sources":[{"id":"src_p01","path":"architecture/evidence/request.md","startLine":1,"endLine":1},{"id":"src_p02","path":"architecture/evidence/request.md","startLine":2,"endLine":2},{"id":"src_p03","path":"architecture/evidence/request.md","startLine":3,"endLine":3},{"id":"src_p04","path":"architecture/evidence/request.md","startLine":4,"endLine":4}]},"documents":[{"path":"flows/process.md","markdown":"# Deployment process\n\n\u003ca id=\"flow_p01\"\u003e\u003c/a\u003e\n## Deployment\n\nPrepare the package and run verification. Publish only on pass; abort on failure. No additional approval, rollback or retry is described. Evidence: [src_p01], [src_p02], [src_p03], [src_p04].\n\n\u003ca id=\"node_p01\"\u003e\u003c/a\u003e\n### Prepare package\n\nWhen deployment is requested, prepare the package before running verification. No packaging tool or responsible person is specified. Evidence: [src_p01].\n\n\u003ca id=\"node_p02\"\u003e\u003c/a\u003e\n### Run verification\n\nRun verification after package preparation. Its result determines whether the package can be published. The verification tool and checks are unspecified. Evidence: [src_p02].\n\n\u003ca id=\"node_p03\"\u003e\u003c/a\u003e\n### Verification passes?\n\nA passing result leads to package publication. A failing result leads to aborting this deployment; no approval or retry is described. Evidence: [src_p02], [src_p03], [src_p04].\n\n\u003ca id=\"node_p04\"\u003e\u003c/a\u003e\n### Publish package and finish\n\nPublish the prepared package only after verification passes, then finish. The supplied description does not specify a destination or additional approval. Evidence: [src_p03].\n\n\u003ca id=\"node_p05\"\u003e\u003c/a\u003e\n### Abort deployment and finish\n\nStop the deployment when verification fails. No package publication, rollback or retry is described for this outcome. Evidence: [src_p04].\n\n## Source evidence\n\n[src_p01]: ../../evidence/request.md#L1\n[src_p02]: ../../evidence/request.md#L2\n[src_p03]: ../../evidence/request.md#L3\n[src_p04]: ../../evidence/request.md#L4\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eDeployment process\u003c/h1\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"flow_p01\"\u003e\u003ch2\u003eDeployment\u003c/h2\u003e\u003cp\u003ePrepare the package and run verification. Publish only on pass; abort on failure. No additional approval, rollback or retry is described. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p01\"\u003e\u003ch3\u003ePrepare package\u003c/h3\u003e\u003cp\u003eWhen deployment is requested, prepare the package before running verification. No packaging tool or responsible person is specified. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p02\"\u003e\u003ch3\u003eRun verification\u003c/h3\u003e\u003cp\u003eRun verification after package preparation. Its result determines whether the package can be published. The verification tool and checks are unspecified. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p03\"\u003e\u003ch3\u003eVerification passes?\u003c/h3\u003e\u003cp\u003eA passing result leads to package publication. A failing result leads to aborting this deployment; no approval or retry is described. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e, \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p04\"\u003e\u003ch3\u003ePublish package and finish\u003c/h3\u003e\u003cp\u003ePublish the prepared package only after verification passes, then finish. The supplied description does not specify a destination or additional approval. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003csection tabindex=\"-1\" class=\"markdown-section\" id=\"node_p05\"\u003e\u003ch3\u003eAbort deployment and finish\u003c/h3\u003e\u003cp\u003eStop the deployment when verification fails. No package publication, rollback or retry is described for this outcome. Evidence: \u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e.\u003c/p\u003e\u003c/section\u003e\u003c/section\u003e\u003ch2\u003eSource evidence\u003c/h2\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:1\" title=\"architecture/evidence/request.md:1\" data-source-id=\"src_p01\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p01\u003c/button\u003e — architecture/evidence/request.md:1\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:2\" title=\"architecture/evidence/request.md:2\" data-source-id=\"src_p02\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p02\u003c/button\u003e — architecture/evidence/request.md:2\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:3\" title=\"architecture/evidence/request.md:3\" data-source-id=\"src_p03\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p03\u003c/button\u003e — architecture/evidence/request.md:3\u003c/p\u003e\u003cp class=\"markdown-source-reference\"\u003e\u003cbutton aria-label=\"Inspect evidence architecture/evidence/request.md:4\" title=\"architecture/evidence/request.md:4\" data-source-id=\"src_p04\" class=\"markdown-link source-link\" type=\"button\"\u003esrc_p04\u003c/button\u003e — architecture/evidence/request.md:4\u003c/p\u003e\u003c/div\u003e","sections":[{"id":"flow_p01","label":"Deployment"},{"id":"node_p01","label":"Prepare package"},{"id":"node_p02","label":"Run verification"},{"id":"node_p03","label":"Verification passes?"},{"id":"node_p04","label":"Publish package and finish"},{"id":"node_p05","label":"Abort deployment and finish"}]},{"path":"index.md","markdown":"# Deployment process\n\nDocumented from developer statements, not repository discovery or runtime verification.\n\n- [Deployment](flows/process.md#flow_p01)\n\n## Coverage\n\nOnly supplied steps, conditions and substeps are documented. Unspecified responsibilities, tools and timing are omitted.\n","html":"\u003cdiv class=\"markdown-body\"\u003e\u003ch1\u003eDeployment process\u003c/h1\u003e\u003cp\u003eDocumented from developer statements, not repository discovery or runtime verification.\u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003cbutton data-document-section=\"flow_p01\" data-document-path=\"flows/process.md\" class=\"markdown-link\" type=\"button\"\u003eDeployment\u003c/button\u003e\u003c/li\u003e\u003c/ul\u003e\u003ch2\u003eCoverage\u003c/h2\u003e\u003cp\u003eOnly supplied steps, conditions and substeps are documented. Unspecified responsibilities, tools and timing are omitted.\u003c/p\u003e\u003c/div\u003e","sections":[]}],"snippets":[{"sourceIds":["src_p01"],"lines":[{"number":1,"text":"When deployment is requested, prepare the package."}]},{"sourceIds":["src_p02"],"lines":[{"number":2,"text":"Then run verification."}]},{"sourceIds":["src_p03"],"lines":[{"number":3,"text":"If verification passes, publish the package and finish."}]},{"sourceIds":["src_p04"],"lines":[{"number":4,"text":"If verification fails, abort deployment and finish."}]}],"findings":[],"diagnostics":[]}]</script><script>const embedded = JSON.parse(document.getElementById('pflow-data').textContent);
 globalThis.pFlowSamples = embedded.map(item => ({ key: item.key, title: item.title, architecture: item.architecture }));
 globalThis.pFlowDocuments = Object.fromEntries(embedded.map(item => [item.key, Object.fromEntries(item.documents.map(doc => [doc.path, doc.markdown]))]));
-globalThis.pFlowContent = Object.fromEntries(embedded.map(item => [item.key, { documents: Object.fromEntries(item.documents.map(doc => [doc.path, { html: doc.html, sections: doc.sections }])), snippets: item.snippets, diagnostics: item.diagnostics }]));
+globalThis.pFlowContent = Object.fromEntries(embedded.map(item => [item.key, { documents: Object.fromEntries(item.documents.map(doc => [doc.path, { html: doc.html, sections: doc.sections }])), snippets: item.snippets, diagnostics: item.diagnostics, findings: item.findings }]));
 /* Presentation adapter. It reads M1 artifacts; it does not infer execution mechanisms. */
 globalThis.pFlow = globalThis.pFlow || {};
 globalThis.pFlow.adaptSample = function adaptSample(sample) {
@@ -870,6 +896,86 @@ globalThis.pFlow = globalThis.pFlow || {};
 }());
 
 ;
+/* Viewport-sized text tooltips. No graph data, HTML parsing or zoom transforms. */
+globalThis.pFlow=globalThis.pFlow||{};
+globalThis.pFlow.createTooltip=function createTooltip() {
+  const popup=document.createElement('div');popup.className='diagram-tooltip';popup.id=`diagram-tooltip-${globalThis.pFlow.tooltipCount=(globalThis.pFlow.tooltipCount||0)+1}`;popup.setAttribute('role','tooltip');popup.hidden=true;document.body.append(popup);
+  let anchor,showTimer,hideTimer,overPopup=false;
+  function hide() {
+    clearTimeout(showTimer);clearTimeout(hideTimer);
+    if(anchor)anchor.removeAttribute('aria-describedby');anchor=undefined;popup.hidden=true;overPopup=false;
+  }
+  function place() {
+    if(!anchor?.isConnected){hide();return;}
+    const box=anchor.getBoundingClientRect(),area=popup.getBoundingClientRect(),margin=12;
+    const x=Math.max(margin,Math.min(innerWidth-area.width-margin,box.left+(box.width-area.width)/2));
+    const below=box.bottom+8,y=below+area.height<=innerHeight-margin?below:Math.max(margin,box.top-area.height-8);
+    popup.style.left=`${x}px`;popup.style.top=`${y}px`;
+  }
+  function show(target,text) {
+    if(anchor!==target)hide();clearTimeout(hideTimer);anchor=target;popup.textContent=text;popup.hidden=false;target.setAttribute('aria-describedby',popup.id);place();
+  }
+  function leave(target) {
+    clearTimeout(showTimer);clearTimeout(hideTimer);
+    hideTimer=setTimeout(()=>{if(!overPopup&&document.activeElement!==target)hide();},100);
+  }
+  function bind(target,text) {
+    target.addEventListener('pointerenter',()=>{clearTimeout(hideTimer);showTimer=setTimeout(()=>show(target,text),250);});
+    target.addEventListener('pointerleave',()=>leave(target));
+    target.addEventListener('focus',()=>show(target,text));target.addEventListener('blur',()=>leave(target));
+  }
+  popup.addEventListener('pointerenter',()=>{overPopup=true;clearTimeout(hideTimer);});
+  popup.addEventListener('pointerleave',()=>{overPopup=false;if(anchor)leave(anchor);else hide();});
+  const escape=event=>{if(event.key==='Escape'&&!popup.hidden)hide();};
+  const scroll=event=>{if(anchor&&event.target!==popup&&event.target.contains?.(anchor)){if(document.activeElement===anchor)place();else hide();}};
+  document.addEventListener('scroll',scroll,true);
+  document.addEventListener('keydown',escape);window.addEventListener('resize',hide);
+  return {bind,hide,refresh(){if(!popup.hidden&&anchor){if(document.activeElement===anchor)place();else hide();}},destroy(){hide();popup.remove();document.removeEventListener('scroll',scroll,true);document.removeEventListener('keydown',escape);window.removeEventListener('resize',hide);}};
+};
+
+;
+/* Optional read-only findings. All displayed strings remain untrusted plain text. */
+globalThis.pFlow=globalThis.pFlow||{};
+globalThis.pFlow.createFindingsPanel=function createFindingsPanel({onOpen}) {
+  const byId=id=>document.getElementById(id),report=byId('findings-report');let sample,flow,selection,rows=[];
+  const text=(tag,value,cls)=>{const e=document.createElement(tag);e.textContent=value;if(cls)e.className=cls;return e;};
+  const allRows=()=>globalThis.pFlowContent?.[sample?.key]?.findings||[];
+  const matches=(finding,chosen)=>finding.targets.some(t=>t.flowId===chosen.ownerFlow.id&&(chosen.type==='node'?t.nodeId===chosen.entity.id:t.edgeId===chosen.entity.id));
+  function render(all=false) {
+    const available=allRows(),active=available.filter(f=>f.active);
+    byId('open-findings').hidden=!available.length;byId('open-findings').textContent=`Issue report (${available.length})`;
+    byId('open-findings').title=`${active.length} current potential issues; ${available.filter(f=>f.state==='stale').length} need revalidation. Read-only report.`;
+    rows=all?available:selection?available.filter(f=>matches(f,selection)):available.filter(f=>f.targets.some(t=>t.flowId===flow?.id));
+    report.replaceChildren();report.hidden=!rows.length;byId('findings-disclosure').hidden=!rows.length;if(!rows.length)return;
+    report.append(text('h3',all?'Potential issues — all findings':'Potential issues'),text('p','AI-reported possibilities, not proven failures. Review the conditions and code evidence.','panel-note'));
+    for(const finding of rows) {
+      const item=document.createElement('article');item.className='finding-item';item.dataset.findingId=finding.id;
+      item.append(text('h4',finding.title),text('p',`${finding.severity} severity · ${finding.confidence} confidence · ${finding.status}${finding.state==='stale'?' · Needs revalidation':''}`,'finding-metadata'),text('p',finding.description));
+      if(finding.state==='stale')item.append(text('p',finding.reasons.join(' '),'finding-stale'));
+      const actions=document.createElement('div');actions.className='section-actions';
+      if(finding.state==='current')for(const target of finding.targets) {
+        const owner=sample.architecture.flows.find(f=>f.id===target.flowId),entity=target.nodeId?owner?.nodes.find(n=>n.id===target.nodeId):target.edgeId?owner?.edges.find(e=>e.id===target.edgeId):owner;
+        if(!entity)continue;
+        const button=text('button',`Locate: ${entity.label||entity.kind}`);button.type='button';button.addEventListener('click',()=>onOpen(target));actions.append(button);
+      }
+      if(actions.children.length)item.append(actions);
+      const evidence=document.createElement('details');evidence.append(text('summary','Code evidence'));
+      for(const entry of finding.evidence) {
+        const source=entry.source;evidence.append(text('p',`${source.path}:${source.startLine}–${source.endLine}${source.symbol?' · '+source.symbol:''}`,'finding-location'));
+        const snippet=finding.snippets.find(s=>s.source.id===source.id);
+        if(snippet) {const list=document.createElement('ol');list.className='source-snippet';list.start=source.startLine;for(const line of snippet.lines){const li=document.createElement('li');li.value=line.number;li.append(text('code',line.text));list.append(li);}evidence.append(list);}
+        else evidence.append(text('p','No current verified excerpt available.'));
+      }
+      item.append(evidence);
+      const reviews=document.createElement('details');reviews.append(text('summary','Review history'));
+      for(const review of finding.reviews)reviews.append(text('p',`${review.status}: ${review.rationale}`));item.append(reviews);report.append(item);
+    }
+  }
+  function showAll() {render(true);report.hidden=false;byId('findings-disclosure').open=true;report.tabIndex=-1;report.focus({preventScroll:true});report.scrollIntoView({block:'nearest'});}
+  return {setContext(nextSample,nextFlow,nextSelection){sample=nextSample;flow=nextFlow;selection=nextSelection;render();},active(){return allRows().filter(f=>f.active);},showAll,reveal(){byId('findings-disclosure').open=true;report.scrollIntoView({block:'nearest'});}};
+};
+
+;
 /* Native SVG presentation. Detail callbacks navigate without changing graph ownership. */
 globalThis.pFlow = globalThis.pFlow || {};
 (function () {
@@ -887,13 +993,15 @@ globalThis.pFlow = globalThis.pFlow || {};
     const label = (short ? source.path.split('/').at(-1) : source.path) + line;
     return label;
   }
-  function createDiagram(container, { onZoom = () => {}, onStatus = () => {}, onOpenDetail, onSelect = () => {} } = {}) {
-    let svg, scene, layout, view, drag, suppressClick = false;
+  function createDiagram(container, { onZoom = () => {}, onStatus = () => {}, onOpenDetail, onSelect = () => {}, onFinding = onSelect } = {}) {
+    let svg, scene, layout, view, drag, suppressClick = false, exceptionsVisible = true, startNodeId;
+    const tooltip=globalThis.pFlow.createTooltip?.() || {bind(){},hide(){},destroy(){}};
     const prefix = `pflow-diagram-${++sequence}`;
     const dimensions = () => ({ width: Math.max(1, container.clientWidth), height: Math.max(1, container.clientHeight) });
     function apply() {
       if (!scene || !view) return;
       scene.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.scale})`);
+      tooltip.refresh?.();
       onZoom(view.scale);
     }
     function fit() {
@@ -913,7 +1021,7 @@ globalThis.pFlow = globalThis.pFlow || {};
       const { width, height } = dimensions(), bounds = layout.bounds;
       view = { scale: 1, x: (width - bounds.width) / 2 - bounds.x, y: Math.max(24, (height - bounds.height) / 2) - bounds.y }; apply();
     }
-    function clear() { drag = undefined; svg?.remove(); svg = undefined; scene = undefined; layout = undefined; view = undefined; suppressClick = false; }
+    function clear() { tooltip.hide(); drag = undefined; svg?.remove(); svg = undefined; scene = undefined; layout = undefined; view = undefined; suppressClick = false; }
     function action(control, callback) {
       control.addEventListener('click', event => {
         event.preventDefault(); event.stopPropagation();
@@ -925,15 +1033,45 @@ globalThis.pFlow = globalThis.pFlow || {};
         if (!event.repeat) callback();
       });
     }
+    function showExceptions(visible) {
+      exceptionsVisible = visible;
+      if (!svg) return;
+      // Hide only exception edges and their exclusively reached terminal outcomes.
+      // Shared outcomes, other steps and graph data remain intact.
+      const edges = layout.edges.map(route => route.edge);
+      const incomingByNode = new Map();
+      for (const edge of edges) {
+        if (!incomingByNode.has(edge.to)) incomingByNode.set(edge.to, []);
+        incomingByNode.get(edge.to).push(edge);
+      }
+      for (const item of svg.querySelectorAll('.edge-exception')) item.classList.toggle('exception-hidden', !visible);
+      for (const item of layout.nodes) {
+        const incoming = incomingByNode.get(item.id) || [];
+        const exclusive = item.node.kind === 'terminal' && item.id !== startNodeId && incoming.length && incoming.every(edge => edge.kind === 'exception');
+        svg.querySelector(`.diagram-node[data-node-id="${item.id}"]`)?.classList.toggle('exception-hidden', !visible && Boolean(exclusive));
+      }
+      if (svg.contains(document.activeElement) && document.activeElement.closest('.exception-hidden')) svg.focus({ preventScroll: true });
+    }
     function setSelection(selected) {
       if (!svg) return;
+      const adjacent = new Set(selected?.type === 'node' ? [selected.id] : []);
+      const related = new Set();
+      for (const route of layout.edges) {
+        const edge = route.edge;
+        if (selected?.type === 'node' && (edge.from === selected.id || edge.to === selected.id) || selected?.type === 'edge' && edge.id === selected.id) {
+          related.add(edge.id); adjacent.add(edge.from); adjacent.add(edge.to);
+        }
+      }
       for (const node of svg.querySelectorAll('.diagram-node')) {
+        node.classList.toggle('is-muted', Boolean(selected) && !adjacent.has(node.dataset.nodeId));
         const active = selected?.type === 'node' && selected.id === node.dataset.nodeId;
         node.classList.toggle('is-selected', active); node.querySelector('.diagram-node-select').setAttribute('aria-pressed', String(active));
       }
       for (const edge of svg.querySelectorAll('.diagram-edge, .diagram-edge-label')) {
         const active = selected?.type === 'edge' && selected.id === (edge.dataset.edgeId || edge.dataset.edgeLabel);
         edge.classList.toggle('is-selected', active);
+        edge.classList.toggle('is-related', related.has(edge.dataset.edgeId || edge.dataset.edgeLabel));
+        edge.classList.toggle('is-muted', Boolean(selected) && !related.has(edge.dataset.edgeId || edge.dataset.edgeLabel));
         if (edge.classList.contains('diagram-edge')) edge.setAttribute('aria-pressed', String(active));
       }
     }
@@ -956,10 +1094,11 @@ globalThis.pFlow = globalThis.pFlow || {};
       if (ratio < 1) { view = { ...view, scale: view.scale * ratio }; apply(); item = target.getBoundingClientRect(); }
       view = { ...view, x: view.x + box.left + box.width / 2 - item.left - item.width / 2, y: view.y + box.top + box.height / 2 - item.top - item.height / 2 }; apply();
     }
-    function render(architecture, flowId, { pathFlowIds = [] } = {}) {
+    function render(architecture, flowId, { pathFlowIds = [], findings = [] } = {}) {
       clear();
       try {
         const graph = globalThis.pFlow.prepareDiagram(architecture, flowId);
+        startNodeId = graph.startNodeId;
         layout = globalThis.pFlow.layoutDiagram(graph);
         if (!layout.nodes.length) { onStatus('empty'); return { ok: true, empty: true }; }
         svg = element('svg', { class: 'diagram-svg', 'text-rendering': 'geometricPrecision', role: 'group', tabindex: 0, 'aria-labelledby': `${prefix}-title`, 'aria-describedby': `${prefix}-description diagram-help` });
@@ -977,13 +1116,15 @@ globalThis.pFlow = globalThis.pFlow || {};
         for (const route of layout.edges) {
           const edge = route.edge;
           const color = edge.kind === 'exception' ? 'exception' : edge.mode === 'async' ? 'async' : edge.kind;
+          const edgeFindings=findings.filter(f=>f.active&&f.targets.some(t=>t.flowId===flowId&&t.edgeId===edge.id));
           const description = `${edge.kind} (${edge.mode}): ${names.get(edge.from)} → ${names.get(edge.to)}${edge.label ? `. ${edge.label}` : ''}. Evidence: ${edge.sourceIds.join(', ')}`;
           const group = element('g', { class: `diagram-edge edge-${edge.kind} mode-${edge.mode}`, role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select relationship ${description}`, 'data-edge-id': edge.id, 'data-from': edge.from, 'data-to': edge.to });
+          if(edgeFindings.length)group.setAttribute('aria-label',group.getAttribute('aria-label')+`. ${edgeFindings.length} potential issues.`);
           group.append(element('title', {}, description));
           const d = route.points.map(([x, y], i) => `${i ? 'L' : 'M'} ${x} ${y}`).join(' ');
           group.append(element('path', { d, class: 'diagram-edge-hit' }), element('path', { d, 'marker-end': `url(#${prefix}-arrow-${color})`, class: 'diagram-edge-path' })); paths.append(group);
           action(group, () => onSelect({ type: 'edge', id: edge.id }));
-          const label = element('g', { class: `diagram-edge-label edge-${edge.kind} mode-${edge.mode}`, 'data-edge-label': edge.id, 'aria-hidden': true });
+          const label = element('g', { class: `diagram-edge-label edge-${edge.kind} mode-${edge.mode}${edgeFindings.length?' has-finding':''}`, 'data-edge-label': edge.id, 'aria-hidden': true });
           label.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!suppressClick || event.detail === 0) onSelect({ type: 'edge', id: edge.id }); });
           const caption = element('text', { x: route.labelX, y: route.labelY + 4, 'text-anchor': 'middle' }, route.label);
           textLimits.push([caption, route.labelWidth - 12]);
@@ -991,6 +1132,7 @@ globalThis.pFlow = globalThis.pFlow || {};
         }
         for (const item of layout.nodes) {
           const { node, x, y, width, height } = item;
+          const nodeFindings=findings.filter(f=>f.active&&f.targets.some(t=>t.flowId===(item.remoteFlow?.id||flowId)&&t.nodeId===node.id));
           const detail = !item.remoteFlow && node.expandFlowId !== undefined && onOpenDetail
             ? architecture.flows.find(flow => flow.id === node.expandFlowId) : undefined;
           const recursive = detail && pathFlowIds.includes(detail.id);
@@ -1000,7 +1142,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           group.setAttribute('role', 'group');
           const select = element('g', { class: 'diagram-node-select', role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select node ${full}` });
           action(select, () => onSelect({ type: 'node', id: node.id }));
-          group.append(element('title', {}, full));
+          tooltip.bind(select,node.label);
           let shape;
           if (node.kind === 'decision') shape = element('polygon', { points: `${width / 2},0 ${width},${height / 2} ${width / 2},${height} 0,${height / 2}` });
           else if (item.category === 'system') shape = element('path', { d: `M 14 0 H ${width} V ${height - 14} L ${width - 14} ${height} H 0 V 14 Z` });
@@ -1013,7 +1155,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           const label = element('text', { class: 'diagram-node-name', x: decision ? width / 2 : 14, y: decision ? 26 : lines.length === 1 ? 26 : 21, 'text-anchor': decision ? 'middle' : 'start' });
           lines.forEach((line, i) => {
             const span = element('tspan', { x: decision ? width / 2 : 14, dy: i ? 16 : 0 }, line);
-            textLimits.push([span, decision ? (i ? (detail ? 156 : 176) : 92) : width - (detail ? 48 : 28), decision ? { width, height } : undefined]); label.append(span);
+            textLimits.push([span, decision ? (i ? (nodeFindings.length ? 128 : detail ? 156 : 176) : 92) : width - (detail ? 48 : 28), decision ? { width, height } : undefined]); label.append(span);
           });
           const kind = element('text', { class: 'diagram-node-type', x: decision ? width / 2 : 14, y: 54, 'text-anchor': decision ? 'middle' : 'start' }, globalThis.pFlow.wrapLabel(type, decision ? 18 : 32, 1)[0]);
           let short = sourceLabel(item.sources[0], true);
@@ -1021,7 +1163,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           if (Array.from(short).length > limit) short = '…' + Array.from(short).slice(-(limit - 1)).join('');
           const source = element('text', { class: 'diagram-node-source', x: decision ? width / 2 : node.kind === 'terminal' ? 22 : 14, y: decision ? 65 : 69, 'text-anchor': decision ? 'middle' : 'start' }, short);
           const diamond = decision ? { width, height } : undefined;
-          textLimits.push([kind, decision ? 128 : width - 28, diamond], [source, decision ? 68 : width - 44, diamond]);
+          textLimits.push([kind, decision ? 128 : width - 28, diamond], [source, decision ? 68 : node.kind === 'terminal' && nodeFindings.length ? width - 56 : width - 44, diamond]);
           select.append(label, kind, source); group.append(select);
           if (detail) {
             const x = width - 28, y = decision ? height / 2 - 12 : 4;
@@ -1029,10 +1171,17 @@ globalThis.pFlow = globalThis.pFlow || {};
             expand.append(element('title', {}, recursive ? 'Detail already in this path' : `Open ${detail.label}`), element('rect', { x, y, width: 24, height: 24, rx: 4 }), element('text', { class: 'diagram-expand-hint', x: x + 12, y: y + 16, 'text-anchor': 'middle', 'aria-hidden': 'true' }, recursive ? '↻' : '↗'));
             action(expand, () => onOpenDetail(node.id)); group.append(expand);
           }
+          if(nodeFindings.length) {
+            const bx=decision?34:node.kind==='terminal'?width-24:width-20,by=decision?height/2:node.kind==='terminal'?height-17:height-15;
+            const warning=element('g',{class:'diagram-warning-control',role:'button',tabindex:0,'aria-label':`Open ${nodeFindings.length} potential issues for ${node.label}`,'data-finding-node':node.id,'data-severity':nodeFindings.reduce((a,f)=>({low:0,medium:1,high:2,critical:3}[f.severity]>{low:0,medium:1,high:2,critical:3}[a]?f.severity:a),'low')});
+            warning.append(element('circle',{cx:bx,cy:by,r:8}),element('text',{x:bx,y:by+4,'text-anchor':'middle','aria-hidden':true},'!'));
+            action(warning,()=>onFinding({type:'node',id:node.id}));tooltip.bind(warning,`${nodeFindings.length} potential issues: ${nodeFindings[0].title}`);group.append(warning);
+          }
           scene.append(group);
         }
         svg.addEventListener('pointerdown', event => {
           if (event.button !== 0 || !event.isPrimary) return;
+          tooltip.hide();
           suppressClick = false;
           drag = { id: event.pointerId, x: event.clientX, y: event.clientY, view: { ...view }, moved: false };
         });
@@ -1072,11 +1221,11 @@ globalThis.pFlow = globalThis.pFlow || {};
           do { characters.pop(); text.textContent = characters.join('') + '…'; }
           while (characters.length && text.getComputedTextLength() > limit);
         }
-        fit(); onStatus('ready'); return { ok: true, empty: false };
+        showExceptions(exceptionsVisible); fit(); onStatus('ready'); return { ok: true, empty: false };
       } catch (error) { clear(); onStatus('error', error.message); return { ok: false, error: error.message }; }
     }
     const resize = new ResizeObserver(() => { if (svg) fit(); }); resize.observe(container);
-    return { render, setSelection, revealSelection, centerSelection, zoom, fit, reset, clear, destroy() { clear(); resize.disconnect(); }, getView: () => view ? { ...view } : undefined };
+    return { render, showExceptions, setSelection, revealSelection, centerSelection, zoom, fit, reset, clear, destroy() { clear(); tooltip.destroy(); resize.disconnect(); }, getView: () => view ? { ...view } : undefined };
   }
   globalThis.pFlow.createDiagram = createDiagram;
 }());
@@ -1343,7 +1492,7 @@ globalThis.pFlow = globalThis.pFlow || {};
 ;
 /* Offline document and source-reference presentation; never reads source files. */
 globalThis.pFlow = globalThis.pFlow || {};
-globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ showTab, onSelectSection = () => {}, onOpenDetail = () => {} }) {
+globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ showSection, onSelectSection = () => {}, onOpenDetail = () => {} }) {
   const byId = id => document.getElementById(id);
   let sample, flow, selected, references = [], sourceIds = [], currentTarget, currentView, markedSection, flashTimer;
   const sources = () => sample?.architecture.sources || [];
@@ -1353,6 +1502,10 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     if (!currentTarget?.isConnected || byId('view-documentation').hidden) return;
     const article = byId('document-article');
     article.scrollTop += currentTarget.getBoundingClientRect().top - article.getBoundingClientRect().top - 10;
+    // Disclosures can scroll the outer panel independently of the narrative.
+    // Keep an explicitly located passage visible without closing those disclosures.
+    const reader = byId('documentation-content'), bounds = reader.getBoundingClientRect(), target = currentTarget.getBoundingClientRect();
+    if (target.top < bounds.top + 8 || target.top > bounds.bottom - 24) reader.scrollTop += target.top - bounds.top - 10;
     const outline = byId('document-outline'), active = outline.querySelector('[aria-current]');
     if (active) {
       const item = active.getBoundingClientRect(), panel = outline.getBoundingClientRect();
@@ -1385,7 +1538,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     globalThis.pFlow.layout.reveal('right');
     if (!sources().some(source => source.id === id)) return;
     if (!sourceIds.includes(id)) sourceIds.push(id);
-    populateSources(id); showTab('source');
+    populateSources(id); showSection('source');
     byId('source-picker').focus({ preventScroll: true });
     byId('view-source').scrollTop = 0;
     byId('view-source').scrollIntoView({ block: 'nearest' });
@@ -1519,6 +1672,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
           }); outline.append(button);
         }
       }
+      byId('document-contents').hidden = rendered.headings.length < 2;
       decorateSections();
       clearSearchHighlights();
       if (target.anchor) markSection(target.anchor, { move: false });
@@ -1563,7 +1717,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     byId('document-picker').value = String(index);
     byId('document-context').textContent = 'Linked documentation; the diagram context is unchanged.';
     byId('document-context').title = byId('document-context').textContent;
-    showTab('documentation'); renderDocument(reference, prepared);
+    showSection('documentation'); renderDocument(reference, prepared);
   }
   function populateDocuments() {
     byId('document-picker').replaceChildren(...references.map((ref, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = ref.path + (ref.anchor ? `#${ref.anchor}` : ''); return option; }));
@@ -1664,6 +1818,25 @@ globalThis.pFlow = globalThis.pFlow || {};
     left: { panel: byId('process-explorer'), content: byId('explorer-content'), button: byId('toggle-left'), handle: byId('resize-left'), min: 180, max: 420, width: 280, closed: false, name: 'process explorer' },
     right: { panel: byId('process-documentation'), content: byId('documentation-content'), button: byId('toggle-right'), handle: byId('resize-right'), min: 280, max: 640, width: 420, closed: false, name: 'process documentation' },
   };
+  const storageKey = 'pflow.presentation.v1';
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(storageKey)); } catch {}
+  for (const key of ['left', 'right']) {
+    const value = saved?.[key], side = sides[key];
+    if (Number.isFinite(value?.width)) side.width = Math.max(side.min, Math.min(side.max, value.width));
+    if (typeof value?.closed === 'boolean') side.closed = value.closed;
+  }
+  function save() {
+    try { localStorage.setItem(storageKey, JSON.stringify({ theme: document.documentElement.dataset.theme || 'light',
+      left: { width: sides.left.width, closed: sides.left.closed }, right: { width: sides.right.width, closed: sides.right.closed } })); } catch {}
+  }
+  function theme(dark) {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    byId('theme-toggle').setAttribute('aria-pressed', String(dark));
+    byId('theme-toggle').setAttribute('aria-label', `Use ${dark ? 'light' : 'dark'} theme`);
+    byId('theme-toggle').firstElementChild.textContent = dark ? '☀' : '☾';
+  }
+  theme(saved?.theme === 'dark');
   const span = side => side.closed ? rail : side.width;
   const minimum = side => Math.min(side.min, Math.max(140, shell.clientWidth * .42));
   const centerMinimum = () => Math.min(320, Math.max(100, shell.clientWidth - rail - divider * 2 - minimum(sides.right)));
@@ -1702,7 +1875,7 @@ globalThis.pFlow = globalThis.pFlow || {};
   }
   function reveal(key) { sides[key].closed = false; fit(key); }
   for (const [key, side] of Object.entries(sides)) {
-    side.button.addEventListener('click', () => { side.closed = !side.closed; fit(key); });
+    side.button.addEventListener('click', () => { side.closed = !side.closed; fit(key); save(); });
     function resize(width) {
       const other = sides[key === 'left' ? 'right' : 'left'];
       side.width = Math.max(minimum(side), Math.min(side.max, available() - span(other), width)); apply();
@@ -1721,22 +1894,18 @@ globalThis.pFlow = globalThis.pFlow || {};
     function stop(event) {
       if (drag?.id !== event.pointerId) return;
       if (event.type === 'pointercancel') resize(drag.width);
-      drag = undefined; shell.classList.remove('is-resizing');
+      save(); drag = undefined; shell.classList.remove('is-resizing');
       if (side.handle.hasPointerCapture(event.pointerId)) side.handle.releasePointerCapture(event.pointerId);
     }
     for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) side.handle.addEventListener(event, stop);
     side.handle.addEventListener('keydown', event => {
       if (side.closed || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
-      resize(event.key === 'Home' ? minimum(side) : event.key === 'End' ? side.max : side.width + (event.key === 'ArrowRight' ? 20 : -20) * (key === 'left' ? 1 : -1));
+      resize(event.key === 'Home' ? minimum(side) : event.key === 'End' ? side.max : side.width + (event.key === 'ArrowRight' ? 20 : -20) * (key === 'left' ? 1 : -1)); save();
     });
   }
   byId('theme-toggle').addEventListener('click', () => {
-    const dark = document.documentElement.dataset.theme !== 'dark';
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    byId('theme-toggle').setAttribute('aria-pressed', String(dark));
-    byId('theme-toggle').setAttribute('aria-label', `Use ${dark ? 'light' : 'dark'} theme`);
-    byId('theme-toggle').firstElementChild.textContent = dark ? '☀' : '☾';
+    theme(document.documentElement.dataset.theme !== 'dark'); save();
   });
   new ResizeObserver(() => fit()).observe(shell);
   fit();
@@ -1751,7 +1920,7 @@ globalThis.pFlow = globalThis.pFlow || {};
   const setText = (id, text) => { byId(id).textContent = text; };
   let currentSample, navigation, selection;
   const documentation = globalThis.pFlow.createDocumentationPanel({
-    showTab: name => showTab(byId(`tab-${name}`)),
+    showSection: openExplanationSection,
     onSelectSection: (sample, association) => activateDocumentSection(sample, association),
     onOpenDetail: (sample, association) => { showAssociation(sample, association); navigate(() => navigation.openDetail(association.entity.id)); },
   });
@@ -1760,9 +1929,17 @@ globalThis.pFlow = globalThis.pFlow || {};
     onDocumentation: ref => documentation.openDocument(ref),
     onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
   });
+  const findings=globalThis.pFlow.createFindingsPanel({onOpen: target=>{
+    const association={flowId:target.flowId,type:target.nodeId?'node':target.edgeId?'edge':'flow',entity:{id:target.nodeId||target.edgeId||target.flowId}};
+    showAssociation(currentSample,association);
+    if(association.type!=='flow')selectEntity({type:association.type,id:association.entity.id});else selectEntity(undefined);
+    diagram.revealSelection();findings.reveal();
+  }});
+  byId('open-findings').addEventListener('click',()=>{globalThis.pFlow.layout.reveal('right');findings.showAll();});
   const controls = ['zoom-in', 'zoom-out', 'zoom-fit', 'zoom-reset'];
   const diagram = globalThis.pFlow.createDiagram(byId('diagram-container'), {
     onSelect: next => selectEntity(next),
+    onFinding: next => {selectEntity(next);findings.reveal();},
     onOpenDetail: nodeId => navigate(() => navigation.openDetail(nodeId)),
     onZoom: scale => setText('zoom-level', `${Math.round(scale * 100)}%`),
     onStatus: (state, message) => {
@@ -1778,6 +1955,10 @@ globalThis.pFlow = globalThis.pFlow || {};
       }
     },
   });
+  byId('show-exceptions').addEventListener('change', () => {
+    diagram.showExceptions(byId('show-exceptions').checked);
+    if (selection && byId('diagram-container').querySelector('.is-selected.exception-hidden')) selectEntity(undefined);
+  });
   byId('zoom-in').addEventListener('click', () => diagram.zoom(1.25));
   byId('zoom-out').addEventListener('click', () => diagram.zoom(.8));
   byId('zoom-fit').addEventListener('click', () => diagram.fit());
@@ -1787,7 +1968,11 @@ globalThis.pFlow = globalThis.pFlow || {};
     const flow = currentSample.architecture.flows.find(item => item.id === state?.flowId);
     const selected = globalThis.pFlow.resolveSelection(currentSample.architecture, flow?.id, next);
     selection = selected ? next : undefined;
+    if (selected && byId('diagram-container').querySelector(`[data-${next.type}-id="${next.id}"].exception-hidden`)) {
+      byId('show-exceptions').checked = true; diagram.showExceptions(true);
+    }
     diagram.setSelection(selection);
+    findings.setContext(currentSample,flow,selected);
     byId('clear-selection').hidden = !selected;
     inspector.render(currentSample.architecture, flow, selected, state?.path.map(frame => frame.flowId) || []);
     documentation.setContext(currentSample, flow, selected, false, locateDocumentation);
@@ -1803,6 +1988,19 @@ globalThis.pFlow = globalThis.pFlow || {};
   byId('clear-selection').addEventListener('click', () => {
     selectEntity(undefined); byId('diagram-container').querySelector('.diagram-svg')?.focus({ preventScroll: true });
   });
+  function updateTreeSelection() {
+    const state = navigation?.getState();
+    const currentPath = state?.path.slice(1).map(frame => frame.viaNodeId) || [];
+    for (const tree of document.querySelectorAll('.navigator-branch')) {
+      const path = JSON.parse(tree.dataset.path);
+      if (tree.dataset.bundleKey === (currentSample?.key || '') && tree.dataset.entryId === (state?.entryId || state?.path[0]?.flowId) && path.length < currentPath.length && path.every((id, i) => currentPath[i] === id)) tree.open = true;
+    }
+    for (const button of document.querySelectorAll('.detail-flow-button')) {
+      const path = state?.path.slice(1).map(frame => frame.viaNodeId) || [];
+      const active = button.dataset.bundleKey === (currentSample?.key || '') && button.dataset.entryId === (state?.entryId || state?.path[0]?.flowId) && button.dataset.path === JSON.stringify(path);
+      button.setAttribute('aria-pressed', String(active));
+    }
+  }
   function renderNavigation(focus = false) {
     const state = navigation?.getState() || { path: [], canBack: false, canForward: false };
     const architecture = currentSample.architecture;
@@ -1830,6 +2028,7 @@ globalThis.pFlow = globalThis.pFlow || {};
       button.disabled = !navigation;
       button.setAttribute('aria-pressed', String(button.dataset.bundleKey === (currentSample.key || '') && button.dataset.entryId === state.entryId));
     }
+    updateTreeSelection();
     if (flow) byId('flow-picker').value = flow.id;
     setText('workspace-title', flow?.label || 'Process overview');
     byId('workspace-title').title = byId('workspace-title').textContent;
@@ -1839,7 +2038,8 @@ globalThis.pFlow = globalThis.pFlow || {};
     const context = entry ? `Start: ${entry.label}` : flow ? 'Direct flow' : '';
     setText('workspace-description', [currentSample.title, context, via ? `via ${via.label}` : ''].filter(Boolean).join(' · '));
     byId('workspace-description').title = byId('workspace-description').textContent;
-    const result = diagram.render(architecture, state.flowId, { pathFlowIds: state.path.map(frame => frame.flowId) });
+    findings.setContext(currentSample,flow,undefined);
+    const result = diagram.render(architecture, state.flowId, { pathFlowIds: state.path.map(frame => frame.flowId), findings:findings.active() });
     selection = undefined; byId('clear-selection').hidden = true;
     inspector.render(architecture, flow, undefined);
     documentation.setContext(currentSample, flow, undefined, true);
@@ -1854,15 +2054,12 @@ globalThis.pFlow = globalThis.pFlow || {};
   byId('navigation-back').addEventListener('click', () => navigate(() => navigation.back()));
   byId('navigation-forward').addEventListener('click', () => navigate(() => navigation.forward()));
   byId('navigation-root').addEventListener('click', () => navigate(() => navigation.root()));
-  function showTab(tab, focus = false) {
-    const tabs = [...document.querySelectorAll('[role="tab"]')];
-    for (const item of tabs) {
-      const selected = item === tab;
-      item.setAttribute('aria-selected', String(selected)); item.tabIndex = selected ? 0 : -1;
-      byId(item.getAttribute('aria-controls')).hidden = !selected;
-    }
-    if (focus) tab.focus();
-    if (tab.id === 'tab-documentation') { documentation.reveal(); requestAnimationFrame(() => documentation.reveal()); }
+  function openExplanationSection(name) {
+    const disclosure = name === 'source' ? byId('evidence-disclosure') : name === 'details' ? byId('technical-disclosure') : name === 'summary' ? byId('summary-disclosure') : undefined;
+    if (disclosure) {
+      disclosure.open = true;
+      disclosure.scrollIntoView({ block: 'nearest' });
+    } else { documentation.reveal(); requestAnimationFrame(() => documentation.reveal()); }
   }
   function setWorkspaceState(state, model) {
     const loading = state === 'loading'; const empty = !model || model.entryCount === 0;
@@ -1877,30 +2074,8 @@ globalThis.pFlow = globalThis.pFlow || {};
     setText('workspace-state-message', loading ? 'Process information is being prepared.' : empty ? 'Recorded process starts will appear here. Use the flow chooser when no start is recorded.' : 'Diagram rendering will appear here. Explore the sample context in the panels below.');
     setText('workspace-state-caption', loading ? 'Loading process documentation' : empty ? 'No process diagram available' : `${model.flowCount} flows · ${model.nodeCount} recorded nodes`);
   }
-  function filterExplorer() {
-    const query = byId('process-filter').value.trim().toLocaleLowerCase();
-    const trigger = byId('category-filter').value;
-    let visible = 0;
-    for (const group of byId('entry-groups').querySelectorAll('.entry-group')) {
-      let count = 0;
-      for (const item of group.querySelectorAll('li')) {
-        const match = (!trigger || group.dataset.trigger === trigger) && (!query || item.dataset.search.includes(query));
-        item.hidden = !match; if (match) count++;
-      }
-      group.hidden = count === 0; visible += count;
-    }
-    byId('filter-empty').hidden = visible > 0;
-  }
-  byId('process-filter').addEventListener('input', filterExplorer);
-  byId('category-filter').addEventListener('change', filterExplorer);
   function renderExplorer(activeSample) {
     const available = samples.some(item => item.key === activeSample.key) ? samples.map(item => item.key === activeSample.key ? activeSample : item) : [activeSample];
-    const allTriggers = [...new Set(available.flatMap(item => globalThis.pFlow.adaptSample(item).groups.map(group => group.label)))];
-    const previous = byId('category-filter').value;
-    byId('category-filter').replaceChildren(...['', ...allTriggers].map(trigger => {
-      const option = document.createElement('option'); option.value = trigger; option.textContent = trigger || 'All starts'; return option;
-    }));
-    if (allTriggers.includes(previous)) byId('category-filter').value = previous;
     setText('entry-count', available.reduce((sum, item) => sum + item.architecture.entryPoints.length, 0));
     byId('entry-groups').replaceChildren();
     for (const sample of available) {
@@ -1923,12 +2098,43 @@ globalThis.pFlow = globalThis.pFlow || {};
             if (currentSample !== sample) initializeSample(sample);
             navigate(() => group.direct ? navigation.selectFlow(entry.id) : navigation.selectEntry(entry.id));
           });
+          function appendDetails(parent, flowId, path, seen) {
+            const flow = sample.architecture.flows.find(flow => flow.id === flowId);
+            if (!flow) return;
+            const expandable = flow.nodes.filter(node => node.expandFlowId);
+            if (!expandable.length) return;
+            const tree = document.createElement('details'); tree.className = 'navigator-branch';
+            tree.dataset.path = JSON.stringify(path); tree.dataset.entryId = entry.id; tree.dataset.bundleKey = sample.key || '';
+            const summary = document.createElement('summary'); summary.textContent = 'Subprocesses'; tree.append(summary);
+            const children = document.createElement('ul'); tree.append(children); parent.append(tree);
+            tree.addEventListener('toggle', () => {
+              if (!tree.open || children.childElementCount) return;
+              for (const node of expandable) {
+                const row = document.createElement('li'), target = sample.architecture.flows.find(f => f.id === node.expandFlowId);
+                if (!target) continue;
+                const child = document.createElement('button'); child.type = 'button'; child.className = 'detail-flow-button'; child.textContent = node.label;
+                child.dataset.path = JSON.stringify([...path, node.id]); child.dataset.entryId = entry.id; child.dataset.bundleKey = sample.key || ''; child.dataset.flowId = target.id;
+                if (seen.has(target.id)) { child.disabled = true; child.textContent += ' (already in this path)'; }
+                else {
+                  child.addEventListener('click', () => {
+                    if (currentSample !== sample) initializeSample(sample);
+                    navigate(() => { group.direct ? navigation.selectFlow(entry.id) : navigation.selectEntry(entry.id); for (const id of [...path, node.id]) navigation.openDetail(id); });
+                  });
+                }
+                row.append(child); children.append(row);
+                if (!seen.has(target.id)) appendDetails(row, target.id, [...path, node.id], new Set([...seen, target.id]));
+              }
+              updateTreeSelection();
+            });
+          }
           item.append(button); entries.append(item);
+          const rootFlowId = group.direct ? entry.id : sample.architecture.entryPoints.find(item => item.id === entry.id)?.flowId;
+          appendDetails(item, rootFlowId, [], new Set([rootFlowId]));
         }
         section.append(heading, entries); byId('entry-groups').append(section);
       }
     }
-    filterExplorer();
+
   }
   byId('open-docs').addEventListener('click', () => {
     const flow = currentSample?.architecture.flows.find(item => item.id === navigation?.getState().flowId);
@@ -1938,7 +2144,7 @@ globalThis.pFlow = globalThis.pFlow || {};
     globalThis.pFlow.layout.reveal('right');
     if (reference) documentation.openDocument(reference);
     else if (Object.hasOwn(globalThis.pFlowDocuments?.[currentSample?.key] || {}, 'index.md')) documentation.openDocument({ path: 'index.md' });
-    else { showTab(byId('tab-documentation')); setText('document-status', 'No documentation is available for this process.'); }
+    else { openExplanationSection('documentation'); setText('document-status', 'No documentation is available for this process.'); }
     byId('document-article').tabIndex = -1; byId('document-article').focus({ preventScroll: true });
   });
   function initializeSample(sample) {
@@ -1967,14 +2173,6 @@ globalThis.pFlow = globalThis.pFlow || {};
     renderNavigation();
     return model;
   }
-  const tabs = [...document.querySelectorAll('[role="tab"]')];
-  tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => showTab(tab));
-    tab.addEventListener('keydown', event => {
-      const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : undefined;
-      if (next !== undefined) { event.preventDefault(); showTab(tabs[next], true); }
-    });
-  });
   function showAssociation(sample, association) {
     const plan = globalThis.pFlow.planSearchFlow(sample.architecture, association.flowId, currentSample === sample ? navigation?.getState() : {}, association.type === 'entry' ? association.entity.id : undefined);
     if (currentSample !== sample) initializeSample(sample);

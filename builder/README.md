@@ -171,3 +171,7 @@ Development assets remain file-backed. Packaged assets are immutable embedded st
 ## Documentation lifecycle
 
 The single packaged runtime also exposes VCS-independent detect, plan and publish commands for code, prompt and mixed evidence. They reuse this Builder and existing validators; graph schema 1.0.0 is unchanged. See [lifecycle instructions](../skills/pflow/references/lifecycle.md) and [runtime commands](../skills/pflow/references/runtime.md). Publication stages all canonical artifacts and HTML together and retains the previous bundle on recoverable failure.
+
+## Optional findings
+
+An adjacent findings.json is optional for both bundle layouts. The Builder validates schema 1.0.0, graph targets and source evidence, embeds a read-only report and marks outdated results for revalidation without active badges. Invalid findings structure blocks a build; stale retained findings generate diagnostics. Base builds never run AI bug analysis. Use the trusted single-runtime findings-inspect/findings-publish commands for reviewed publication of findings plus HTML. See [analysis and review instructions](../skills/pflow/references/potential-bugs.md).

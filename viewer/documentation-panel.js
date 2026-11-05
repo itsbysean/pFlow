@@ -1,6 +1,6 @@
 /* Offline document and source-reference presentation; never reads source files. */
 globalThis.pFlow = globalThis.pFlow || {};
-globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ showTab, onSelectSection = () => {}, onOpenDetail = () => {} }) {
+globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ showSection, onSelectSection = () => {}, onOpenDetail = () => {} }) {
   const byId = id => document.getElementById(id);
   let sample, flow, selected, references = [], sourceIds = [], currentTarget, currentView, markedSection, flashTimer;
   const sources = () => sample?.architecture.sources || [];
@@ -10,6 +10,10 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     if (!currentTarget?.isConnected || byId('view-documentation').hidden) return;
     const article = byId('document-article');
     article.scrollTop += currentTarget.getBoundingClientRect().top - article.getBoundingClientRect().top - 10;
+    // Disclosures can scroll the outer panel independently of the narrative.
+    // Keep an explicitly located passage visible without closing those disclosures.
+    const reader = byId('documentation-content'), bounds = reader.getBoundingClientRect(), target = currentTarget.getBoundingClientRect();
+    if (target.top < bounds.top + 8 || target.top > bounds.bottom - 24) reader.scrollTop += target.top - bounds.top - 10;
     const outline = byId('document-outline'), active = outline.querySelector('[aria-current]');
     if (active) {
       const item = active.getBoundingClientRect(), panel = outline.getBoundingClientRect();
@@ -42,7 +46,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     globalThis.pFlow.layout.reveal('right');
     if (!sources().some(source => source.id === id)) return;
     if (!sourceIds.includes(id)) sourceIds.push(id);
-    populateSources(id); showTab('source');
+    populateSources(id); showSection('source');
     byId('source-picker').focus({ preventScroll: true });
     byId('view-source').scrollTop = 0;
     byId('view-source').scrollIntoView({ block: 'nearest' });
@@ -176,6 +180,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
           }); outline.append(button);
         }
       }
+      byId('document-contents').hidden = rendered.headings.length < 2;
       decorateSections();
       clearSearchHighlights();
       if (target.anchor) markSection(target.anchor, { move: false });
@@ -220,7 +225,7 @@ globalThis.pFlow.createDocumentationPanel = function createDocumentationPanel({ 
     byId('document-picker').value = String(index);
     byId('document-context').textContent = 'Linked documentation; the diagram context is unchanged.';
     byId('document-context').title = byId('document-context').textContent;
-    showTab('documentation'); renderDocument(reference, prepared);
+    showSection('documentation'); renderDocument(reference, prepared);
   }
   function populateDocuments() {
     byId('document-picker').replaceChildren(...references.map((ref, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = ref.path + (ref.anchor ? `#${ref.anchor}` : ''); return option; }));

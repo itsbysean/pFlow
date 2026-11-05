@@ -8,7 +8,7 @@ On macOS, from the repository root:
 open viewer/index.html
 ```
 
-The Process starts explorer lists starts from all three approved the data contract samples. Use its text and recorded-condition filters to find a process. Start with **Synchronous refresh**, select **Refresh command**, then use the explicit **↗** controls to open **Refresh component** and **Read state**. Select **Fetch state** to inspect its HTTP metadata and read its associated Markdown section. **Asynchronous jobs** demonstrates a verified producer/consumer connection; **Custom task dispatch** demonstrates configuration and registry evidence.
+The Process starts explorer lists starts from all three approved the data contract samples. Use the Header search to find documentation, or expand supported subprocesses beneath a start. Start with **Synchronous refresh**, select **Refresh command**, then use the explicit **↗** controls to open **Refresh component** and **Read state**. Select **Fetch state** to inspect its HTTP metadata and read its associated Markdown section. **Asynchronous jobs** demonstrates a verified producer/consumer connection; **Custom task dispatch** demonstrates configuration and registry evidence.
 
 ## Selection and expansion
 
@@ -27,7 +27,7 @@ The renderer implements the the data contract profile with native DOM APIs: head
 
 Source buttons in the inspector or Markdown open **Evidence references**. That view shows the exact repository-relative path, inclusive line range, and symbol when present. File-level references omit line fields. The source preview has location-only fixtures. Builder-generated HTML includes the bounded numbered snippets prepared from actual SourceReferences; the pane renders line text with native code/text nodes. Missing snippets show their processing warning or the location-only state. It does not fetch local files, follow source-definition URLs, extract code, or fabricate snippets. The source pane never reads original files; extraction happens at build time.
 
-Markdown snapshots are exact copies of the the data contract sample documents. Source citations resolve through the architecture's SourceReference IDs. the data contract validation remains responsible for checking authored definitions against their repository locations; runtime rendering does not replace that validation. The process-summary tab reports structural counts and documented exits, without treating node-array order as an execution sequence.
+Markdown snapshots are exact copies of the the data contract sample documents. Source citations resolve through the architecture's SourceReference IDs. the data contract validation remains responsible for checking authored definitions against their repository locations; runtime rendering does not replace that validation. The Process summary disclosure reports structural counts and documented exits, without treating node-array order as an execution sequence.
 
 ## Navigation and viewport
 
@@ -132,7 +132,7 @@ Use the existing index/flow templates for a concise purpose, scope, start, major
 
 The Viewer uses one full-height explorer, diagram and documentation column below the pFlow/search/Docs/theme header. No project, branch or Settings control remains. Docs restores the documentation column and opens the active Flow document without changing graph selection. The same existing renderer and canonical links populate Documentation, Evidence references and Process summary. The optional Details tab retains the existing inspector; current node/edge selection behavior is described below. Search result activation retains its existing passage navigation.
 
-Use the chevrons to collapse or restore each side independently. Both can be closed. Drag the dividers, or focus a separator and use Left/Right (20px), Home (minimum), or End (available maximum). The center retains usable width. At narrow sizes panels shrink within responsive limits, then collapse as needed. Restoring one may collapse the other when both cannot fit. Restore buttons stay in visible rails. The existing diagram ResizeObserver fits the SVG to changed space. Widths and theme are session-only and are not saved.
+Use the chevrons to collapse or restore each side independently. Both can be closed. Drag the dividers, or focus a separator and use Left/Right (20px), Home (minimum), or End (available maximum). The center retains usable width. At narrow sizes panels shrink within responsive limits, then collapse as needed. Restoring one may collapse the other when both cannot fit. Restore buttons stay in visible rails. The existing diagram ResizeObserver fits the SVG to changed space. Theme, panel widths and explicit collapsed states are saved in local storage when available. Invalid or blocked storage falls back safely. Selected process, selected node, viewport and exception visibility are not persisted. Responsive layout still clamps restored widths to the available space.
 
 Light is the default. The theme button changes all surface, graph, search and evidence tokens. Evidence remains read-only. Multiple artifacts are browsed through actual process starts, not a replacement project selector. Artifacts without starts expose their documented Flows explicitly.
 
@@ -146,7 +146,7 @@ Click a mapped section's text, its outline entry, or **Locate in diagram** to se
 
 **Open detail** is a separate action in supported Node sections and the existing SVG control. It opens only an actual referenced Flow. Selecting a section in another Flow reuses the existing expansion-only path planner: prefer the current entry, then artifact order, with breadth-first node-order paths. An unreachable Flow opens directly with a notice rather than an invented parent. Async edges never supply hierarchy. Back/Forward/Top level retain their existing meaning, including shared caller context and cycle protection.
 
-Normal document scrolling does not pan the graph. Section activation preserves document scroll while centering the graph. Search continues to open its matched passage, including unmapped index text. **Docs** explicitly restores the active diagram Flow document after such a cross-bundle search. Optional inspector/evidence views remain accessible through the right-column tabs and actual citations. Nothing fetches source files at runtime.
+Normal document scrolling does not pan the graph. Section activation preserves document scroll while centering the graph. Search continues to open its matched passage, including unmapped index text. **Docs** explicitly restores the active diagram Flow document after such a cross-bundle search. Technical details and evidence remain available in independent disclosures below the narrative and through actual citations. Nothing fetches source files at runtime.
 
 Only the currently mounted document is reused, keyed by sample, normalized path and exact Markdown/processed content. Selection/evidence metadata is updated separately. No second parser, graph model or competing selection state is introduced. The [Viewer improvements plan](../docs/design/m8-02-plan.md) and [completion/review record](../docs/design/m8-02-review.md) cover tests and limits.
 
@@ -166,8 +166,24 @@ Logical dimensions grow with the graph, not with the available screen width. Fit
 
 ## Reading component documentation
 
-The selected right-panel tab stays active through node/edge selection, flow changes, drill-down, Back and process-start changes. Documentation links, search results and **Docs** are explicit requests to open Documentation; evidence links explicitly open Evidence. The Evidence picker follows the selected component, or the current Flow's recorded node/edge references when nothing is selected.
+The complete narrative remains mounted while independent Evidence, Process summary and Technical details disclosures keep their open state through node/edge selection, flow changes, drill-down, Back and process-start changes. Evidence links open the Evidence disclosure; documentation links, search results and **Docs** locate the narrative. The Evidence picker follows the selected component, or the current Flow's recorded node/edge references when nothing is selected.
 
-The document context and canonical reference identify the selected component. Its own section is highlighted and brought into view when Documentation is active, while the complete Flow text remains mounted. Missing sections remain an explicit Flow fallback. Component prose is authored from evidence; the Viewer does not generate explanations from labels. **Docs** deliberately opens the full current Flow document, restores its column and focuses the article without changing diagram selection.
+The document context and canonical reference identify the selected component. Its own section is highlighted and brought into view in the narrative, while the complete Flow text remains mounted. Missing sections remain an explicit Flow fallback. Component prose is authored from evidence; the Viewer does not generate explanations from labels. **Docs** deliberately opens the full current Flow document, restores its column and focuses the article without changing diagram selection.
 
 Node selection keeps the component's category color and exact shape. It uses a slightly stronger fill, a modest stroke and a soft glow, with no surrounding selection box. Keyboard focus uses a separate dashed contour matching the actual shape. Moving focus does not clear selection. Hover changes the fill without moving or scaling the component.
+
+## Full-label tooltips and optional issue reports
+
+Hover a node or focus it with the keyboard to read the full label. Tooltip text uses viewport pixels, not graph zoom. Escape dismisses it; pointer access to the tooltip and keyboard focus preserve it until dismissal/exit. Graph movement repositions a focused tooltip or dismisses a hover tooltip; unrelated document scrolling does not dismiss keyboard context. Navigation clears stale anchors.
+
+When a separately validated findings.json is embedded, current unreviewed/supported findings mark their exact nodes with a severity-colored warning control and their exact edge labels with a warning outline. Warning controls open the Findings disclosure; they do not expand a Flow. Issue report opens the read-only retained list, including dismissed/resolved or stale diagnoses. Stale results have no active badges. Explicit Locate actions use existing hierarchical navigation; no paths or replacement associations are invented. Evidence and review history expand on demand. The Viewer cannot write review decisions. No findings means no extra report control.
+
+## Simplified process reading
+
+The Header contains the only search input. The Navigator groups starts using recorded triggers and lazily exposes only existing `expandFlowId` relationships. Each detail button retains its entry and calling-node path. Shared graphs are not copied. Repeated Flows in the current path are disabled and labelled; asynchronous edges never create hierarchy.
+
+Selecting a node emphasizes its immediate connections and dims unrelated elements. Selecting an edge emphasizes its two endpoints. Clearing selection restores all elements without rebuilding the SVG. Full node names remain available through hover/focus tooltips.
+
+**Show exceptions** is on initially. Turning it off hides exception edges and terminal outcomes reached only by exception edges. Shared outcomes and other steps remain visible. Coordinates and viewport are preserved; blank space may remain. Explicit documentation/search navigation to a hidden exception reveals it again. Original Markdown and graph data remain complete.
+
+The Contents outline is optional and collapsed initially. Evidence and technical metadata are disclosed on demand; the full narrative stays available. Findings have their own disclosure, with separate evidence and review-history controls. No change history, analysis-progress indicator or Documentation Mismatch is inferred from missing data. Those inputs are not part of the current Viewer payload.

@@ -15,13 +15,15 @@ globalThis.pFlow = globalThis.pFlow || {};
     const label = (short ? source.path.split('/').at(-1) : source.path) + line;
     return label;
   }
-  function createDiagram(container, { onZoom = () => {}, onStatus = () => {}, onOpenDetail, onSelect = () => {} } = {}) {
-    let svg, scene, layout, view, drag, suppressClick = false;
+  function createDiagram(container, { onZoom = () => {}, onStatus = () => {}, onOpenDetail, onSelect = () => {}, onFinding = onSelect } = {}) {
+    let svg, scene, layout, view, drag, suppressClick = false, exceptionsVisible = true, startNodeId;
+    const tooltip=globalThis.pFlow.createTooltip?.() || {bind(){},hide(){},destroy(){}};
     const prefix = `pflow-diagram-${++sequence}`;
     const dimensions = () => ({ width: Math.max(1, container.clientWidth), height: Math.max(1, container.clientHeight) });
     function apply() {
       if (!scene || !view) return;
       scene.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.scale})`);
+      tooltip.refresh?.();
       onZoom(view.scale);
     }
     function fit() {
@@ -41,7 +43,7 @@ globalThis.pFlow = globalThis.pFlow || {};
       const { width, height } = dimensions(), bounds = layout.bounds;
       view = { scale: 1, x: (width - bounds.width) / 2 - bounds.x, y: Math.max(24, (height - bounds.height) / 2) - bounds.y }; apply();
     }
-    function clear() { drag = undefined; svg?.remove(); svg = undefined; scene = undefined; layout = undefined; view = undefined; suppressClick = false; }
+    function clear() { tooltip.hide(); drag = undefined; svg?.remove(); svg = undefined; scene = undefined; layout = undefined; view = undefined; suppressClick = false; }
     function action(control, callback) {
       control.addEventListener('click', event => {
         event.preventDefault(); event.stopPropagation();
@@ -53,15 +55,45 @@ globalThis.pFlow = globalThis.pFlow || {};
         if (!event.repeat) callback();
       });
     }
+    function showExceptions(visible) {
+      exceptionsVisible = visible;
+      if (!svg) return;
+      // Hide only exception edges and their exclusively reached terminal outcomes.
+      // Shared outcomes, other steps and graph data remain intact.
+      const edges = layout.edges.map(route => route.edge);
+      const incomingByNode = new Map();
+      for (const edge of edges) {
+        if (!incomingByNode.has(edge.to)) incomingByNode.set(edge.to, []);
+        incomingByNode.get(edge.to).push(edge);
+      }
+      for (const item of svg.querySelectorAll('.edge-exception')) item.classList.toggle('exception-hidden', !visible);
+      for (const item of layout.nodes) {
+        const incoming = incomingByNode.get(item.id) || [];
+        const exclusive = item.node.kind === 'terminal' && item.id !== startNodeId && incoming.length && incoming.every(edge => edge.kind === 'exception');
+        svg.querySelector(`.diagram-node[data-node-id="${item.id}"]`)?.classList.toggle('exception-hidden', !visible && Boolean(exclusive));
+      }
+      if (svg.contains(document.activeElement) && document.activeElement.closest('.exception-hidden')) svg.focus({ preventScroll: true });
+    }
     function setSelection(selected) {
       if (!svg) return;
+      const adjacent = new Set(selected?.type === 'node' ? [selected.id] : []);
+      const related = new Set();
+      for (const route of layout.edges) {
+        const edge = route.edge;
+        if (selected?.type === 'node' && (edge.from === selected.id || edge.to === selected.id) || selected?.type === 'edge' && edge.id === selected.id) {
+          related.add(edge.id); adjacent.add(edge.from); adjacent.add(edge.to);
+        }
+      }
       for (const node of svg.querySelectorAll('.diagram-node')) {
+        node.classList.toggle('is-muted', Boolean(selected) && !adjacent.has(node.dataset.nodeId));
         const active = selected?.type === 'node' && selected.id === node.dataset.nodeId;
         node.classList.toggle('is-selected', active); node.querySelector('.diagram-node-select').setAttribute('aria-pressed', String(active));
       }
       for (const edge of svg.querySelectorAll('.diagram-edge, .diagram-edge-label')) {
         const active = selected?.type === 'edge' && selected.id === (edge.dataset.edgeId || edge.dataset.edgeLabel);
         edge.classList.toggle('is-selected', active);
+        edge.classList.toggle('is-related', related.has(edge.dataset.edgeId || edge.dataset.edgeLabel));
+        edge.classList.toggle('is-muted', Boolean(selected) && !related.has(edge.dataset.edgeId || edge.dataset.edgeLabel));
         if (edge.classList.contains('diagram-edge')) edge.setAttribute('aria-pressed', String(active));
       }
     }
@@ -84,10 +116,11 @@ globalThis.pFlow = globalThis.pFlow || {};
       if (ratio < 1) { view = { ...view, scale: view.scale * ratio }; apply(); item = target.getBoundingClientRect(); }
       view = { ...view, x: view.x + box.left + box.width / 2 - item.left - item.width / 2, y: view.y + box.top + box.height / 2 - item.top - item.height / 2 }; apply();
     }
-    function render(architecture, flowId, { pathFlowIds = [] } = {}) {
+    function render(architecture, flowId, { pathFlowIds = [], findings = [] } = {}) {
       clear();
       try {
         const graph = globalThis.pFlow.prepareDiagram(architecture, flowId);
+        startNodeId = graph.startNodeId;
         layout = globalThis.pFlow.layoutDiagram(graph);
         if (!layout.nodes.length) { onStatus('empty'); return { ok: true, empty: true }; }
         svg = element('svg', { class: 'diagram-svg', 'text-rendering': 'geometricPrecision', role: 'group', tabindex: 0, 'aria-labelledby': `${prefix}-title`, 'aria-describedby': `${prefix}-description diagram-help` });
@@ -105,13 +138,15 @@ globalThis.pFlow = globalThis.pFlow || {};
         for (const route of layout.edges) {
           const edge = route.edge;
           const color = edge.kind === 'exception' ? 'exception' : edge.mode === 'async' ? 'async' : edge.kind;
+          const edgeFindings=findings.filter(f=>f.active&&f.targets.some(t=>t.flowId===flowId&&t.edgeId===edge.id));
           const description = `${edge.kind} (${edge.mode}): ${names.get(edge.from)} → ${names.get(edge.to)}${edge.label ? `. ${edge.label}` : ''}. Evidence: ${edge.sourceIds.join(', ')}`;
           const group = element('g', { class: `diagram-edge edge-${edge.kind} mode-${edge.mode}`, role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select relationship ${description}`, 'data-edge-id': edge.id, 'data-from': edge.from, 'data-to': edge.to });
+          if(edgeFindings.length)group.setAttribute('aria-label',group.getAttribute('aria-label')+`. ${edgeFindings.length} potential issues.`);
           group.append(element('title', {}, description));
           const d = route.points.map(([x, y], i) => `${i ? 'L' : 'M'} ${x} ${y}`).join(' ');
           group.append(element('path', { d, class: 'diagram-edge-hit' }), element('path', { d, 'marker-end': `url(#${prefix}-arrow-${color})`, class: 'diagram-edge-path' })); paths.append(group);
           action(group, () => onSelect({ type: 'edge', id: edge.id }));
-          const label = element('g', { class: `diagram-edge-label edge-${edge.kind} mode-${edge.mode}`, 'data-edge-label': edge.id, 'aria-hidden': true });
+          const label = element('g', { class: `diagram-edge-label edge-${edge.kind} mode-${edge.mode}${edgeFindings.length?' has-finding':''}`, 'data-edge-label': edge.id, 'aria-hidden': true });
           label.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); if (!suppressClick || event.detail === 0) onSelect({ type: 'edge', id: edge.id }); });
           const caption = element('text', { x: route.labelX, y: route.labelY + 4, 'text-anchor': 'middle' }, route.label);
           textLimits.push([caption, route.labelWidth - 12]);
@@ -119,6 +154,7 @@ globalThis.pFlow = globalThis.pFlow || {};
         }
         for (const item of layout.nodes) {
           const { node, x, y, width, height } = item;
+          const nodeFindings=findings.filter(f=>f.active&&f.targets.some(t=>t.flowId===(item.remoteFlow?.id||flowId)&&t.nodeId===node.id));
           const detail = !item.remoteFlow && node.expandFlowId !== undefined && onOpenDetail
             ? architecture.flows.find(flow => flow.id === node.expandFlowId) : undefined;
           const recursive = detail && pathFlowIds.includes(detail.id);
@@ -128,7 +164,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           group.setAttribute('role', 'group');
           const select = element('g', { class: 'diagram-node-select', role: 'button', tabindex: 0, 'aria-pressed': false, 'aria-label': `Select node ${full}` });
           action(select, () => onSelect({ type: 'node', id: node.id }));
-          group.append(element('title', {}, full));
+          tooltip.bind(select,node.label);
           let shape;
           if (node.kind === 'decision') shape = element('polygon', { points: `${width / 2},0 ${width},${height / 2} ${width / 2},${height} 0,${height / 2}` });
           else if (item.category === 'system') shape = element('path', { d: `M 14 0 H ${width} V ${height - 14} L ${width - 14} ${height} H 0 V 14 Z` });
@@ -141,7 +177,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           const label = element('text', { class: 'diagram-node-name', x: decision ? width / 2 : 14, y: decision ? 26 : lines.length === 1 ? 26 : 21, 'text-anchor': decision ? 'middle' : 'start' });
           lines.forEach((line, i) => {
             const span = element('tspan', { x: decision ? width / 2 : 14, dy: i ? 16 : 0 }, line);
-            textLimits.push([span, decision ? (i ? (detail ? 156 : 176) : 92) : width - (detail ? 48 : 28), decision ? { width, height } : undefined]); label.append(span);
+            textLimits.push([span, decision ? (i ? (nodeFindings.length ? 128 : detail ? 156 : 176) : 92) : width - (detail ? 48 : 28), decision ? { width, height } : undefined]); label.append(span);
           });
           const kind = element('text', { class: 'diagram-node-type', x: decision ? width / 2 : 14, y: 54, 'text-anchor': decision ? 'middle' : 'start' }, globalThis.pFlow.wrapLabel(type, decision ? 18 : 32, 1)[0]);
           let short = sourceLabel(item.sources[0], true);
@@ -149,7 +185,7 @@ globalThis.pFlow = globalThis.pFlow || {};
           if (Array.from(short).length > limit) short = '…' + Array.from(short).slice(-(limit - 1)).join('');
           const source = element('text', { class: 'diagram-node-source', x: decision ? width / 2 : node.kind === 'terminal' ? 22 : 14, y: decision ? 65 : 69, 'text-anchor': decision ? 'middle' : 'start' }, short);
           const diamond = decision ? { width, height } : undefined;
-          textLimits.push([kind, decision ? 128 : width - 28, diamond], [source, decision ? 68 : width - 44, diamond]);
+          textLimits.push([kind, decision ? 128 : width - 28, diamond], [source, decision ? 68 : node.kind === 'terminal' && nodeFindings.length ? width - 56 : width - 44, diamond]);
           select.append(label, kind, source); group.append(select);
           if (detail) {
             const x = width - 28, y = decision ? height / 2 - 12 : 4;
@@ -157,10 +193,17 @@ globalThis.pFlow = globalThis.pFlow || {};
             expand.append(element('title', {}, recursive ? 'Detail already in this path' : `Open ${detail.label}`), element('rect', { x, y, width: 24, height: 24, rx: 4 }), element('text', { class: 'diagram-expand-hint', x: x + 12, y: y + 16, 'text-anchor': 'middle', 'aria-hidden': 'true' }, recursive ? '↻' : '↗'));
             action(expand, () => onOpenDetail(node.id)); group.append(expand);
           }
+          if(nodeFindings.length) {
+            const bx=decision?34:node.kind==='terminal'?width-24:width-20,by=decision?height/2:node.kind==='terminal'?height-17:height-15;
+            const warning=element('g',{class:'diagram-warning-control',role:'button',tabindex:0,'aria-label':`Open ${nodeFindings.length} potential issues for ${node.label}`,'data-finding-node':node.id,'data-severity':nodeFindings.reduce((a,f)=>({low:0,medium:1,high:2,critical:3}[f.severity]>{low:0,medium:1,high:2,critical:3}[a]?f.severity:a),'low')});
+            warning.append(element('circle',{cx:bx,cy:by,r:8}),element('text',{x:bx,y:by+4,'text-anchor':'middle','aria-hidden':true},'!'));
+            action(warning,()=>onFinding({type:'node',id:node.id}));tooltip.bind(warning,`${nodeFindings.length} potential issues: ${nodeFindings[0].title}`);group.append(warning);
+          }
           scene.append(group);
         }
         svg.addEventListener('pointerdown', event => {
           if (event.button !== 0 || !event.isPrimary) return;
+          tooltip.hide();
           suppressClick = false;
           drag = { id: event.pointerId, x: event.clientX, y: event.clientY, view: { ...view }, moved: false };
         });
@@ -200,11 +243,11 @@ globalThis.pFlow = globalThis.pFlow || {};
           do { characters.pop(); text.textContent = characters.join('') + '…'; }
           while (characters.length && text.getComputedTextLength() > limit);
         }
-        fit(); onStatus('ready'); return { ok: true, empty: false };
+        showExceptions(exceptionsVisible); fit(); onStatus('ready'); return { ok: true, empty: false };
       } catch (error) { clear(); onStatus('error', error.message); return { ok: false, error: error.message }; }
     }
     const resize = new ResizeObserver(() => { if (svg) fit(); }); resize.observe(container);
-    return { render, setSelection, revealSelection, centerSelection, zoom, fit, reset, clear, destroy() { clear(); resize.disconnect(); }, getView: () => view ? { ...view } : undefined };
+    return { render, showExceptions, setSelection, revealSelection, centerSelection, zoom, fit, reset, clear, destroy() { clear(); tooltip.destroy(); resize.disconnect(); }, getView: () => view ? { ...view } : undefined };
   }
   globalThis.pFlow.createDiagram = createDiagram;
 }());

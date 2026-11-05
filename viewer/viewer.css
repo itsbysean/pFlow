@@ -371,3 +371,49 @@ body { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
   .workspace-navigation { padding: 5px; } .workspace-toolbar { padding: 5px; }
   .workspace-heading p, .toolbar-label { display: none; }
 }
+
+/* Tooltip text stays in viewport coordinates and never changes SVG geometry. */
+.diagram-tooltip { position: fixed; z-index: 1000; max-width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 8px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: 0 3px 12px color-mix(in srgb, var(--text) 15%, transparent); font: 13px/1.5 var(--sans); overflow-wrap: anywhere; }
+.diagram-warning-control { cursor: pointer; }
+.diagram-warning-control circle { fill: var(--orange-soft); stroke: var(--orange); stroke-width: 1.5; }
+.diagram-warning-control text { fill: var(--orange); font: bold 11px var(--sans); pointer-events: none; }
+.diagram-warning-control:focus-visible circle { stroke: var(--blue); stroke-width: 3; }
+.diagram-edge-label.has-finding rect { stroke: var(--orange); stroke-width: 2; }
+.findings-report { padding: 14px; }
+.finding-item { border-top: 1px solid var(--line); padding: 12px 0; overflow-wrap: anywhere; }
+.finding-item h4 { margin: 0 0 7px; }
+.finding-item p { margin: 7px 0; }
+.finding-item button { margin: 4px 5px 4px 0; }
+.finding-metadata, .finding-location { color: var(--muted); font-size: 11px; }
+.finding-stale { color: var(--orange); }
+.finding-item details { margin-top: 10px; }
+.finding-item summary { cursor: pointer; font-weight: 600; }
+
+.diagram-warning-control[data-severity="high"] circle, .diagram-warning-control[data-severity="critical"] circle { fill: var(--red-soft); stroke: var(--red); }
+.diagram-warning-control[data-severity="high"] text, .diagram-warning-control[data-severity="critical"] text { fill: var(--red); }
+.diagram-warning-control[data-severity="low"] circle { fill: var(--blue-soft); stroke: var(--blue); }
+.diagram-warning-control[data-severity="low"] text { fill: var(--blue); }
+
+.diagram-warning-control, .diagram-warning-control:focus-visible { outline: none; }
+
+/* One narrative, with evidence and technical information disclosed on demand. */
+.documentation-content { overflow-y: auto; }
+#view-documentation { flex: 1 0 360px; min-height: 260px; }
+#document-contents { flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+#document-contents > summary, .explanation-disclosure > summary, .document-facts > summary { padding: 10px 14px; cursor: pointer; font-weight: 600; }
+.explanation-disclosure { flex: 0 0 auto; border-top: 1px solid var(--line); }
+.document-facts { align-self: stretch; margin: 0; padding: 0; max-height: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.document-facts .metadata-grid { padding: 0 14px 10px; }
+.explanation-disclosure > div { max-height: 420px; overflow: auto; }
+.navigator-branch { margin: 3px 10px 6px 22px; font-size: 12px; }
+.navigator-branch summary { cursor: pointer; color: var(--muted); padding: 5px 0; }
+.navigator-branch ul { list-style: none; padding-left: 10px; border-left: 1px solid var(--line); }
+.detail-flow-button { width: 100%; border: 0; background: transparent; text-align: left; padding: 8px; overflow-wrap: anywhere; }
+.detail-flow-button[aria-pressed="true"] { background: var(--blue-soft); color: var(--blue); }
+.detail-flow-button:disabled { color: var(--muted); }
+.exception-toggle { display: flex; gap: 4px; align-items: center; font-size: 11px; color: var(--muted); }
+.diagram-node.is-muted, .diagram-edge.is-muted, .diagram-edge-label.is-muted { opacity: .25; }
+.diagram-edge.is-related .diagram-edge-path { stroke-width: 2.5; }
+.diagram-edge-label.is-related rect { stroke: var(--blue); }
+.diagram-node.is-muted:focus-within, .diagram-edge.is-muted:focus-visible { opacity: 1; }
+.exception-hidden { display: none; }

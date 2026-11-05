@@ -18,12 +18,18 @@ import { inspectArchitectureSet, rebuildArchitectureSet } from '../skills/pflow-
 export { schema, prepareBuild, writeStandaloneHTML, selectOutput, resolveBundleRoot, validateDocumentation, collectGitChanges, planImpact, prepareRegeneration, inspectArchitectureSet, rebuildArchitectureSet };
 import { detectDocumentation, planLifecycle, prepareLifecycle, snapshotVersion } from '../lifecycle/documentation.mjs';
 export { detectDocumentation, planLifecycle, prepareLifecycle, snapshotVersion };
+import {findingsSchema,architectureHash,captureFindingEvidence,inspectFindings,reconcileFindings} from '../findings/validate.mjs';
+import {inspectFindingBundle,prepareFindingsPublication} from '../findings/publish.mjs';
+export {findingsSchema,architectureHash,captureFindingEvidence,inspectFindings,reconcileFindings,inspectFindingBundle,prepareFindingsPublication};
 const safe = text => String(text).replace(/[\u0000-\u001f\u007f-\u009f]/g, char => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`);
 const help = `Usage: node <skill>/scripts/pflow.mjs <command> [options]
 
 build       --input <root> --repository-root <evidence-root> --output <file.html>
 validate    --input <root> --repository-root <evidence-root> [--output <file.html>]
 inspect     --input <root> --repository-root <evidence-root> --output <file.html>
+findings-inspect --request <options.json>
+findings-publish --request <options.json> [--apply]
+findings-schema Print the optional findings JSON Schema.
 lifecycle-detect --request <options.json>
 lifecycle-plan --request <options.json>
 lifecycle-publish --request <options.json> [--apply]
@@ -49,9 +55,10 @@ function request(args, keys) {
 const buildKeys = ['input','repositoryRoot','output'];
 export async function runCLI(args) {
   const [command, ...rest] = args;
-  if (args.length === 1 && ['--help','-h'].includes(command) || rest.length === 1 && ['--help','-h'].includes(rest[0]) && ['build','validate','inspect','select-output','impact','regenerate','rebuild','schema','lifecycle-detect','lifecycle-plan','lifecycle-publish'].includes(command)) return process.stdout.write(help);
+  if (args.length === 1 && ['--help','-h'].includes(command) || rest.length === 1 && ['--help','-h'].includes(rest[0]) && ['build','validate','inspect','select-output','impact','regenerate','rebuild','schema','lifecycle-detect','lifecycle-plan','lifecycle-publish','findings-inspect','findings-publish','findings-schema'].includes(command)) return process.stdout.write(help);
   if (args.length === 1 && ['--version','-v'].includes(command)) return process.stdout.write(`pFlow ${metadata.version}\n`);
   const json = value => process.stdout.write(JSON.stringify(value, null, 2) + '\n');
+  if(command==='findings-schema'&&!rest.length)return json(findingsSchema);
   if (command === 'schema' && !rest.length) return json(schema);
   if (['build','validate','inspect'].includes(command)) {
     const tail = [...rest];
@@ -67,6 +74,13 @@ export async function runCLI(args) {
     for (const issue of prepared.diagnostics) process.stderr.write(`${safe(issue.artifact)} [warning:${issue.phase}] ${safe(issue.path)}: ${safe(issue.message)}\n`);
     process.stdout.write(`Validated and prepared ${prepared.artifacts.length} architecture artifacts and ${prepared.artifacts.reduce((n,a)=>n+a.documents.length,0)} Markdown documents.\nEmbedded ${prepared.artifacts.reduce((n,a)=>n+a.snippets.length,0)} source snippets. Wrote ${generated.bytes} bytes to ${safe(generated.outputPath)}\n`);
     return;
+  }
+  if(command==='findings-inspect')return json(inspectFindingBundle(request(rest,['bundleRoot','repositoryRoot'])));
+  if(command==='findings-publish') {
+    const apply=rest.at(-1)==='--apply';
+    const input=request(apply?rest.slice(0,-1):rest,['bundleRoot','repositoryRoot','candidate','previousDigest','reviewChanges']);
+    const stage=await prepareFindingsPublication(input);
+    try{return json(apply?{applied:true,...await stage.apply()}:{applied:false,diagnostics:stage.diagnostics});}finally{stage.dispose();}
   }
   if (command === 'lifecycle-detect') return json(detectDocumentation(request(rest,['workspace','intent','target'])));
   if (command === 'lifecycle-plan') return json(await planLifecycle(request(rest,['bundleRoot','evidenceRoot','evidenceUpdates'])));
