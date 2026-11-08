@@ -24,7 +24,7 @@ node /installed/pflow/scripts/pflow.mjs validate --input /target/docs/architectu
 node /installed/pflow/scripts/pflow.mjs build --input /target/docs/architecture --repository-root /target --output /target/docs/architecture/architecture.html
 ```
 
-These are placeholders; resolve and quote actual paths. [Runtime guidance](../../skills/pflow/references/runtime.md) documents output selection, impact, regeneration, inspected safe rebuild and exported APIs. Existing `node builder/cli.mjs build ...`, help/version and source module APIs remain available. New commands are additive; no public graph schema or input-mode field was added.
+These are placeholders; resolve and quote actual paths. [Runtime guidance](../../src/skills/pflow/references/runtime.md) documents output selection, impact, regeneration, inspected safe rebuild and exported APIs. Existing `node builder/cli.mjs build ...`, help/version and source module APIs remain available. New commands are additive; no public graph schema or input-mode field was added.
 
 ## Integration and resource classification
 
@@ -44,9 +44,9 @@ The build copies maintained stage guidance into named Markdown references, witho
 | `packaging/cli.mjs` | Small additive dispatcher and maintained API exports; strict transient JSON request keys/boolean controls |
 | `builder/viewer-assets.mjs` | Shared file-backed/embedded asset source and protected/fingerprinted file inventory |
 | `builder/html.mjs` | Reuse asset provider and protect runtime/assets; existing rendering/serialization/publication retained |
-| `skills/pflow-rebuild/scripts/rebuild.mjs` | Use the same asset inventory in existing freshness checks |
-| `skills/pflow/SKILL.md`, `skills/pflow/references/{runtime,build,output,workflow,prompt-analysis}.md` | Installed runtime, dual-mode routing/output/evidence and command guidance |
-| `skills/pflow-rebuild/references/{consistency,rebuild}.md` | Current shared runtime and flat/legacy corpus wording |
+| `src/skills/pflow-rebuild/scripts/rebuild.mjs` | Use the same asset inventory in existing freshness checks |
+| `src/skills/pflow/SKILL.md`, `src/skills/pflow/references/{runtime,build,output,workflow,prompt-analysis}.md` | Installed runtime, dual-mode routing/output/evidence and command guidance |
+| `src/skills/pflow-rebuild/references/{consistency,rebuild}.md` | Current shared runtime and flat/legacy corpus wording |
 | `package.json`, `package-lock.json`, `.gitignore` | Pinned development bundler, build command and generated-output exclusion |
 | `README.md`, `builder/README.md`, `docs/roadmap.md` | Build/install/use scope and verified completion |
 | `test/skill-packaging.test.mjs` | Nine independent-install, browser, safety, reproducibility and incremental cases |

@@ -4,7 +4,7 @@ Started from local main aa14768. Added the main AI documentation Skill and a raw
 
 ## Files created or modified
 
-- skills/pflow/SKILL.md and references/{workflow,generation,build}.md: concise main workflow, actual output conventions, existing stage reuse, canonical generation, evidence checks, trusted validation/build and offline verification.
+- src/skills/pflow/SKILL.md and references/{workflow,generation,build}.md: concise main workflow, actual output conventions, existing stage reuse, canonical generation, evidence checks, trusted validation/build and offline verification.
 - test/fixtures/documentation-generation/repository/: compact authored target extending M5-03 with reachable XML consumer registration, a selected message-port specification, a configured shared bus and runtime plugin uncertainty. Contains hostile source text/vendor traps solely as untrusted fixture data.
 - test/fixtures/documentation-generation/generated/graph.json and docs/{index.md,flows/*.md}: final reviewed artifacts from the blind raw-input run, stored without a Builder-discovered filename. expectations.json assigns test roles to their existing opaque IDs.
 - test/documentation-generation.test.mjs: five meaningful integration tests of generated contents, evidence, validation, actual CLI, output/source isolation, failed-build preservation and relocated offline browser interactions.

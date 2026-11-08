@@ -4,12 +4,12 @@ Implemented on main afdb8f2 while preserving the existing uncommitted M6-01 chan
 
 ## Files created or modified for M6-02
 
-- skills/pflow-regenerate/SKILL.md and references/{workflow,generation,preservation}.md: plan-driven M5 reuse, ownership/provenance, lifecycle/identity, source refresh, preservation and safe apply.
-- skills/pflow-regenerate/scripts/regenerate.mjs: candidate scope/identity/evidence guards, source/doc freshness, private mirror validation and apply orchestration.
-- skills/pflow-regenerate/scripts/safe-update.mjs: native text three-way merge, exact bundle fingerprints and recoverable directory replacement/rollback.
+- src/skills/pflow-regenerate/SKILL.md and references/{workflow,generation,preservation}.md: plan-driven M5 reuse, ownership/provenance, lifecycle/identity, source refresh, preservation and safe apply.
+- src/skills/pflow-regenerate/scripts/regenerate.mjs: candidate scope/identity/evidence guards, source/doc freshness, private mirror validation and apply orchestration.
+- src/skills/pflow-regenerate/scripts/safe-update.mjs: native text three-way merge, exact bundle fingerprints and recoverable directory replacement/rollback.
 - test/targeted-regeneration.test.mjs and test/safe-update.test.mjs: twenty-six integration and preservation/transaction tests.
 - test/fixtures/regeneration/baseline/{graph.json,roles.json,docs/index.md,docs/flows/*.md}: approved generated fixture text/identities; raw source reuses the M6-01 impact fixture. Names avoid default Builder discovery.
-- skills/pflow/SKILL.md and references/workflow.md, skills/pflow-impact/references/impact.md: explicit routing without starting HTML generation.
+- src/skills/pflow/SKILL.md and references/workflow.md, src/skills/pflow-impact/references/impact.md: explicit routing without starting HTML generation.
 - README.md, docs/targeted-regeneration-evaluation.md, docs/design/m6-02-plan.md and this file: usage, evaluation, plan and completion record.
 
 ## Workflow and preservation

@@ -12,8 +12,8 @@ Create only intended architecture directories and files, inside the selected out
 
 Scope coverage honestly. Include confirmed entry triggers, inspected owned modules, analyzed flows and relevant external/routing chains; distinguish inactive, uninspected and unresolved surfaces. Do not claim exhaustive architecture or runtime success from file inspection. Missing consumers remain gaps, not invented local entries. Unsupported runtime configuration stays an expression/key.
 
-When explicitly asked for change detection/impact planning, use [pflow-impact](../../pflow-impact/SKILL.md) as a separate workflow. It stops at an impact plan and does not authorize this full generation/build sequence or M6-02.
+When explicitly asked for change detection/impact planning, use [pflow-impact](impact-workflow.md) as a separate workflow. It stops at an impact plan and does not authorize this full generation/build sequence or M6-02.
 
-Explicit targeted-regeneration requests use [pflow-regenerate](../../pflow-regenerate/SKILL.md), reusing M5 analysis/generation with safe preservation and apply. That workflow does not invoke this Skill's HTML build step.
+Explicit targeted-regeneration requests use [pflow-regenerate](regenerate-workflow.md), reusing M5 analysis/generation with safe preservation and apply. That workflow does not invoke this Skill's HTML build step.
 
-After an explicitly requested incremental regeneration/rebuild sequence, continue with [pflow-rebuild](../../pflow-rebuild/SKILL.md) for complete-set consistency and safe HTML replacement. Rebuild-only requests reuse current artifacts and do not repeat source analysis.
+After an explicitly requested incremental regeneration/rebuild sequence, continue with [pflow-rebuild](rebuild-workflow.md) for complete-set consistency and safe HTML replacement. Rebuild-only requests reuse current artifacts and do not repeat source analysis.

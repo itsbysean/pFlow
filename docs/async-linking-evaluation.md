@@ -1,6 +1,6 @@
 # Async linking evaluation
 
-The [source Skill](../skills/pflow-async-linking/SKILL.md) is an AI investigation stage. It reuses M5-01 registration, M5-02 execution and M5-03 boundary evidence. It does not install a matcher, parser or broker runtime. Schema 1.0.0 remains unchanged.
+The [source Skill](../src/skills/pflow-async-linking/SKILL.md) is an AI investigation stage. It reuses M5-01 registration, M5-02 execution and M5-03 boundary evidence. It does not install a matcher, parser or broker runtime. Schema 1.0.0 remains unchanged.
 
 ## Fixture contract
 

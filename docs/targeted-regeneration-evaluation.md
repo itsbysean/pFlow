@@ -1,6 +1,6 @@
 # Targeted regeneration evaluation
 
-[pflow-regenerate](../skills/pflow-regenerate/SKILL.md) consumes a reviewed M6-01 impact plan and its original Git evidence, reuses the four M5 analysis procedures, and applies reviewed graph/Markdown candidates. It is not a second source-analysis engine. No schema or persistent patch/ownership format is introduced.
+[pflow-regenerate](../src/skills/pflow-regenerate/SKILL.md) consumes a reviewed M6-01 impact plan and its original Git evidence, reuses the four M5 analysis procedures, and applies reviewed graph/Markdown candidates. It is not a second source-analysis engine. No schema or persistent patch/ownership format is introduced.
 
 ## Preservation contract
 

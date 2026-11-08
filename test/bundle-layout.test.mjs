@@ -11,7 +11,7 @@ import {chromium} from 'playwright-core';
 import {selectOutput} from '../builder/output-policy.mjs';
 import {resolveBundleRoot} from '../builder/bundle-layout.mjs';
 import {prepareBuild} from '../builder/pipeline.mjs';
-import {inspectArchitectureSet,rebuildArchitectureSet} from '../skills/pflow-rebuild/scripts/rebuild.mjs';
+import {inspectArchitectureSet,rebuildArchitectureSet} from '../src/skills/pflow-rebuild/scripts/rebuild.mjs';
 import {writeStandaloneHTML} from '../builder/html.mjs';
 const tool=fileURLToPath(new URL('../',import.meta.url)),sample=path.join(tool,'test/fixtures/prompt-mode/onboarding/bundle');
 function setup(t,layout='flat'){

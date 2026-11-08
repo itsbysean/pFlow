@@ -23,7 +23,7 @@ The checks validate both bundles with the existing M1 validators. Controlled fix
 
 Give a fresh Coding Agent only this request, the Skill and the two raw repository roots. Do not expose `expected/`, oracle tests or prior conclusions:
 
-> Use skills/pflow-discovery/SKILL.md to discover domain execution entries in each raw repository. Report process launch roots as reachability evidence, not separate confirmed entries for this evaluation. Write a compact repository/coverage summary and a minimal valid M1 bundle for each repository under a temporary evaluation directory. Do not run target code or trace handler bodies. Validate with the existing tool validators against the actual source roots.
+> Use src/skills/pflow-discovery/SKILL.md to discover domain execution entries in each raw repository. Report process launch roots as reachability evidence, not separate confirmed entries for this evaluation. Write a compact repository/coverage summary and a minimal valid M1 bundle for each repository under a temporary evaluation directory. Do not run target code or trace handler bodies. Validate with the existing tool validators against the actual source roots.
 
 Evaluate the result semantically, without comparing display wording or opaque ID values:
 

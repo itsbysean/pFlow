@@ -9,7 +9,7 @@ import { chromium } from 'playwright-core';
 import { detectDocumentation, planLifecycle, prepareLifecycle } from '../lifecycle/documentation.mjs';
 import { selectOutput } from '../builder/output-policy.mjs';
 import { prepareBuild } from '../builder/pipeline.mjs';
-import { fingerprintBundle } from '../skills/pflow-regenerate/scripts/safe-update.mjs';
+import { fingerprintBundle } from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
 import { buildSkill } from '../packaging/build-skill.mjs';
 const project=fileURLToPath(new URL('../',import.meta.url));
 const json=x=>JSON.stringify(x,null,2)+'\n';

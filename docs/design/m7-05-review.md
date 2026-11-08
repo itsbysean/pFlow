@@ -17,7 +17,7 @@ No runtime, schema, validator, dependency or test file was changed by M7-05. Ear
 | Check | Actual result |
 |---|---|
 | `npm test` | 559 passed; zero failed, skipped or cancelled; fresh full run, including available browser tests |
-| Skill-creator `quick_validate.py skills/pflow` | Skill is valid |
+| Skill-creator `quick_validate.py src/skills/pflow` | Skill is valid |
 | Fresh A — raw service through Skill/shared pipeline | Zero validation diagnostics; 2 starts, 5 flows, 33 nodes, 31 edges; one evidenced cross-flow async relationship |
 | Fresh B — onboarding with material clarification | Zero diagnostics; 1 start, 2 flows, 10 nodes, 8 edges; exact request and separately cited answer |
 | Fresh C — deployment in separate workspace | Zero diagnostics; 1 start, 2 flows, 17 nodes, 15 edges; exact request, supported handoffs and conditions |

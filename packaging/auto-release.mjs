@@ -12,6 +12,7 @@ export function nextPatch(version,tags=[]) {
 }
 const metadata=root=>['package.json','package-lock.json'].map(file=>JSON.parse(readFileSync(path.join(root,file),'utf8')));
 const statePath=root=>path.resolve(root,git(root,'rev-parse','--git-path','pflow-release.json'));
+const releaseEdit=file=>['package.json','package-lock.json'].includes(file)||file.startsWith('skills/pflow/');
 function tags(root) {
  return git(root,'for-each-ref','--format=%(refname:short)%00%(*objectname)%00%(objectname)%00%(contents:subject)','refs/tags').split('\n').filter(Boolean).map(line=>{const [name,peeled,object,subject]=line.split('\0');return {name,target:peeled||object,subject};});
 }
@@ -26,7 +27,7 @@ export function prepareAutoRelease(root=process.cwd(),source=git(root,'rev-parse
  const saved=existsSync(statePath(root))?JSON.parse(readFileSync(statePath(root),'utf8')):undefined;
  const dirty=git(root,'status','--porcelain','--untracked-files=no');
  const edits=git(root,'diff','HEAD','--name-only').split('\n').filter(Boolean);
- if(dirty&&!(saved?.source===source&&pkg.version===saved.version&&edits.every(f=>['package.json','package-lock.json'].includes(f))))throw new Error('Release preparation requires a clean tracked worktree.');
+ if(dirty&&!(saved?.source===source&&pkg.version===saved.version&&edits.every(releaseEdit)))throw new Error('Release preparation requires a clean tracked worktree.');
  const known=tags(root),matches=known.filter(t=>/^v\d+\.\d+\.\d+$/.test(t.name)&&(t.subject===`pflow-source:${source}`||t.target===source));
  if(matches.length>1)throw new Error('Multiple release tags identify this source.');
  let state;
@@ -46,7 +47,7 @@ export function publishReleaseGit(root=process.cwd()) {
  const state=JSON.parse(readFileSync(statePath(root),'utf8'));
  if(metadata(root).some(p=>p.version!==state.version)||metadata(root)[1].packages[''].version!==state.version)throw new Error('Prepared version changed before publication.');
  const edits=git(root,'diff','HEAD','--name-only').split('\n').filter(Boolean);
- if(edits.some(file=>!['package.json','package-lock.json'].includes(file)))throw new Error('Unrelated tracked changes prevent publication.');
+ if(edits.some(file=>!releaseEdit(file)))throw new Error('Unrelated tracked changes prevent publication.');
  if(state.reuse) {
   const tagged=tags(root).find(t=>t.name===state.tag&&(t.subject===`pflow-source:${state.source}`||t.target===state.source));
   if(!tagged)throw new Error('Prepared release tag is missing or changed.');
@@ -54,11 +55,12 @@ export function publishReleaseGit(root=process.cwd()) {
   return state;
  }
  if(git(root,'rev-parse','HEAD')!==state.source)throw new Error('Release source changed before publication.');
- const changed=git(root,'diff','HEAD','--name-only').split('\n').filter(Boolean).sort();
- if(JSON.stringify(changed)!==JSON.stringify(['package-lock.json','package.json']))throw new Error('Only prepared version files may change.');
+ const changed=[...new Set([...git(root,'diff','HEAD','--name-only').split('\n').filter(Boolean),...git(root,'ls-files','--others','--exclude-standard','--','skills/pflow').split('\n').filter(Boolean)])].sort();
+ if(!changed.includes('package.json')||!changed.includes('package-lock.json')||changed.some(file=>!releaseEdit(file)))throw new Error('Only prepared version and distribution files may change.');
  const remote=git(root,'ls-remote','origin','refs/heads/main').split(/\s+/)[0];
  if(remote!==state.source)throw new Error('Main advanced during verification; publish from the newer main run instead.');
- git(root,'add','--','package.json','package-lock.json');
+ const staged=['package.json','package-lock.json'];if(existsSync(path.join(root,'skills/pflow')))staged.push('skills/pflow');
+ git(root,'add','--',...staged);
  git(root,'-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','commit','-m',`chore: release ${state.tag}`);
  git(root,'-c','user.name=github-actions[bot]','-c','user.email=41898282+github-actions[bot]@users.noreply.github.com','tag','-a',state.tag,'-m',`pflow-source:${state.source}`);
  // No force push: concurrent main changes or protected branches must fail.

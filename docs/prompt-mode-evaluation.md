@@ -1,6 +1,6 @@
 # M7-02 prompt-mode evaluation
 
-M7-02 extends the existing pFlow Skill, not the public graph, Builder or Viewer. Repository mode still uses M5 discovery, execution, boundary and async analysis. Prompt mode loads [prompt analysis](../skills/pflow/references/prompt-analysis.md), captures [real evidence files](../skills/pflow/references/prompt-evidence.md) and joins the existing generation/validation/build stages.
+M7-02 extends the existing pFlow Skill, not the public graph, Builder or Viewer. Repository mode still uses M5 discovery, execution, boundary and async analysis. Prompt mode loads [prompt analysis](../src/skills/pflow/references/prompt-analysis.md), captures [real evidence files](../src/skills/pflow/references/prompt-evidence.md) and joins the existing generation/validation/build stages.
 
 ## Current invocation and roots
 
@@ -69,7 +69,7 @@ Current architecture.json + sibling docs/ layout remains required. M7-03 path/la
 
 ## Final review and regression results
 
-Full npm test: **507/507 passed**, zero failures/skips. The official skill-creator quick validator passed for skills/pflow. An independent reviewer also reran all 18 focused tests, including offline Chrome, and verified the full-suite log.
+Full npm test: **507/507 passed**, zero failures/skips. The official skill-creator quick validator passed for src/skills/pflow. An independent reviewer also reran all 18 focused tests, including offline Chrome, and verified the full-suite log.
 
 Independent additional checks (after exposure to the authored tests, so not blind): a literal-message prompt retained exact evidence and produced only the described display/finish steps. Its actual CLI build passed without warnings, producing 137077-byte HTML; parsed output contained no active injected markup. No outside file or network action occurred. In a separate copy containing a manual note, a changed prompt request stopped before replacement for a baseline/ownership decision. Every prior bundle byte and the previous HTML were retained, and M6 was not invoked.
 

@@ -1,6 +1,6 @@
 # End-to-end documentation evaluation
 
-The [main source Skill](../skills/pflow/SKILL.md) connects the four existing analysis Skills to canonical artifact generation, shared validation and the existing trusted Builder. It is an AI investigation workflow, not a custom analysis engine or broker/parser runtime.
+The [main source Skill](../src/skills/pflow/SKILL.md) connects the four existing analysis Skills to canonical artifact generation, shared validation and the existing trusted Builder. It is an AI investigation workflow, not a custom analysis engine or broker/parser runtime.
 
 ## Raw-input evaluation
 

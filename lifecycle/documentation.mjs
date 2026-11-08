@@ -8,8 +8,8 @@ import { containsPath, resolveBundleRoot } from '../builder/bundle-layout.mjs';
 import { prepareBuild } from '../builder/pipeline.mjs';
 import { writeStandaloneHTML } from '../builder/html.mjs';
 import { validateStructure } from '../validation/validate-artifact.mjs';
-import { applyBundle, fingerprintBundle } from '../skills/pflow-regenerate/scripts/safe-update.mjs';
-import { flowBlocks } from '../skills/pflow-regenerate/scripts/regenerate.mjs';
+import { applyBundle, fingerprintBundle } from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
+import { flowBlocks } from '../src/skills/pflow-regenerate/scripts/regenerate.mjs';
 
 export const snapshotVersion = '1.0.0';
 const snapshotName = 'snapshot.json';

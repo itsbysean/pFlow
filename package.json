@@ -7,6 +7,8 @@
     "test": "node --test test/*.test.mjs",
     "archdoc": "node builder/cli.mjs",
     "build:skill": "node packaging/build-skill.mjs",
+    "publish:skill": "node packaging/build-skill.mjs --publish",
+    "verify:skill": "node packaging/build-skill.mjs --check",
     "build:release": "node packaging/release.mjs"
   },
   "devDependencies": {

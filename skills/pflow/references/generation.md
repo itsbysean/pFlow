@@ -1,6 +1,6 @@
 # Generate the approved artifacts
 
-Read the actual [M1 model](../../../docs/design/m1-01-common-architecture-data-model.md), [schema](../../../schema/architecture-1.0.0.schema.json), [Markdown contract](../../../docs/markdown-contract.md) and [templates](../../../docs/templates/architecture-index.md). These are authoritative, not earlier illustrative entity/path examples. Use modelVersion 1.0.0 and existing fields only. Reuse the selected mode's findings; do not reanalyze complete handlers or descriptions to write their summaries. Repository mode retains source/configuration evidence. Prompt mode uses the captured request/clarification evidence and mapping from [prompt analysis](prompt-analysis.md); it does not infer repository activation, calls or integrations.
+Read the actual [M1 model](contracts/model.md), [schema](contracts/schema.md), [Markdown contract](contracts/markdown.md) and [templates](templates/architecture-index.md). These are authoritative, not earlier illustrative entity/path examples. Use modelVersion 1.0.0 and existing fields only. Reuse the selected mode's findings; do not reanalyze complete handlers or descriptions to write their summaries. Repository mode retains source/configuration evidence. Prompt mode uses the captured request/clarification evidence and mapping from [prompt analysis](prompt-analysis.md); it does not infer repository activation, calls or integrations.
 
 ## Diagram JSON
 

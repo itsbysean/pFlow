@@ -4,7 +4,21 @@ pFlow documents how systems work and how teams work. A coding agent uses reposit
 
 ## Install
 
-[Download the latest Skill ZIP](https://github.com/itsbysean/pFlow/releases/latest/download/pflow.zip), extract it, and copy the `pflow/` folder into your agent's Skills location. Keep `SKILL.md`, `references/` and `scripts/pflow.mjs` together.
+Install the complete Skill directly from GitHub:
+
+```sh
+npx skills add itsbysean/pFlow --skill pflow
+```
+
+List the available Skill without installing it:
+
+```sh
+npx skills add itsbysean/pFlow --list
+```
+
+The installed Skill contains `SKILL.md`, `references/` and `scripts/pflow.mjs`. No repository clone, npm install or build step is required.
+
+Alternatively, [download the latest Skill ZIP](https://github.com/itsbysean/pFlow/releases/latest/download/pflow.zip), extract it, and copy the `pflow/` folder into your agent's Skills location. Keep `SKILL.md`, `references/` and `scripts/pflow.mjs` together.
 
 Node.js 24+ is required. The installed Skill needs no npm install or web server. The common documentation lifecycle needs no Git or SVN. GitHub's source-code archive is a development checkout, not the installed Skill.
 
@@ -46,7 +60,7 @@ docs/architecture/
 
 Explicit output paths are final bundle destinations. Otherwise pFlow prefers an existing root `docs/`, then `doc/`, or creates `docs/`. Legacy bundles remain supported. See [output policy](docs/output-bundle-evaluation.md).
 
-pFlow can update code, natural-language or mixed-evidence documentation using a portable Snapshot and current file fingerprints. It reanalyzes affected flows, preserves unrelated information and publishes validated Markdown, graph, Snapshot and HTML together. Ambiguous requests, manual changes or unsafe impact require clarification or reviewed full reanalysis. The established Git-based tools remain available. See [documentation lifecycle](skills/pflow/references/lifecycle.md). pFlow does not run target scripts, install target dependencies or contact infrastructure to discover architecture.
+pFlow can update code, natural-language or mixed-evidence documentation using a portable Snapshot and current file fingerprints. It reanalyzes affected flows, preserves unrelated information and publishes validated Markdown, graph, Snapshot and HTML together. Ambiguous requests, manual changes or unsafe impact require clarification or reviewed full reanalysis. The established Git-based tools remain available. See [documentation lifecycle](src/skills/pflow/references/lifecycle.md). pFlow does not run target scripts, install target dependencies or contact infrastructure to discover architecture.
 
 ## Optional potential issues
 
@@ -59,18 +73,20 @@ Hover or keyboard-focus a diagram node to read its full name at a zoom-independe
 ```sh
 npm ci --ignore-scripts
 npm test
+npm run publish:skill
+npm run verify:skill
 npm run build:release
 ```
 
-Tests require Chrome/Chromium; set `PFLOW_BROWSER_PATH` if needed. Packaging also uses Python 3's standard ZIP library. Build output is ignored under `dist/`; the installed runtime remains one JavaScript file.
+Tests require Chrome/Chromium; set `PFLOW_BROWSER_PATH` if needed. Packaging also uses Python 3's standard ZIP library. Development Skill sources live under `src/skills/`; `npm run publish:skill` writes the validated distribution to `skills/pflow/`. Build output and release artifacts remain ignored under `dist/`. The installed runtime remains one JavaScript file.
 
-Publishing is manual. In GitHub Actions, run **Publish patch release** from `main` to test, increment the patch version and publish the ZIP. Run **Deploy website to GitHub Pages** separately to update the homepage. Merging a PR does not deploy either. See [release instructions](docs/release-workflow.md).
+Publishing is manual. In GitHub Actions, run **Publish patch release** from `main` to test, increment the patch version, regenerate `skills/pflow/`, commit it with the version files to `main` as `chore: release vX.Y.Z`, tag it and publish the GitHub Release ZIP. Run **Deploy website to GitHub Pages** separately to update the homepage. Merging a PR does not deploy either. See [release instructions](docs/release-workflow.md).
 
 ## Reference
 
 - [Builder commands](builder/README.md)
 - [Viewer behavior and tests](viewer/README.md)
-- [Skill instructions](skills/pflow/SKILL.md)
+- [Skill source](src/skills/pflow/SKILL.md) and [committed distribution](skills/pflow/SKILL.md)
 - [Graph schema](schema/architecture-1.0.0.schema.json) and [Markdown contract](docs/markdown-contract.md)
 - [Sample bundles](examples/) and [project roadmap](docs/roadmap.md)
 

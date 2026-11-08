@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseHTML } from 'linkedom';
-import { inspectArchitectureSet, rebuildArchitectureSet } from '../skills/pflow-rebuild/scripts/rebuild.mjs';
+import { inspectArchitectureSet, rebuildArchitectureSet } from '../src/skills/pflow-rebuild/scripts/rebuild.mjs';
 import { prepareBuild } from '../builder/pipeline.mjs';
 const project = fileURLToPath(new URL('../', import.meta.url));
 function fixture(t) {

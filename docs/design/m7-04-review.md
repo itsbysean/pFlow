@@ -9,7 +9,7 @@ Baseline: main ff9d6b5 with uncommitted M7-01–M7-03 implementation/planning. A
 - viewer/diagram.js: generic SVG/evidence wording and the existing keyboard description linked with the visible hint; unchanged kinds, geometry and controls.
 - viewer/details-inspector.js, viewer/documentation-panel.js and viewer/markdown.js: neutral uncertainty/evidence/detail wording while retaining exact metadata, source symbols, text-node excerpts and safe citation controls.
 - viewer/viewer.css: one scoped dashed legend marker using existing tokens; no layout redesign.
-- docs/templates/{architecture-index,execution-flow}.md and skills/pflow/references/generation.md: concise generic knowledge-transfer guidance with canonical anchors/citations and evidence-backed rationale only.
+- docs/templates/{architecture-index,execution-flow}.md and src/skills/pflow/references/generation.md: concise generic knowledge-transfer guidance with canonical anchors/citations and evidence-backed rationale only.
 - test/generic-presentation.test.mjs: eight content/standalone browser cases; no new model or fixture analyzer.
 - test/viewer.test.mjs, test/documentation-generation.test.mjs and test/consistency-rebuild.test.mjs: update directly affected accessible/text expectations while retaining behavior and technical-data assertions.
 - README.md, viewer/README.md, docs/roadmap.md, docs/generic-presentation-evaluation.md, docs/design/m7-04-plan.md and this report: current use, decisions, evidence and limits.

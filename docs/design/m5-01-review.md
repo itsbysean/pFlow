@@ -6,9 +6,9 @@ Implemented on local main after 02accc6. Approved M1 model/schema 1.0.0 and Mark
 
 | Files | Purpose |
 |---|---|
-| `skills/pflow-discovery/SKILL.md` | AI-first repository/entry discovery, evidence thresholds, scope and stopping rules |
-| `skills/pflow-discovery/references/investigation.md` | Adaptive mechanism/configuration investigation, negative evidence and coverage |
-| `skills/pflow-discovery/references/output.md` | Existing M1 mapping, minimal handler-entry Flows, identity, Markdown and validation |
+| `src/skills/pflow-discovery/SKILL.md` | AI-first repository/entry discovery, evidence thresholds, scope and stopping rules |
+| `src/skills/pflow-discovery/references/investigation.md` | Adaptive mechanism/configuration investigation, negative evidence and coverage |
+| `src/skills/pflow-discovery/references/output.md` | Existing M1 mapping, minimal handler-entry Flows, identity, Markdown and validation |
 | `test/fixtures/discovery/repository/` | Small authored HTTP, XML schedule, custom stdin dispatch, runtime target and misleading declarations |
 | `test/fixtures/discovery/python-repository/` | Console launch and project-owned stdin callback registry |
 | `test/fixtures/discovery/expected/{javascript,python}/` | Stable M1 oracle snapshots, canonical Markdown and private evaluation expectations |

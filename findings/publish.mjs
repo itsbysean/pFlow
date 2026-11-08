@@ -5,7 +5,7 @@ import {containsPath,resolveBundleRoot} from '../builder/bundle-layout.mjs';
 import {prepareBuild} from '../builder/pipeline.mjs';
 import {writeStandaloneHTML} from '../builder/html.mjs';
 import {resolveSourceFile} from '../builder/sources.mjs';
-import {applyBundle,fingerprintBundle} from '../skills/pflow-regenerate/scripts/safe-update.mjs';
+import {applyBundle,fingerprintBundle} from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
 import {inspectFindings,loadFindings,reconcileFindings,sha256} from './validate.mjs';
 const fail=message=>{throw new Error(`Findings publication: ${message}`);};
 const json=value=>JSON.stringify(value,null,2)+'\n';

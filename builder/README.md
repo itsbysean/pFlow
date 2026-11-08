@@ -162,7 +162,7 @@ node /installed/pflow/scripts/pflow.mjs validate --input /target/docs/architectu
 node /installed/pflow/scripts/pflow.mjs build --input /target/docs/architecture --repository-root /target --output /target/docs/architecture/architecture.html
 ```
 
-`--help` lists additive commands for output selection, impact planning, regeneration preparation/apply and inspected safe rebuilding. The [runtime reference](../skills/pflow/references/runtime.md) defines their transient arguments and the maintained API exports. No source-analysis engine or automatic provenance/index approval is added. Prompt updates still use explicit full generation.
+`--help` lists additive commands for output selection, impact planning, regeneration preparation/apply and inspected safe rebuilding. The [runtime reference](../src/skills/pflow/references/runtime.md) defines their transient arguments and the maintained API exports. No source-analysis engine or automatic provenance/index approval is added. Prompt updates still use explicit full generation.
 
 The build uses pinned development esbuild and embeds schema/version JSON, Viewer assets and third-party JavaScript. Node built-ins remain external. The existing optional Canvas and CSSOM add-ons are fixed to their existing non-addon fallbacks; no ambient native/global package is loaded. Third-party license notices are embedded in the executable. Reference documents and templates are copied with checked local links, not fetched at runtime. The distribution directory is generated/ignored; source modules and tests remain authoritative.
 
@@ -170,8 +170,8 @@ Development assets remain file-backed. Packaged assets are immutable embedded st
 
 ## Documentation lifecycle
 
-The single packaged runtime also exposes VCS-independent detect, plan and publish commands for code, prompt and mixed evidence. They reuse this Builder and existing validators; graph schema 1.0.0 is unchanged. See [lifecycle instructions](../skills/pflow/references/lifecycle.md) and [runtime commands](../skills/pflow/references/runtime.md). Publication stages all canonical artifacts and HTML together and retains the previous bundle on recoverable failure.
+The single packaged runtime also exposes VCS-independent detect, plan and publish commands for code, prompt and mixed evidence. They reuse this Builder and existing validators; graph schema 1.0.0 is unchanged. See [lifecycle instructions](../src/skills/pflow/references/lifecycle.md) and [runtime commands](../src/skills/pflow/references/runtime.md). Publication stages all canonical artifacts and HTML together and retains the previous bundle on recoverable failure.
 
 ## Optional findings
 
-An adjacent findings.json is optional for both bundle layouts. The Builder validates schema 1.0.0, graph targets and source evidence, embeds a read-only report and marks outdated results for revalidation without active badges. Invalid findings structure blocks a build; stale retained findings generate diagnostics. Base builds never run AI bug analysis. Use the trusted single-runtime findings-inspect/findings-publish commands for reviewed publication of findings plus HTML. See [analysis and review instructions](../skills/pflow/references/potential-bugs.md).
+An adjacent findings.json is optional for both bundle layouts. The Builder validates schema 1.0.0, graph targets and source evidence, embeds a read-only report and marks outdated results for revalidation without active badges. Invalid findings structure blocks a build; stale retained findings generate diagnostics. Base builds never run AI bug analysis. Use the trusted single-runtime findings-inspect/findings-publish commands for reviewed publication of findings plus HTML. See [analysis and review instructions](../src/skills/pflow/references/potential-bugs.md).

@@ -8,7 +8,7 @@ Implemented on main at afdb8f2 while preserving the uncommitted M6-01–M6-03 wo
 - docs/design/m6-04-plan.md: scopes and observable acceptance before real evaluations.
 - docs/real-repository-e2e.md: reproducible source-checkout procedure, real scopes, output evidence, corrections, offline/incremental/recovery results and limits.
 - docs/design/m6-04-review.md: this completion record.
-- skills/pflow-execution-flow/references/{representation,evaluation}.md: concise guidance for guard order, normal completion versus throw, typed recovery/propagation, invocation binding, path-specific defaults and dependent caller summaries.
+- src/skills/pflow-execution-flow/references/{representation,evaluation}.md: concise guidance for guard order, normal completion versus throw, typed recovery/propagation, invocation binding, path-specific defaults and dependent caller summaries.
 - test/flow-review-regression.test.mjs and test/fixtures/flow-review/{repository/operations.mjs,expected/graph.json,expected/roles.json,expected/docs/index.md,expected/docs/execution.md}: seven portable source-review regressions.
 
 Real source copies, generated documentation, browser captures, manifests and replay drivers remain private under /private/tmp/pflow-m6-04. They are not checked into the product or required by the tests. The approved schema, Viewer, search, Builder and M6 helper implementations were reused unchanged by this milestone.
