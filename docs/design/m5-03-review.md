@@ -4,8 +4,8 @@ Implemented on local main from 09afc5e. M1 schema 1.0.0, Viewer and Builder rema
 
 ## Files
 
-- skills/pflow-external-boundaries/SKILL.md and references/{representation,evidence,review}.md: separate AI boundary stage with invocation/configuration evidence rules, generic metadata and review limits.
-- skills/pflow-execution-flow/references/representation.md: explicit optional handoff; does not activate the next stage automatically.
+- src/skills/pflow-external-boundaries/SKILL.md and references/{representation,evidence,review}.md: separate AI boundary stage with invocation/configuration evidence rules, generic metadata and review limits.
+- src/skills/pflow-execution-flow/references/representation.md: explicit optional handoff; does not activate the next stage automatically.
 - test/fixtures/boundaries/: authored JavaScript/JSON/XML and Python repositories, M5-02 seeds, enriched oracles, identity roles and canonical Markdown. No installed fixture packages or vendor execution.
 - test/external-boundary-evaluation.test.mjs: 11 deterministic contract, argument, evidence, negative and counterfactual checks.
 - README.md, docs/external-boundary-evaluation.md, docs/design/m5-03-plan.md and this review: usage, evaluation boundaries, plan and results.

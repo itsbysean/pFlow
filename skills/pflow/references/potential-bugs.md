@@ -10,7 +10,7 @@ For each candidate, explain the triggering condition, code behavior and possible
 
 ## Separate findings contract
 
-Store `findings.json` at the resolved bundle root, beside architecture.html, for either flat or legacy layout. Use [the findings schema](../../../schema/findings-1.0.0.schema.json). It reuses the exact approved SourceReference definition and does not change Diagram JSON.
+Store `findings.json` at the resolved bundle root, beside architecture.html, for either flat or legacy layout. Use [the findings schema](contracts/findings-schema.md). It reuses the exact approved SourceReference definition and does not change Diagram JSON.
 
 The document contains findingsVersion 1.0.0 and a findings array. Each record has:
 

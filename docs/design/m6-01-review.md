@@ -4,11 +4,11 @@ Started on local main afdb8f2. Implemented change evidence collection and impact
 
 ## Files created or modified
 
-- skills/pflow-impact/SKILL.md: separate impact-only workflow.
-- skills/pflow-impact/references/{baseline,impact,review}.md: explicit provenance/scope, baseline validation, source/refinement rules, graph closure and review.
-- skills/pflow-impact/scripts/git-changes.mjs: small read-only native-Git collector.
-- skills/pflow-impact/scripts/impact.mjs: conservative validated graph/evidence impact draft.
-- skills/pflow/SKILL.md and references/workflow.md: narrow routing for impact requests, without activating generation/build.
+- src/skills/pflow-impact/SKILL.md: separate impact-only workflow.
+- src/skills/pflow-impact/references/{baseline,impact,review}.md: explicit provenance/scope, baseline validation, source/refinement rules, graph closure and review.
+- src/skills/pflow-impact/scripts/git-changes.mjs: small read-only native-Git collector.
+- src/skills/pflow-impact/scripts/impact.mjs: conservative validated graph/evidence impact draft.
+- src/skills/pflow/SKILL.md and references/workflow.md: narrow routing for impact requests, without activating generation/build.
 - test/git-changes.test.mjs and test/impact-planning.test.mjs: twenty-five real-Git, graph, safety, fallback and preservation tests.
 - test/fixtures/impact/repository/: inert owned bootstrap, entries, shared service, consumer, selected adapter contract, source configuration and unrelated notes.
 - test/fixtures/impact/baseline/{graph.json,roles.json,docs/}: M1 baseline and test-only identity roles. Non-build filenames preserve default artifact discovery.

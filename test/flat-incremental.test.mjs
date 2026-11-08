@@ -8,11 +8,11 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseHTML} from 'linkedom';
 import {resolveBundleRoot} from '../builder/bundle-layout.mjs';
-import {collectGitChanges} from '../skills/pflow-impact/scripts/git-changes.mjs';
-import {planImpact} from '../skills/pflow-impact/scripts/impact.mjs';
-import {prepareRegeneration} from '../skills/pflow-regenerate/scripts/regenerate.mjs';
-import {fingerprintBundle} from '../skills/pflow-regenerate/scripts/safe-update.mjs';
-import {inspectArchitectureSet,rebuildArchitectureSet} from '../skills/pflow-rebuild/scripts/rebuild.mjs';
+import {collectGitChanges} from '../src/skills/pflow-impact/scripts/git-changes.mjs';
+import {planImpact} from '../src/skills/pflow-impact/scripts/impact.mjs';
+import {prepareRegeneration} from '../src/skills/pflow-regenerate/scripts/regenerate.mjs';
+import {fingerprintBundle} from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
+import {inspectArchitectureSet,rebuildArchitectureSet} from '../src/skills/pflow-rebuild/scripts/rebuild.mjs';
 const tool=fileURLToPath(new URL('../',import.meta.url)),base=path.join(tool,'test/fixtures/regeneration/baseline'),raw=path.join(tool,'test/fixtures/impact/repository'),graph=JSON.parse(readFileSync(path.join(base,'graph.json'))),roles=JSON.parse(readFileSync(path.join(base,'roles.json')));
 function fixture(t){
  const parent=realpathSync(mkdtempSync(path.join(tmpdir(),'pflow-flat-update-'))),root=path.join(parent,'target'),snapshot=path.join(parent,'baseline'),bundle=path.join(root,'architecture');cpSync(raw,root,{recursive:true});mkdirSync(path.join(bundle,'diagrams'),{recursive:true});cpSync(path.join(base,'docs'),bundle,{recursive:true});for(const name of ['alpha','beta','shared','consumer','unrelated']){const p=path.join(bundle,'flows',name+'.md');writeFileSync(p,readFileSync(p,'utf8').replaceAll(']: ../../../',']: ../../'));}writeFileSync(path.join(bundle,'diagrams/architecture.json'),JSON.stringify(graph,null,2)+'\n');writeFileSync(path.join(bundle,'architecture.html'),'prior valid HTML\n');writeFileSync(path.join(bundle,'manual.md'),'Manual unrelated file.\n');cpSync(root,snapshot,{recursive:true});

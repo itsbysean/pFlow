@@ -1,10 +1,13 @@
-import { readFileSync, readdirSync, mkdirSync, writeFileSync, rmSync, renameSync, mkdtempSync, chmodSync, lstatSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdirSync, writeFileSync, rmSync, renameSync, mkdtempSync, chmodSync, lstatSync, existsSync, cpSync } from 'node:fs';
 import { builtinModules } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { build } from 'esbuild';
 import { parseHTML } from 'linkedom';
 const root=fileURLToPath(new URL('../',import.meta.url));
+const sourceSkillRoot=path.join(root,'src/skills');
+const committedDistribution=path.join(root,'skills/pflow');
+const buildDistribution=path.join(root,'dist/pflow');
 const stageNames=['pflow','pflow-discovery','pflow-execution-flow','pflow-external-boundaries','pflow-async-linking','pflow-impact','pflow-regenerate','pflow-rebuild'];
 const runtimeRef='references/runtime.md';
 function dependencyNotices(inputs) {
@@ -28,14 +31,14 @@ function dependencyNotices(inputs) {
 }
 function mapping(){
  const map=new Map();
- for(const name of stageNames){map.set(`skills/${name}/SKILL.md`,name==='pflow'?'SKILL.md':`references/${name.slice('pflow-'.length)}-workflow.md`);
-  for(const f of readdirSync(path.join(root,'skills',name,'references')).sort())if(f.endsWith('.md'))map.set(`skills/${name}/references/${f}`,name==='pflow'?`references/${f}`:`references/${name.slice('pflow-'.length)}/${f}`);
+ for(const name of stageNames){map.set(`src/skills/${name}/SKILL.md`,name==='pflow'?'SKILL.md':`references/${name.slice('pflow-'.length)}-workflow.md`);
+  for(const f of readdirSync(path.join(sourceSkillRoot,name,'references')).sort())if(f.endsWith('.md'))map.set(`src/skills/${name}/references/${f}`,name==='pflow'?`references/${f}`:`references/${name.slice('pflow-'.length)}/${f}`);
  }
  map.set('docs/design/m1-01-common-architecture-data-model.md','references/contracts/model.md');map.set('docs/markdown-contract.md','references/contracts/markdown.md');map.set('schema/architecture-1.0.0.schema.json','references/contracts/schema.md');map.set('schema/findings-1.0.0.schema.json','references/contracts/findings-schema.md');
  for(const name of ['architecture-index.md','execution-flow.md'])map.set(`docs/templates/${name}`,`references/templates/${name}`);
  return map;
 }
-const sourceRuntime=/\b(?:builder\/[\w-]+\.mjs|validation\/[\w-]+\.mjs|skills\/[\w-]+\/scripts\/[\w-]+\.mjs)\b/g;
+const sourceRuntime=/\b(?:builder\/[\w-]+\.mjs|validation\/[\w-]+\.mjs|(?:src\/)?skills\/[\w-]+\/scripts\/[\w-]+\.mjs)\b/g;
 function rewrite(source,destination,map){
  let text=readFileSync(path.join(root,source),'utf8');
  if(source.endsWith('.json'))return '# '+(source.includes('/findings-')?'Optional code findings JSON Schema':'Approved architecture JSON Schema')+'\n\nVersion 1.0.0; also embedded in the executable. Findings reuse the architecture SourceReference definition in schema.md.\n\n```json\n'+text.trimEnd()+'\n```\n';
@@ -71,10 +74,37 @@ export function validateDistribution(directory){
  }}
  return files;
 }
-export async function buildSkill({output=path.join(root,'dist/pflow')}={}){
- // Output is a development build destination, never an analyzed target path.
- const final=path.resolve(output);if(final===root||root.startsWith(final+path.sep)||!path.basename(final))throw new Error('Unsafe distribution build destination.');
+function distributionDestination(output){
+ const final=path.resolve(output);
+ if(final===root||root.startsWith(final+path.sep)||!path.basename(final))throw new Error('Unsafe distribution build destination.');
+ if(final===sourceSkillRoot||final.startsWith(sourceSkillRoot+path.sep))throw new Error('Distribution cannot overwrite development Skill sources.');
  if(existsSync(final)&&lstatSync(final).isSymbolicLink())throw new Error('Distribution destination cannot be a symlink.');
+ return final;
+}
+function replaceDirectory(staged,final){
+ const backup=mkdtempSync(path.join(path.dirname(final),'.pflow-backup-'));
+ let previous;
+ try{
+  if(existsSync(final)){previous=path.join(backup,'previous');renameSync(final,previous);}
+  try{renameSync(staged,final);}
+  catch(error){if(previous)renameSync(previous,final);throw error;}
+ }finally{rmSync(backup,{recursive:true,force:true});}
+}
+function copyDistribution(source,destination){
+ const files=validateDistribution(source);
+ for(const file of files){const from=path.join(source,file),to=path.join(destination,file);mkdirSync(path.dirname(to),{recursive:true});cpSync(from,to);chmodSync(to,lstatSync(from).mode&0o777);}
+ return files;
+}
+export function compareDistributions(built,committed){
+ const builtFiles=validateDistribution(built),committedFiles=validateDistribution(committed);
+ const missing=builtFiles.filter(file=>!committedFiles.includes(file)),extra=committedFiles.filter(file=>!builtFiles.includes(file));
+ if(missing.length||extra.length)throw new Error(`Committed distribution differs from the build; missing [${missing.join(', ')}], unexpected [${extra.join(', ')}]. Run npm run publish:skill.`);
+ for(const file of builtFiles)if(!readFileSync(path.join(built,file)).equals(readFileSync(path.join(committed,file))))throw new Error(`Committed distribution is stale: ${file}. Run npm run publish:skill.`);
+ return committedFiles;
+}
+export async function buildSkill({output=buildDistribution}={}){
+ // Output is a development build destination, never an analyzed target path.
+ const final=distributionDestination(output);
  if(existsSync(final)&&readdirSync(final).length)validateDistribution(final);
  const template=readFileSync(path.join(root,'viewer/index.html'),'utf8'),document=parseHTML(template).document;
  const names=['index.html',...document.querySelectorAll('script[src],link[rel="stylesheet"]')].map(n=>typeof n==='string'?n:n.getAttribute('src')||n.getAttribute('href')).filter(n=>!['sample-data.js','sample-documents.js'].includes(n));
@@ -97,10 +127,35 @@ export async function buildSkill({output=path.join(root,'dist/pflow')}={}){
   const map=mapping();for(const [source,destination] of map){const to=path.join(temporary,destination);mkdirSync(path.dirname(to),{recursive:true});writeFileSync(to,rewrite(source,destination,map));}
   const files=validateDistribution(temporary);
   // Only replace this dedicated generated directory after successful validation.
-  if(existsSync(final))rmSync(final,{recursive:true});renameSync(temporary,final);
+  replaceDirectory(temporary,final);
   return {directory:final,files,runtimeBytes:executable.length};
  }finally{rmSync(temporary,{recursive:true,force:true});}
 }
+export async function publishSkill({output=committedDistribution,dist=buildDistribution}={}){
+ const built=await buildSkill({output:dist});
+ const final=distributionDestination(output);
+ mkdirSync(path.dirname(final),{recursive:true});
+ const temporary=mkdtempSync(path.join(path.dirname(final),'.pflow-publish-'));
+ try{
+  const files=copyDistribution(built.directory,temporary);
+  validateDistribution(temporary);
+  replaceDirectory(temporary,final);
+  return {directory:final,files,runtimeBytes:built.runtimeBytes};
+ }finally{rmSync(temporary,{recursive:true,force:true});}
+}
+export async function checkPublishedDistribution({output=committedDistribution,dist=buildDistribution}={}){
+ const built=await buildSkill({output:dist});
+ const final=distributionDestination(output);
+ if(!existsSync(final))throw new Error(`Committed distribution is missing: ${path.relative(root,final)}. Run npm run publish:skill.`);
+ const files=compareDistributions(built.directory,final);
+ return {directory:final,files,runtimeBytes:built.runtimeBytes};
+}
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- try{const result=await buildSkill();process.stdout.write(`Built ${result.directory}: ${result.files.length} files; one runtime (${result.runtimeBytes} bytes).\n`);}catch(error){process.stderr.write(`Skill build: ${error.message}\n`);process.exitCode=1;}
+ try{
+  const args=process.argv.slice(2);
+  if(args.some(arg=>!['--publish','--check'].includes(arg))||new Set(args).size!==args.length||(args.includes('--publish')&&args.includes('--check')))throw new Error('Usage: node packaging/build-skill.mjs [--publish|--check]');
+  if(args.includes('--publish')){const result=await publishSkill();process.stdout.write(`Published ${result.directory}: ${result.files.length} files; one runtime (${result.runtimeBytes} bytes).\n`);}
+  else if(args.includes('--check')){const result=await checkPublishedDistribution();process.stdout.write(`Verified ${result.directory}: ${result.files.length} files; one runtime (${result.runtimeBytes} bytes).\n`);}
+  else{const result=await buildSkill();process.stdout.write(`Built ${result.directory}: ${result.files.length} files; one runtime (${result.runtimeBytes} bytes).\n`);}
+ }catch(error){process.stderr.write(`Skill build: ${error.message}\n`);process.exitCode=1;}
 }

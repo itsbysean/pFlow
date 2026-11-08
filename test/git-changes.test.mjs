@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, readFileSync, existsSync, renameSync, rmSync, chmodSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { collectGitChanges } from '../skills/pflow-impact/scripts/git-changes.mjs';
+import { collectGitChanges } from '../src/skills/pflow-impact/scripts/git-changes.mjs';
 
 function fixture(t) {
   const root = mkdtempSync(join(tmpdir(), 'pflow-git-'));

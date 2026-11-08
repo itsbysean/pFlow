@@ -6,9 +6,9 @@ Implemented on local main after 1a55d0c. M1 model/schema 1.0.0, Builder, Viewer,
 
 | Files | Change |
 |---|---|
-| `skills/pflow-execution-flow/SKILL.md` | Confirmed-entry handoff, contextual owned traversal, significant paths, uncertainty and stopping rules |
-| `skills/pflow-execution-flow/references/{representation,dispatch,evaluation}.md` | M1 mapping, target resolution, finite detail/recursion and semantic review |
-| `skills/pflow-discovery/references/output.md` | Explicit link to the separately requested next-stage Skill; discovery scope remains unchanged |
+| `src/skills/pflow-execution-flow/SKILL.md` | Confirmed-entry handoff, contextual owned traversal, significant paths, uncertainty and stopping rules |
+| `src/skills/pflow-execution-flow/references/{representation,dispatch,evaluation}.md` | M1 mapping, target resolution, finite detail/recursion and semantic review |
+| `src/skills/pflow-discovery/references/output.md` | Explicit link to the separately requested next-stage Skill; discovery scope remains unchanged |
 | `test/fixtures/flow-analysis/repository/` | Small authored JavaScript receiver, injected service/repository, policies, callback and runtime plugin |
 | `test/fixtures/flow-analysis/python-repository/` | Console receiver and cross-module recursive helper |
 | `test/fixtures/flow-analysis/seeds/{javascript,python}/` | M5-01-style confirmed M1 handoffs with canonical Markdown |

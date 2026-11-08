@@ -1,6 +1,6 @@
 # External boundary evaluation
 
-M5-03 is an AI analysis stage, not a deterministic repository scanner. The source Skill is [pflow-external-boundaries](../skills/pflow-external-boundaries/SKILL.md). It consumes a confirmed M5-02 bundle and actual source root. Existing M1 contracts remain unchanged.
+M5-03 is an AI analysis stage, not a deterministic repository scanner. The source Skill is [pflow-external-boundaries](../src/skills/pflow-external-boundaries/SKILL.md). It consumes a confirmed M5-02 bundle and actual source root. Existing M1 contracts remain unchanged.
 
 ## Fixtures and checks
 

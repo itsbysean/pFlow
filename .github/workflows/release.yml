@@ -24,6 +24,8 @@ jobs:
       - name: Prepare next patch or resume the same source
         run: node packaging/auto-release.mjs prepare
       - run: npm ci --ignore-scripts
+      - name: Publish generated Skill distribution
+        run: npm run publish:skill
       - name: Install test browser
         run: |
           npx --no-install playwright-core install --with-deps chromium
@@ -35,6 +37,8 @@ jobs:
       - run: npm test
       - name: Build verified version
         run: npm run build:release -- --tag "$RELEASE_TAG"
+      - name: Verify committed Skill distribution
+        run: npm run verify:skill
       - name: Verify package checksum
         working-directory: dist
         run: sha256sum -c pflow.zip.sha256

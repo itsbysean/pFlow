@@ -4,10 +4,10 @@ Baseline: main ff9d6b5 with existing uncommitted M7-01 planning. Preserve those 
 
 ## Files created or modified
 
-- skills/pflow/SKILL.md: routes repository versus prompt input through one Skill; preserves repository M5 stages and shares generation/validation/build.
-- skills/pflow/references/prompt-analysis.md: supported steps/branches/detail, material clarification, omitted responsibilities, safe full generation and untrusted-evidence rules.
-- skills/pflow/references/prompt-evidence.md: exact UTF-8 capture, separate attributed clarification answers, selected document/evidence roots and current layout.
-- skills/pflow/references/{generation,build}.md: mode-aware evidence and shared canonical output/Builder instructions, with repository bindings retained.
+- src/skills/pflow/SKILL.md: routes repository versus prompt input through one Skill; preserves repository M5 stages and shares generation/validation/build.
+- src/skills/pflow/references/prompt-analysis.md: supported steps/branches/detail, material clarification, omitted responsibilities, safe full generation and untrusted-evidence rules.
+- src/skills/pflow/references/prompt-evidence.md: exact UTF-8 capture, separate attributed clarification answers, selected document/evidence roots and current layout.
+- src/skills/pflow/references/{generation,build}.md: mode-aware evidence and shared canonical output/Builder instructions, with repository bindings retained.
 - test/prompt-mode.test.mjs and test/fixtures/prompt-mode/: authored onboarding, deployment, literal/instruction-text and ambiguous cases with raw inputs, compatible graph/Markdown examples and semantic evidence witnesses.
 - README.md and docs/roadmap.md: current use/status without changing later milestone assignments.
 - docs/prompt-mode-evaluation.md, docs/design/m7-02-plan.md and this report: scope, actual results, independent review and limitations.
@@ -28,7 +28,7 @@ Prompt updates are explicit full generation only. Existing manual/uncertain mate
 
 - Focused tests: node --test test/prompt-mode.test.mjs — 18/18 passed, zero skips/failures.
 - Full npm test — 507/507 passed, zero skips/failures; existing repository, M1–M6 and offline tests remain green.
-- Official skill-creator quick validation — passed for skills/pflow.
+- Official skill-creator quick validation — passed for src/skills/pflow.
 - Authored tests exercise actual validators/CLI, exact request/answer/range capture including Unicode/CRLF, supported branch/hierarchy topology, omitted actors, structurally valid semantic counterexamples, missing/invalid evidence, traversal/symlink escape and preservation of previous HTML.
 - Offline Chrome verifies relocated prompt HTML after removing inputs: keyboard select/expand/back, exact numbered answer snippets, search/highlighting and inert injected markup. Only opened HTML files are requested; no page errors occurred.
 

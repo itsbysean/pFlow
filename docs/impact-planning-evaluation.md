@@ -1,6 +1,6 @@
 # Incremental change and impact evaluation
 
-Use [pflow-impact](../skills/pflow-impact/SKILL.md) for change detection and impact planning only. The main generation Skill routes these requests without starting its generation or HTML sequence. No M1 fields, dependency or persistent impact format are added.
+Use [pflow-impact](../src/skills/pflow-impact/SKILL.md) for change detection and impact planning only. The main generation Skill routes these requests without starting its generation or HTML sequence. No M1 fields, dependency or persistent impact format are added.
 
 ## Evidence and algorithm
 

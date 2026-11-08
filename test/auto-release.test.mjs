@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {mkdtempSync,writeFileSync,readFileSync,rmSync,realpathSync,chmodSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,realpathSync,chmodSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -32,6 +32,13 @@ test('rerun after tag push reuses the same version without another commit, tag o
  const f=fixture(t);prepareAutoRelease(f.repo);publishReleaseGit(f.repo);const released=f.run('rev-parse','HEAD');
  f.run('checkout','--detach',f.source);f.run('clean','-fd');const retried=prepareAutoRelease(f.repo);assert.equal(retried.tag,'v1.0.1');assert.equal(retried.reuse,true);publishReleaseGit(f.repo);
  assert.equal(f.run('rev-parse','HEAD'),f.source);assert.equal(f.run('ls-remote','origin','refs/heads/main').split(/\s/)[0],released);assert.equal(f.run('tag').split('\n').length,1);
+});
+test('publication commits the generated distribution with the version files',t=>{
+ const f=fixture(t),distribution=path.join(f.repo,'skills/pflow');mkdirSync(distribution,{recursive:true});
+ writeFileSync(path.join(distribution,'SKILL.md'),'previous distribution');f.run('add','.');f.run('commit','-qm','distribution');f.run('push','-q','origin','main');
+ const plan=prepareAutoRelease(f.repo);writeFileSync(path.join(distribution,'SKILL.md'),`pflow ${plan.version}`);publishReleaseGit(f.repo);
+ assert.deepEqual(f.run('diff-tree','--no-commit-id','--name-only','-r','HEAD').split('\n').sort(),['package-lock.json','package.json','skills/pflow/SKILL.md']);
+ assert.equal(f.run('show',`${plan.tag}:skills/pflow/SKILL.md`),`pflow ${plan.version}`);
 });
 test('next source change increments the previous released patch',t=>{
  const f=fixture(t);prepareAutoRelease(f.repo);publishReleaseGit(f.repo);writeFileSync(path.join(f.repo,'source.txt'),'next');f.run('add','source.txt');f.run('commit','-qm','next source');

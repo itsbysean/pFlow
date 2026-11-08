@@ -10,13 +10,13 @@ Implementation:
 - builder/bundle-layout.mjs: shared flat/legacy filesystem resolver and ambiguity/containment checks.
 - builder/pipeline.mjs: passes actual docsRoot to the existing validators and content pipeline, retaining internal resolved locations.
 - builder/html.mjs: protects Markdown files at their resolved root without changing embedded data or rendering.
-- skills/pflow-regenerate/scripts/regenerate.mjs: resolves baseline/current/staged graph/Markdown paths, blocks layout mismatch and retains existing safety rules.
-- skills/pflow-rebuild/scripts/rebuild.mjs: fingerprints resolved corpus files and exposes the actual index path in review inventory/diagnostics.
+- src/skills/pflow-regenerate/scripts/regenerate.mjs: resolves baseline/current/staged graph/Markdown paths, blocks layout mismatch and retains existing safety rules.
+- src/skills/pflow-rebuild/scripts/rebuild.mjs: fingerprints resolved corpus files and exposes the actual index path in review inventory/diagnostics.
 
 Instructions and documentation:
 
-- skills/pflow/SKILL.md and references/{output,workflow,generation,build,prompt-evidence}.md: use the trusted selector and returned roots, author flat new bundles and preserve legacy layouts/evidence semantics.
-- skills/pflow-impact/references/baseline.md, skills/pflow-regenerate/references/preservation.md and skills/pflow-rebuild/references/rebuild.md: shared resolution without changing repository-only impact/apply scope.
+- src/skills/pflow/SKILL.md and references/{output,workflow,generation,build,prompt-evidence}.md: use the trusted selector and returned roots, author flat new bundles and preserve legacy layouts/evidence semantics.
+- src/skills/pflow-impact/references/baseline.md, src/skills/pflow-regenerate/references/preservation.md and src/skills/pflow-rebuild/references/rebuild.md: shared resolution without changing repository-only impact/apply scope.
 - README.md, builder/README.md and docs/roadmap.md: current usage/status and both layouts. Historical M1–M6 completion reports were not rewritten.
 - docs/output-bundle-evaluation.md, docs/design/m7-03-plan.md and this report: design, results, review and limits.
 

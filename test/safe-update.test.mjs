@@ -4,7 +4,7 @@ import * as fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { mergeDocument, fingerprintBundle, applyBundle } from '../skills/pflow-regenerate/scripts/safe-update.mjs';
+import { mergeDocument, fingerprintBundle, applyBundle } from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
 
 const baseline = '# Generated\n\nOld description\n\n## Details\n\nStable text\n\n## Notes\n\nGenerated note\n';
 

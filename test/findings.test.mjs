@@ -9,8 +9,8 @@ import {inspectFindingBundle,prepareFindingsPublication} from '../findings/publi
 import {prepareBuild} from '../builder/pipeline.mjs';
 import {writeStandaloneHTML} from '../builder/html.mjs';
 import {prepareLifecycle} from '../lifecycle/documentation.mjs';
-import {fingerprintBundle} from '../skills/pflow-regenerate/scripts/safe-update.mjs';
-import {inspectArchitectureSet,rebuildArchitectureSet} from '../skills/pflow-rebuild/scripts/rebuild.mjs';
+import {fingerprintBundle} from '../src/skills/pflow-regenerate/scripts/safe-update.mjs';
+import {inspectArchitectureSet,rebuildArchitectureSet} from '../src/skills/pflow-rebuild/scripts/rebuild.mjs';
 const fixture=t=>{const root=realpathSync(mkdtempSync(path.join(tmpdir(),'pflow-findings-')));t.after(()=>rmSync(root,{recursive:true,force:true}));return findingsFixture(root);};
 const options=f=>({architecture:f.graph,repositoryRoot:f.root});
 const publish=(f,candidate=f.candidate(),extra={})=>prepareFindingsPublication({bundleRoot:f.bundle,repositoryRoot:f.root,candidate,previousDigest:inspectFindingBundle({bundleRoot:f.bundle,repositoryRoot:f.root}).digest,...extra});

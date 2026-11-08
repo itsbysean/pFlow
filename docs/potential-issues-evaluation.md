@@ -38,9 +38,9 @@ The findings publisher stages findings.json and HTML through the existing Builde
 | Findings contract and evidence/review logic | schema/findings-1.0.0.schema.json, findings/validate.mjs |
 | Safe publication and inspection | findings/publish.mjs |
 | Builder and packaging | builder/pipeline.mjs, builder/html.mjs, packaging/cli.mjs, packaging/build-skill.mjs |
-| Incremental safety | lifecycle/documentation.mjs, skills/pflow-rebuild/scripts/rebuild.mjs |
+| Incremental safety | lifecycle/documentation.mjs, src/skills/pflow-rebuild/scripts/rebuild.mjs |
 | Viewer | viewer/tooltip.js, viewer/findings.js, viewer/diagram.js, viewer/viewer.js, viewer/index.html, viewer/viewer.css |
-| Instructions | skills/pflow/SKILL.md, references/potential-bugs.md, references/runtime.md, references/build.md |
+| Instructions | src/skills/pflow/SKILL.md, references/potential-bugs.md, references/runtime.md, references/build.md |
 | Product documentation | README.md, builder/README.md, viewer/README.md, docs/roadmap.md |
 | Tests | test/findings.test.mjs, test/findings-viewer.test.mjs, test/support/findings-fixture.mjs, test/viewer.test.mjs |
 

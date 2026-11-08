@@ -24,6 +24,8 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV, `PFLOW_BROWSER_PATH=${chromium.executablePath()}\n`);
           JS
       - run: npm test
+      - name: Verify committed Skill distribution
+        run: npm run verify:skill
       - name: Build release ZIP
         run: npm run build:release
       - name: Keep verified package

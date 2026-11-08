@@ -21,7 +21,7 @@ They check schema/semantic/Markdown conformance, unchanged seed identities/evide
 
 Give a fresh Coding Agent only the Skill, linked contracts, raw source roots and corresponding discovery seeds/docs:
 
-> Use skills/pflow-execution-flow/SKILL.md to analyze internal execution starting from each confirmed seed. Preserve proven handoff identities. Emit a concise M1 bundle and coverage report under a temporary output directory and validate against the actual source roots. Do not run target code or inspect expected snapshots, oracle tests or prior analysis. Stop before integration metadata extraction/linking.
+> Use src/skills/pflow-execution-flow/SKILL.md to analyze internal execution starting from each confirmed seed. Preserve proven handoff identities. Emit a concise M1 bundle and coverage report under a temporary output directory and validate against the actual source roots. Do not run target code or inspect expected snapshots, oracle tests or prior analysis. Stop before integration metadata extraction/linking.
 
 Review meaning, not display wording or exact newly assigned IDs:
 

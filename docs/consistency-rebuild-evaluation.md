@@ -1,6 +1,6 @@
 # Complete-set consistency and HTML rebuild evaluation
 
-[pflow-rebuild](../skills/pflow-rebuild/SKILL.md) connects applied M6-02 updates to complete current-set validation and safe M4 HTML publication. It adds orchestration checks, not another schema validator, parser, rendering engine or source analyzer.
+[pflow-rebuild](../src/skills/pflow-rebuild/SKILL.md) connects applied M6-02 updates to complete current-set validation and safe M4 HTML publication. It adds orchestration checks, not another schema validator, parser, rendering engine or source analyzer.
 
 ## Existing contracts and missing semantic check
 

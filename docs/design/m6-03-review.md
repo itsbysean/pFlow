@@ -4,10 +4,10 @@ Implemented on main afdb8f2 while preserving the uncommitted M6-01/M6-02 work. P
 
 ## Files created or modified for M6-03
 
-- skills/pflow-rebuild/SKILL.md and references/{consistency,rebuild}.md: complete-set validation, exact index review, existing Builder reuse, safe/idempotent HTML publication and limits.
-- skills/pflow-rebuild/scripts/rebuild.mjs: inspectArchitectureSet and rebuildArchitectureSet, delegating to existing prepareBuild, validateOutput and writeStandaloneHTML.
+- src/skills/pflow-rebuild/SKILL.md and references/{consistency,rebuild}.md: complete-set validation, exact index review, existing Builder reuse, safe/idempotent HTML publication and limits.
+- src/skills/pflow-rebuild/scripts/rebuild.mjs: inspectArchitectureSet and rebuildArchitectureSet, delegating to existing prepareBuild, validateOutput and writeStandaloneHTML.
 - test/rebuild-safety.test.mjs and test/consistency-rebuild.test.mjs: thirteen safety and four actual-regeneration/whole-set/offline integration tests.
-- skills/pflow/SKILL.md and references/workflow.md, skills/pflow-regenerate/references/preservation.md: connected incremental/rebuild routing without parallel generation logic.
+- src/skills/pflow/SKILL.md and references/workflow.md, src/skills/pflow-regenerate/references/preservation.md: connected incremental/rebuild routing without parallel generation logic.
 - README.md, docs/consistency-rebuild-evaluation.md, docs/design/m6-03-plan.md and this record: usage, evaluation and completion results.
 
 ## Consistency and review approach

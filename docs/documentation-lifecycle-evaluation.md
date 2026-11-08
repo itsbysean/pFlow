@@ -8,7 +8,7 @@ Implementation reuses:
 
 - `builder/output-policy.mjs` and `builder/bundle-layout.mjs` for output selection, containment and flat/legacy resolution.
 - `builder/pipeline.mjs`, shared validators and `builder/html.mjs` for full candidate validation, safe Markdown, bounded snippets and standalone Viewer generation.
-- `skills/pflow-regenerate/scripts/safe-update.mjs` fingerprintBundle/applyBundle for freshness, recoverable publication and rollback. Its Git-based mergeDocument is not used by the common lifecycle.
+- `src/skills/pflow-regenerate/scripts/safe-update.mjs` fingerprintBundle/applyBundle for freshness, recoverable publication and rollback. Its Git-based mergeDocument is not used by the common lifecycle.
 - The canonical Flow-block reader from regeneration, extended with an optional entity prefix to protect unaffected Entry Point prose too. Existing M6 callers retain default behavior.
 - `packaging/cli.mjs` and the existing bundle build for one installed runtime.
 
@@ -20,11 +20,11 @@ The main agent recorded this plan before implementation: retain public contracts
 | --- | --- |
 | lifecycle/documentation.mjs | Detection, Snapshot validation, scoped inventories, impact closure, staged create/update/full recovery |
 | packaging/cli.mjs | lifecycle-detect, lifecycle-plan, lifecycle-publish and matching exported APIs |
-| skills/pflow/SKILL.md | Create/update routing, mixed evidence and common lifecycle integration |
-| skills/pflow/references/lifecycle.md | Snapshot 1.0.0 profile, ownership, scope, evidence, analysis and publication workflow |
-| skills/pflow/references/runtime.md | CLI request/API contract |
-| skills/pflow/references/{prompt-analysis,prompt-evidence,generation,build}.md | Prompt amendments, coverage baseline and shared publication guidance |
-| skills/pflow-regenerate/scripts/regenerate.mjs | Reusable section-reader export; no M6 safety changes |
+| src/skills/pflow/SKILL.md | Create/update routing, mixed evidence and common lifecycle integration |
+| src/skills/pflow/references/lifecycle.md | Snapshot 1.0.0 profile, ownership, scope, evidence, analysis and publication workflow |
+| src/skills/pflow/references/runtime.md | CLI request/API contract |
+| src/skills/pflow/references/{prompt-analysis,prompt-evidence,generation,build}.md | Prompt amendments, coverage baseline and shared publication guidance |
+| src/skills/pflow-regenerate/scripts/regenerate.mjs | Reusable section-reader export; no M6 safety changes |
 | README.md, builder/README.md | Current lifecycle usage and limitations |
 | website/index.html | Four requested example prompts, Korean equivalents, copy controls and current update guidance |
 | test/documentation-lifecycle.test.mjs | 30 behavior tests, including isolated installed-runtime/offline checks |

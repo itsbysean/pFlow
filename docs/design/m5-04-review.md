@@ -4,8 +4,8 @@ Started on local main at a337298. Implemented a separate source Skill for eviden
 
 ## Files changed
 
-- skills/pflow-async-linking/SKILL.md and references/{representation,matching,review}.md: minimal linking workflow, evidence criteria, existing receive/async representation and finite-context review.
-- skills/pflow-external-boundaries/references/representation.md: explicit next-stage handoff, keeping M5-03's no-link scope intact.
+- src/skills/pflow-async-linking/SKILL.md and references/{representation,matching,review}.md: minimal linking workflow, evidence criteria, existing receive/async representation and finite-context review.
+- src/skills/pflow-external-boundaries/references/representation.md: explicit next-stage handoff, keeping M5-03's no-link scope intact.
 - test/fixtures/async-linking/repository/: owned bootstrap, handlers, registration and config plus a declared custom message-port integration contract. The dependency is fictitious and is not installed/executed.
 - test/fixtures/async-linking/seeds/: existing M5-03 graph, identity roles and canonical documentation scaffolding.
 - test/fixtures/async-linking/expected/: linked oracle, expected identities, preserved documentation and separate candidate diagnostics. Filenames exclude these fixtures from default Builder artifact discovery.

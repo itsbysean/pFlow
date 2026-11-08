@@ -32,7 +32,7 @@ Use returned bundleRoot, graphPath, docsRoot and outputPath rather than reconstr
 <bundle>/architecture.html
 ```
 
-Existing legacy architecture.json + docs/ bundles retain their layout. The shared builder/bundle-layout.mjs resolver is also used by preparation and M6; it rejects competing graphs/corpora instead of migrating or duplicating documents. A new output containing unowned index/HTML/corpus files is blocked for review; a recognized graph does not itself establish generated ownership. Preserve manual/unknown content and apply the selected mode's ownership rules.
+Existing legacy architecture.json + docs/ bundles retain their layout. The shared scripts/pflow.mjs resolver is also used by preparation and M6; it rejects competing graphs/corpora instead of migrating or duplicating documents. A new output containing unowned index/HTML/corpus files is blocked for review; a recognized graph does not itself establish generated ownership. Preserve manual/unknown content and apply the selected mode's ownership rules.
 
 Root roles:
 
