@@ -2,6 +2,8 @@
 
 pFlow documents how systems work and how teams work. A coding agent uses repository evidence or a process description to create linked Markdown, flow diagrams and one offline HTML Viewer.
 
+Homepage: <https://itsbysean.github.io/pFlow/>
+
 ## Install
 
 Install the complete Skill directly from GitHub:
